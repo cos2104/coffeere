@@ -395,6 +395,39 @@ details.appendix>summary:hover{color:var(--ink)}
 .foot b{color:var(--ink-2);font-weight:500}
 .foot a{color:var(--ink-2);text-decoration-color:var(--line)}
 
+
+/* ── 추출 화면 : 타이머가 돌면 추출 순서만 크게 남깁니다 ── */
+#bmExit{display:none}
+body.brewing #bmEnter{display:none}
+body.brewing #bmExit{display:inline-block}
+body.brewing{overflow:hidden}
+body.brewing .detail{position:fixed;inset:0;z-index:90;border:0;border-radius:0;max-height:none;
+  overflow-y:auto;background:var(--bg);transform:none;visibility:visible;box-shadow:none}
+body.brewing .detail > *:not(#brewSec){display:none}
+body.brewing #brewSec{display:block;max-width:820px;margin:0 auto;padding:24px 20px 64px;border:0}
+body.brewing #brewSec .sec-label span:last-child{display:none}
+body.brewing .timer{background:transparent;border:0;padding:10px 0 4px}
+body.brewing .clock{font-size:clamp(46px,11vw,72px)}
+body.brewing .t-now{font-size:16px;color:var(--ink)}
+body.brewing .t-now b{color:var(--ember)}
+body.brewing .pour{background:transparent;border-color:var(--line-soft)}
+body.brewing .pd,body.brewing .sv{width:clamp(118px,23vw,168px);height:clamp(118px,23vw,168px)}
+body.brewing .pour-name{font-size:23px}
+body.brewing .pour-desc{font-size:13.5px}
+body.brewing .replay{display:none}
+body.brewing .step{padding:10px 10px}
+body.brewing .step.done{opacity:.2}
+body.brewing .col-read b{font-size:15px}
+
+/* 접히는 브루잉 노트 */
+details.fold > summary{cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;gap:10px}
+details.fold > summary::-webkit-details-marker{display:none}
+details.fold > summary::after{content:"＋";color:var(--ember);font-size:14px;letter-spacing:0}
+details.fold[open] > summary::after{content:"−"}
+details.fold > summary:hover{color:var(--ink-2)}
+details.fold[open] > summary{margin-bottom:12px}
+details.fold > summary.sec-label{margin:0}
+
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 
@@ -1766,7 +1799,11 @@ function renderControls(){
 const isNarrow = () => window.innerWidth < 1080;
 function openSheet(){ if (isNarrow()) document.body.classList.add("sheet"); }
 function closeSheet(){ document.body.classList.remove("sheet"); }
-window.addEventListener("keydown", e => { if (e.key === "Escape") closeSheet(); });
+window.addEventListener("keydown", e => {
+  if (e.key !== "Escape") return;
+  if (document.body.classList.contains("brewing")) setBrewing(false);  // 추출 화면 먼저 닫기 (타이머는 유지)
+  else closeSheet();
+});
 window.addEventListener("resize", () => { if (!isNarrow()) closeSheet(); });
 function ensureSelection(){
   const vis = visible();
@@ -1902,6 +1939,7 @@ function toggleTimer(){
     preview.playing = false;
     timer.start = performance.now(); timer.running = true;
     ensureLoop();
+    setBrewing(true);                 // 추출 화면으로 전환
   }
   updateTimerButtons();
 }
@@ -2022,7 +2060,13 @@ function paintTimer(){
 
   /* 타이머가 돌 때만 화면이 단계를 따라갑니다. 멈춰 있으면 미리보기를 건드리지 않습니다 */
   const isLive = timer.running || timer.elapsed > 0;
-  if (isLive && curIdx >= 0 && curIdx !== shownStep) setPourStep(curIdx, false);
+  if (isLive && curIdx >= 0 && curIdx !== shownStep){
+    setPourStep(curIdx, false);
+    if (document.body.classList.contains("brewing") && !REDUCE){
+      const cur = document.querySelector('#tl .step[data-i="' + curIdx + '"]');
+      if (cur) cur.scrollIntoView({ block:"nearest", behavior:"smooth" });
+    }
+  }
 
   if (isLive){
     const cs = steps[shownStep];
@@ -2056,9 +2100,20 @@ function paintTimer(){
     }
   }
 }
+/* 추출 화면(집중 모드) — 타이머가 돌 때 추출 순서만 크게 보여줍니다 */
+function setBrewing(on){
+  document.body.classList.toggle("brewing", !!on);
+  if (on){
+    const d = document.getElementById("detail");
+    if (d) d.scrollTop = 0;
+  }
+  updateTimerButtons();
+}
 function updateTimerButtons(){
   const b = document.getElementById("tPlay");
   if (b) b.textContent = timer.running ? "⏸ 일시정지" : (timer.elapsed > 0 ? "▶ 이어서" : "▶ 시작");
+  const be = document.getElementById("bmEnter");
+  if (be) be.hidden = !(timer.running || timer.elapsed > 0) || document.body.classList.contains("brewing");
   const s = document.getElementById("tSound");
   if (s){
     s.textContent = state.sound ? "🔊 소리 켬" : "🔇 소리 끔";
@@ -2247,12 +2302,14 @@ function renderDetail(){
       "</dl>" + flagNote + refNote + bandNote +
     "</div>" + (doseNote ? '<div class="sec" style="padding-bottom:0;border-bottom:0">' + doseNote + "</div>" : "") +
 
-    '<div class="sec"><p class="sec-label"><span>추출 순서</span><span>단계를 누르면 붓는 모양이 바뀝니다</span></p>' +
+    '<div class="sec" id="brewSec"><p class="sec-label"><span>추출 순서</span><span>단계를 누르면 붓는 모양이 바뀝니다</span></p>' +
       '<div class="timer"><span class="clock" id="clock">0:00</span>' +
         '<span class="tbtns">' +
           '<button type="button" class="tbtn primary" id="tPlay">▶ 시작</button>' +
           '<button type="button" class="tbtn" id="tReset">■ 리셋</button>' +
-          '<button type="button" class="tbtn" id="tSound" aria-pressed="true">🔊 소리 켬</button></span>' +
+          '<button type="button" class="tbtn" id="tSound" aria-pressed="true">🔊 소리 켬</button>' +
+          '<button type="button" class="tbtn" id="bmEnter">⛶ 추출 화면</button>' +
+          '<button type="button" class="tbtn" id="bmExit">✕ 닫기</button></span>' +
         '<span class="t-now" id="tNow">시작을 누르면 순서대로 따라갑니다.</span></div>' +
       '<div class="column"><div class="col-track"><div class="col-fill" id="colFill"></div></div>' +
         '<div class="col-ticks">' + ticks + "</div>" +
@@ -2262,11 +2319,13 @@ function renderDetail(){
       '<div class="tl" id="tl">' + tl + "</div>" +
     "</div>" +
     finish +
-    '<div class="sec"><p class="sec-label">브루잉 노트</p>' +
+    '<details class="sec fold"><summary class="sec-label">브루잉 노트 · 팁 ' + r.tips.length + "개</summary>" +
       '<ul class="tips">' + r.tips.map(t => "<li>" + t + "</li>").join("") + "</ul>" +
-      sourceBlock(r) + "</div>";
+      sourceBlock(r) + "</details>";
 
   document.getElementById("dBack").addEventListener("click", closeSheet);
+  document.getElementById("bmEnter").addEventListener("click", () => setBrewing(true));
+  document.getElementById("bmExit").addEventListener("click", () => setBrewing(false));
   document.getElementById("grindTile").addEventListener("click", e => {
     const b = e.currentTarget, open = b.getAttribute("aria-expanded") !== "true";
     b.setAttribute("aria-expanded", open ? "true" : "false");
@@ -2279,7 +2338,7 @@ function renderDetail(){
   }
   document.getElementById("tPlay").addEventListener("click", toggleTimer);
   document.getElementById("tReset").addEventListener("click", () => {
-    stopTimer(); updateTimerButtons(); paintTimer();
+    stopTimer(); setBrewing(false); updateTimerButtons(); paintTimer();
     const f = steps.findIndex(s => s.pat); setPourStep(f < 0 ? 0 : f, true);
   });
   document.getElementById("tSound").addEventListener("click", () => {
