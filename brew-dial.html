@@ -2361,11 +2361,14 @@ function renderDetail(){
       '<div class="tl" id="tl">' + tl + "</div>" +
     "</div>" +
     finish +
-    '<details class="sec fold"><summary class="sec-label">브루잉 노트 · 팁 ' + r.tips.length + "개</summary>" +
+    '<details class="sec fold" id="noteFold"' + (state.noteOpen ? " open" : "") + '><summary class="sec-label">브루잉 노트 · 팁 ' + r.tips.length + "개</summary>" +
       '<ul class="tips">' + r.tips.map(t => "<li>" + t + "</li>").join("") + "</ul>" +
       sourceBlock(r) + "</details>";
 
   document.getElementById("dBack").addEventListener("click", closeSheet);
+  document.getElementById("noteFold").addEventListener("toggle", e => {
+    state.noteOpen = e.target.open; save();   // 원두량·배전도를 바꿔도 펼침 상태 유지
+  });
   document.getElementById("bmEnter").addEventListener("click", () => setBrewing(true));
   document.getElementById("bmExit").addEventListener("click", () => setBrewing(false));
   document.getElementById("grindTile").addEventListener("click", e => {
