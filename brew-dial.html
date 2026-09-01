@@ -427,6 +427,7 @@ details.fold[open] > summary::after{content:"−"}
 details.fold > summary:hover{color:var(--ink-2)}
 details.fold[open] > summary{margin-bottom:12px}
 details.fold > summary.sec-label{margin:0}
+details.fold[open] > summary.sec-label{margin:0 0 12px}
 
 @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
@@ -662,7 +663,7 @@ const METHOD_LIST = [
 /* ── 물 붓는 모양 ──────────────────────────────────────── */
 const PATTERNS = {
   bloom:    { label:"뜸 나선",     stream:"보통",   height:"낮게", rate:6,
-              desc:"중심에서 바깥으로 동심원을 그리며 가루를 남김없이 적십니다. <b>필터 벽은 건드리지 않습니다</b> — 벽을 때리면 물이 커피를 지나치지 않고 옆으로 새요. 물이 적어서 붓기만으로 전부 적시기는 어렵기 때문에, 대부분의 레시피가 곧바로 <b>스월이나 스푼 저어주기</b>을 함께 씁니다." },
+              desc:"중심에서 바깥으로 동심원을 그리며 가루를 남김없이 적십니다. <b>필터 벽은 건드리지 않습니다</b> — 벽을 때리면 물이 커피를 지나치지 않고 옆으로 새요. 물이 적어서 붓기만으로 전부 적시기는 어렵기 때문에, 대부분의 레시피가 곧바로 <b>스월이나 스푼 저어주기</b>를 함께 씁니다." },
   drop:     { label:"점드립",     stream:"한 방울씩", height:"낮게", rate:1.5,
               desc:"물줄기를 만들지 않고 중심에 물방울을 한 방울씩 떨어뜨립니다. 가장 느리고 가장 진한 정통 핸드드립." },
   coin:     { label:"동전 서클",   stream:"가늘게", height:"낮게", rate:3.5,
@@ -783,7 +784,7 @@ const RECIPES = [
       { at:100, kind:"act",   label:"스핀으로 베드 평탄화" },
       { at:225, kind:"end",   label:"추출 완료 (3:30–4:00)" }],
     tips:[
-      "<b>가늘게 + 강하게 저어주기</b>이 전제입니다. 굵게 갈면 이 레시피는 밍밍해집니다.",
+      "<b>가늘게 + 강하게 저어주기</b>가 전제입니다. 굵게 갈면 이 레시피는 밍밍해집니다.",
       "미분이 많아 배출이 느려지므로 4분을 넘겨도 당황할 필요 없습니다.",
       "떫거나 마르는 느낌이 나면 저어주기를 줄이지 말고 <b>물 온도를 먼저</b> 낮춰보세요.",
       "필터는 미리 충분히 린싱하고 드리퍼·서버를 예열합니다."],
@@ -798,7 +799,7 @@ const RECIPES = [
         label:i ? (i+1)+"차 붓기" : "1차 붓기 · 뜸", to:u*(i+1), pat:i?"smallCir":"spiral", height:"낮게" });
       out.push({ at:270, kind:"end", label:"추출 완료 (4:30 목표)" }); return out; },
     tips:[
-      "매번는 <b>정확히 30초 간격</b>으로. 물이 다 빠지기 전에 다음 붓기가 시작됩니다.",
+      "매 붓기는 <b>정확히 30초 간격</b>으로. 물이 다 빠지기 전에 다음 붓기가 시작됩니다.",
       "물높이를 낮게 유지하면 채널링이 줄고 클린컵이 살아납니다.",
       "총 시간이 길어 온도 손실이 큽니다. 드리퍼·서버 예열을 반드시 하세요.",
       "붓는 횟수를 6회로 줄이면 바디가, 10회로 늘리면 투명도가 올라갑니다."],
@@ -909,7 +910,7 @@ const RECIPES = [
     tips:[
       "분쇄도는 <b>코만단테 29클릭 · 펠로우 오드 3.75</b>, 물 온도는 미디엄 다크 기준 90℃입니다.",
       "붓는 속도를 <b>4 → 4 → 4 → 5 → 8g/s</b>로 올리는 것이 뼈대입니다.",
-      "후반에 커지는 것은 물줄기 세기입니다. 마지막을 넓은 나선으로 그린다는 근거는 없어 기존 매핑을 바로잡았습니다.",
+      "후반에 커지는 것은 <b>물줄기 세기</b>입니다. 원의 크기를 키우라는 언급은 원문에 없습니다.",
       "웨이브 155/185와 실제 주전자 높이는 출처 미지정입니다."],
     source:"전주연 칼리타 웨이브 레시피 · coffee4m 2차 정리 · 20g / 200g"
   },
@@ -930,7 +931,7 @@ const RECIPES = [
     tips:[
       "공식 최신 가이드는 누적 <b>35 / 90 / 140 / 190 / 240g</b>, 시작 <b>0:00 / 0:30 / 1:00 / 1:30 / 1:50</b>입니다.",
       "155와 약배전 적합은 각각 용량과 로스터 성향에 따른 권장값이며 레시피 본문 명시는 아닙니다.",
-      "기존 4회 붓기와 ‘뒤로 갈수록 빠르게’ 설명은 최신 공식판과 맞지 않아 제거했습니다."],
+      "이 단계 구성은 LIGHT UP COFFEE의 최신 공식 가이드를 그대로 따른 것입니다."],
     source:"LIGHT UP COFFEE 공식 Kalita Wave 가이드 · 15g / 240g / 90℃"
   },
   {
@@ -1025,7 +1026,7 @@ const RECIPES = [
     tips:[
       "검증 가능한 2차 정리본은 <b>20g / 340g / 95℃ / 4:20</b>입니다.",
       "원문 정리에는 동전 서클·연속 60초 붓기·배전도·주전자 높이가 없습니다. 화면의 나선과 자동 붓기 시간은 시각화 기본값입니다.",
-      "기존 22g/360g/3:30 변형 대신 영상 기반 정리본으로 교체했습니다."],
+      "수치는 스콧 라오의 공개 영상을 정리한 것입니다."],
     source:"Scott Rao Kalita Wave 영상 기반 Timer.Coffee 2차 정리 · 20g / 340g / 95℃ / 4:20"
   },
   {
@@ -1040,7 +1041,7 @@ const RECIPES = [
       { at:40, kind:"pour", label:"150g까지 · 0:40–1:01 · 5g/s 나선", to:c.water*0.60, dur:21, pat:"spiral", stream:"보통", flowRateGps:5 },
       { at:80, kind:"pour", label:"250g까지 · 수위 조건 · 4–5g/s", to:c.water, dur:23, pat:"spiral", stream:"보통", flowRateRangeGps:[4,5], triggerText:"수위가 커피층 위 약 1인치(2.5cm)까지 내려오면", approx:true },
       { at:103, kind:"act", label:"드리퍼를 부드럽게 스월" },
-      { at:120, kind:"end", label:"실제로는 다 내려옴 시 분리" }],
+      { at:120, kind:"end", label:"다 내려오면 드리퍼 분리" }],
     tips:[
       "마지막 시작의 원문 트리거는 <b>1:20이 아니라 수위</b>입니다. 1:20은 타이머용 대표값입니다.",
       "원문은 미분량에 따라 시간이 크게 달라지므로 총 시간을 좇지 말라고 합니다. 화면의 2:00은 시퀀스 표시용입니다.",
@@ -1060,7 +1061,7 @@ const RECIPES = [
     tips:[
       "공식 사이즈는 <b>Wave 155</b>입니다.",
       "약배전 적합은 Coffee Collective의 로스터 성향 근거이며 레시피 본문 배전 명시는 아닙니다.",
-      "1:45는 다 내려옴가 아니라 <b>붓기 종료</b>입니다. 마지막 quick stir는 서버/컵의 추출 음료를 섞는 동작입니다."],
+      "1:45는 다 내려온 시각이 아니라 <b>붓기 종료</b>입니다. 마지막 quick stir는 서버/컵의 추출 음료를 섞는 동작입니다."],
     source:"Coffee Collective 공식 Small Kalita · Wave 155 · 16g / 250g / 붓기 종료 1:45"
   },
   {
@@ -1225,7 +1226,7 @@ const RECIPES = [
       { at:0, kind:"bloom", label:"온수 30g까지 · 전 베드 적시기", to:c.water*(30/335), pat:"bloom" },
       { at:30, kind:"pour", label:"온수 100g까지 · 원형 붓기", to:c.water*(100/335), pat:"spiral" },
       { at:60, kind:"pour", label:"온수 200g까지 · 원형 붓기", to:c.water*(200/335), pat:"spiral", triggerText:"30초 경과 또는 수위 약 1cm 하강 중 먼저" },
-      { at:90, kind:"pour", label:"후반 반복 1/2 · 400g까지", to:c.water*(267.5/335), pat:"spiral", triggerText:"30초 경과 또는 수위 약 1cm 하강 중 먼저", approx:true },
+      { at:90, kind:"pour", label:"온수 " + Math.round(c.water*(267.5/335)) + "g까지 · 원형 붓기", to:c.water*(267.5/335), pat:"spiral", triggerText:"30초 경과 또는 수위 약 1cm 하강 중 먼저", approx:true },
       { at:120, kind:"pour", label:"온수 335g까지", to:c.water, pat:"spiral", triggerText:"30초 경과 또는 수위 약 1cm 하강 중 먼저", approx:true },
       { at:150, kind:"end", label:"붓기 종료 · 얼음이 녹으면 저어 마무리" }],
     tips:[
@@ -1516,6 +1517,9 @@ function stepsFor(r){
   const out = r.steps(c).map(s => {
     const to = (typeof s.to === "number") ? s.to : cum;
     const add = to - cum; cum = to;
+    /* 라벨 속 누적량(예: "200g까지")은 원 용량 기준 숫자라, 실제 계산된 누적값으로 맞춥니다 */
+    if (s.label && s.label.indexOf("g까지") >= 0)
+      s.label = s.label.replace(/\d+(?:\.\d+)?(?=g까지)/g, String(Math.round(to)));
     const prevHeight = lastH;
     // 뜸은 중심에서 바깥까지 넓게 도는 전용 궤적을 씁니다
     const pat = (s.kind === "bloom" && s.pat === "spiral") ? "bloom" : s.pat;
@@ -1878,6 +1882,12 @@ function renderList(){
       '<span class="row-dial"><span class="n">' + gr.text + '</span><br><span class="u">' +
         gr.g.unit + " · " + Math.round(gr.um) + "μm</span></span>";
     b.addEventListener("click", () => {
+      if (state.selected === r.id){
+        /* 같은 레시피 재탭 — 진행 중인 타이머를 지우지 않고 화면만 복귀 */
+        openSheet();
+        if (timer.running || timer.elapsed > 0) setBrewing(true);
+        return;
+      }
       state.selected = r.id; save(); stopTimer(); renderList(); renderDetail(); openSheet();
     });
     wrap.appendChild(b);
@@ -1924,12 +1934,18 @@ let raf = 0, shownStep = -1;
 
 function ensureLoop(){ if (!raf) raf = requestAnimationFrame(tickAll); }
 function tickAll(){
-  if (timer.running || timer.elapsed > 0) paintTimer();
-  else if (preview.playing) paintPreview();
+  /* 미리보기가 재생 중이면(타이머는 멈춰 있을 때만 시작됨) 미리보기가 화면을 소유합니다 */
+  if (preview.playing) paintPreview();
+  else if (timer.running || timer.elapsed > 0) paintTimer();
   raf = (timer.running || preview.playing) ? requestAnimationFrame(tickAll) : 0;
 }
 function resetSounds(){ fired = { step:-1, ticks:{}, stops:{} }; }
-function stopTimer(){ timer.running = false; timer.elapsed = 0; shownStep = -1; resetSounds(); }
+function stopTimer(){
+  timer.running = false; timer.elapsed = 0; shownStep = -1; resetSounds();
+  preview.playing = false;
+  dropWake(); clearInterval(timer.iv); timer.iv = 0;
+  if (typeof setBrewing === "function") setBrewing(false);
+}
 function toggleTimer(){
   if (timer.running){
     timer.elapsed += (performance.now() - timer.start)/1000;
@@ -1939,8 +1955,13 @@ function toggleTimer(){
     preview.playing = false;
     timer.start = performance.now(); timer.running = true;
     ensureLoop();
+    holdWake();                       // 추출 중 화면 꺼짐 방지 (지원 브라우저)
+    /* 탭이 숨겨지면 rAF가 멈춰 소리도 멈춥니다 — 1초 인터벌로 최소한의 알림을 유지 */
+    clearInterval(timer.iv);
+    timer.iv = setInterval(() => { if (document.hidden && timer.running) paintTimer(); }, 1000);
     setBrewing(true);                 // 추출 화면으로 전환
   }
+  if (!timer.running){ dropWake(); clearInterval(timer.iv); timer.iv = 0; }
   updateTimerButtons();
 }
 const elapsedNow = () => timer.running ? timer.elapsed + (performance.now() - timer.start)/1000 : timer.elapsed;
@@ -2048,7 +2069,7 @@ function paintTimer(){
 
   const now = document.getElementById("tNow");
   if (now){
-    if (t === 0) now.innerHTML = "시작을 누르면 추출 순서을 따라갑니다.";
+    if (t === 0) now.innerHTML = "시작을 누르면 추출 순서를 따라갑니다.";
     else {
       const cur = steps[Math.max(0, curIdx)], next = steps[curIdx + 1];
       const s = steps[curIdx];
@@ -2100,12 +2121,33 @@ function paintTimer(){
     }
   }
 }
+/* 추출 중 화면 꺼짐 방지 — 미지원 브라우저에서는 조용히 무시됩니다 */
+let wakeLock = null;
+function holdWake(){
+  try {
+    if (navigator.wakeLock && !wakeLock){
+      navigator.wakeLock.request("screen").then(w => {
+        wakeLock = w;
+        w.addEventListener("release", () => { wakeLock = null; });
+      }).catch(() => {});
+    }
+  } catch (e) {}
+}
+function dropWake(){ try { if (wakeLock) wakeLock.release(); } catch (e) {} wakeLock = null; }
+document.addEventListener("visibilitychange", () => {
+  if (!document.hidden && timer.running) holdWake();   // 탭 복귀 시 재요청 (숨기면 자동 해제됨)
+});
+
 /* 추출 화면(집중 모드) — 타이머가 돌 때 추출 순서만 크게 보여줍니다 */
 function setBrewing(on){
+  const was = document.body.classList.contains("brewing");
   document.body.classList.toggle("brewing", !!on);
   if (on){
     const d = document.getElementById("detail");
     if (d) d.scrollTop = 0;
+  } else if (was && isNarrow()){
+    /* 좁은 화면에서 추출 화면을 닫으면 상세가 사라지지 않게 시트로 복귀 */
+    document.body.classList.add("sheet");
   }
   updateTimerButtons();
 }
@@ -2187,7 +2229,7 @@ function renderDetail(){
   const c = ctxFor(r), steps = stepsFor(r), gr = grindFor(r), m = METHODS[r.method];
 
   const flagNote = gr.flag === "under"
-    ? '<div class="callout warn"><span class="ic">△</span><span>계산된 목표가 이 그라인더의 <b>가장 가는 눈금보다 아래</b>입니다. 최소 눈금으로 두고 물 온도·저어주기으로 조절하세요.</span></div>'
+    ? '<div class="callout warn"><span class="ic">△</span><span>계산된 목표가 이 그라인더의 <b>가장 가는 눈금보다 아래</b>입니다. 최소 눈금으로 두고 물 온도·저어주기로 조절하세요.</span></div>'
     : gr.flag === "over"
     ? '<div class="callout warn"><span class="ic">△</span><span>계산된 목표가 이 그라인더의 <b>가장 굵은 눈금을 넘어섭니다</b>. 최대 눈금으로 두고 붓기를 짧게 가져가세요.</span></div>' : "";
 
@@ -2353,6 +2395,7 @@ function renderDetail(){
   });
 
   updateTimerButtons();
+  shownStep = -1;                       // 재렌더로 비워진 붓기 패널을 paintTimer가 다시 채우게
   paintTimer();
   const fp = steps.findIndex(s => s.pat);
   if (!timer.running && timer.elapsed === 0) setPourStep(fp < 0 ? 0 : fp, true);
@@ -2374,7 +2417,7 @@ function renderAppendix(){
     { id:"handdrip", dripper:"kono", step:{ pat:"coin", stream:"가늘게", height:"낮게" },
       pts:["물줄기 가늘게 · 붓는 높이 2–3cm", "작은 원을 여러 번 나눠", "저어주기 최소 · 진한 원액 후 가수", "코노 · 융 · 칼리타 계보"] },
     { id:"pourover", dripper:"v60", step:{ pat:"wide", stream:"굵게", height:"보통" },
-      pts:["물줄기 굵게 · 붓는 높이 5–8cm", "넓은 원으로 적은 횟수", "높이와 저어주기으로 균일하게", "V60 · 케멕스 · 오리가미 계보"] }
+      pts:["물줄기 굵게 · 붓는 높이 5–8cm", "넓은 원으로 적은 횟수", "높이와 저어주기로 균일하게", "V60 · 케멕스 · 오리가미 계보"] }
   ];
   document.getElementById("vsGrid").innerHTML = vs.map(v => {
     const m = METHODS[v.id];
