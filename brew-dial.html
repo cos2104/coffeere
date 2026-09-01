@@ -1,0 +1,2353 @@
+<title>브루 다이얼</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+KR:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+/* ── 토큰 : 다크 우선 ─────────────────────────────────────── */
+:root{
+  --bg:#16110D; --bg-2:#1B1511; --panel:#1E1813; --panel-2:#261F19; --panel-3:#2E261F;
+  --line:#372E26; --line-soft:#2A231D;
+  --ink:#F1E8DD; --ink-2:#BFB0A0; --ink-3:#9C8C7C;
+  --ember:#E8933F; --ember-2:#F3B369; --ember-dim:rgba(232,147,63,.13); --ember-line:rgba(232,147,63,.38);
+  --water:#7BB0DA; --water-dim:rgba(123,176,218,.12); --water-line:rgba(123,176,218,.45);
+  --alert:#E8705C; --alert-dim:rgba(232,112,92,.12);
+  --good:#6CC49E; --good-dim:rgba(108,196,158,.12); --good-line:rgba(108,196,158,.42);
+  --shadow:0 18px 40px -24px rgba(0,0,0,.9);
+
+  --ff-display:'Gowun Batang','Nanum Myeongjo',Georgia,serif;
+  --ff-sans:'IBM Plex Sans KR','Apple SD Gothic Neo','Malgun Gothic',system-ui,sans-serif;
+  --ff-mono:'IBM Plex Mono','IBM Plex Sans KR',ui-monospace,monospace;
+
+  --r:14px; --r-s:9px;
+}
+@media (prefers-color-scheme:light){
+  :root:not([data-theme="dark"]){
+    --bg:#EFE9DE; --bg-2:#E9E2D5; --panel:#FBF7F0; --panel-2:#F3EDE3; --panel-3:#EDE5D8;
+    --line:#D9CEBF; --line-soft:#E6DED2;
+    --ink:#241C14; --ink-2:#5C4F42; --ink-3:#6B5D51;
+    --ember:#A0530F; --ember-2:#7E4008; --ember-dim:rgba(160,83,15,.10); --ember-line:rgba(160,83,15,.38);
+    --water:#2F6690; --water-dim:rgba(47,102,144,.10); --water-line:rgba(47,102,144,.42);
+    --alert:#B03A28; --alert-dim:rgba(176,58,40,.09);
+    --good:#276A4E; --good-dim:rgba(39,106,78,.10); --good-line:rgba(39,106,78,.40);
+    --shadow:0 16px 34px -26px rgba(60,40,20,.55);
+  }
+}
+:root[data-theme="light"]{
+  --bg:#EFE9DE; --bg-2:#E9E2D5; --panel:#FBF7F0; --panel-2:#F3EDE3; --panel-3:#EDE5D8;
+  --line:#D9CEBF; --line-soft:#E6DED2;
+  --ink:#241C14; --ink-2:#5C4F42; --ink-3:#6B5D51;
+  --ember:#A0530F; --ember-2:#7E4008; --ember-dim:rgba(160,83,15,.10); --ember-line:rgba(160,83,15,.38);
+  --water:#2F6690; --water-dim:rgba(47,102,144,.10); --water-line:rgba(47,102,144,.42);
+  --alert:#B03A28; --alert-dim:rgba(176,58,40,.09);
+  --good:#276A4E; --good-dim:rgba(39,106,78,.10); --good-line:rgba(39,106,78,.40);
+  --shadow:0 16px 34px -26px rgba(60,40,20,.55);
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:var(--ff-sans); font-weight:400; font-size:15px; line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+button{font:inherit;color:inherit;background:none;border:none;cursor:pointer}
+input{font:inherit;color:inherit}
+:focus-visible{outline:2px solid var(--ember);outline-offset:2px;border-radius:4px}
+table{border-collapse:collapse}
+
+.wrap{max-width:1340px;margin:0 auto;padding:28px 20px 72px;display:flex;flex-direction:column;gap:22px}
+
+/* ── 마스트헤드 ──────────────────────────────────────────── */
+.mast{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:14px 24px;
+  padding-bottom:18px;border-bottom:1px solid var(--line)}
+.mast h1{font-family:var(--ff-display);font-weight:700;font-size:clamp(30px,4.6vw,46px);
+  margin:2px 0 0;letter-spacing:.01em;line-height:1.1;text-wrap:balance}
+.eyebrow{font-family:var(--ff-mono);font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--ember)}
+.mast p{margin:0;max-width:44ch;color:var(--ink-2);font-size:14px;font-weight:300}
+
+/* ── 설정 바 (한 줄에 모아 접기) ─────────────────────────── */
+.bar{display:grid;grid-template-columns:repeat(auto-fit,minmax(112px,1fr));gap:1px;
+  background:var(--line-soft);border:1px solid var(--line);border-radius:var(--r);
+  box-shadow:var(--shadow);overflow:hidden}
+.ctl{background:var(--panel);padding:9px 11px;display:flex;flex-direction:column;gap:5px;min-width:0}
+.ctl[hidden]{display:none}
+.ctl > label{font-family:var(--ff-mono);font-size:9.5px;letter-spacing:.15em;text-transform:uppercase;
+  color:var(--ink-3);display:flex;align-items:center;gap:5px}
+.selwrap{position:relative;display:block}
+.selwrap::after{content:"";position:absolute;right:12px;top:50%;width:6px;height:6px;
+  border-right:1.7px solid var(--ember);border-bottom:1.7px solid var(--ember);
+  transform:translateY(-70%) rotate(45deg);pointer-events:none;transition:border-color .15s,transform .15s}
+.selwrap:hover::after{border-color:var(--ember-2);transform:translateY(-45%) rotate(45deg)}
+.ctl select{
+  appearance:none;-webkit-appearance:none;width:100%;
+  background:linear-gradient(180deg,var(--panel-2),var(--panel-3));color:var(--ink);
+  border:1px solid var(--line);border-radius:8px;
+  padding:8px 26px 8px 10px;font-size:13px;line-height:1.25;cursor:pointer;
+  text-overflow:ellipsis;transition:border-color .15s,box-shadow .15s}
+.ctl select:hover{border-color:var(--ember-line)}
+.ctl select:focus-visible{border-color:var(--ember);box-shadow:0 0 0 3px var(--ember-dim);outline:none}
+.ctl option{background:var(--panel);color:var(--ink)}
+.rdot{width:9px;height:9px;border-radius:50%;flex:none;box-shadow:0 0 0 1px rgba(0,0,0,.25) inset}
+.adj{font-family:var(--ff-mono);font-size:15px;font-weight:600;font-variant-numeric:tabular-nums;
+  display:flex;align-items:center;color:var(--ember)}
+.adj small{font-family:var(--ff-sans);font-size:11px;color:var(--ink-3);font-weight:300;margin-left:6px}
+
+.calib{display:none;gap:10px;flex-wrap:wrap;padding:11px 13px;border:1px dashed var(--ember-line);
+  background:var(--ember-dim);border-radius:var(--r-s)}
+.calib.on{display:flex}
+.calib label{display:flex;flex-direction:column;gap:4px;font-size:11px;color:var(--ink-2);font-weight:300}
+.calib input{width:84px;background:var(--panel);border:1px solid var(--line);border-radius:6px;
+  padding:6px 8px;font-family:var(--ff-mono);font-size:14px;font-variant-numeric:tabular-nums}
+.calib .note{flex-basis:100%;font-size:11.5px;color:var(--ink-3);font-weight:300;line-height:1.5;margin:0}
+
+.stepper{display:flex;align-items:center;border:1px solid var(--line);border-radius:7px;
+  background:var(--panel-2);width:100%}
+.stepper button{flex:none;width:32px;height:34px;font-family:var(--ff-mono);font-size:16px;color:var(--ink-2);line-height:1}
+.stepper button:hover{color:var(--ember)}
+.stepper .val{flex:1;font-family:var(--ff-mono);font-size:15px;font-weight:600;text-align:center;
+  font-variant-numeric:tabular-nums;min-width:0}
+.stepper .val span{font-size:11px;color:var(--ink-3);font-weight:400}
+
+/* ── 본문 2단 ───────────────────────────────────────────── */
+.cols{display:grid;gap:20px;grid-template-columns:1fr;align-items:start}
+@media(min-width:1080px){.cols{grid-template-columns:minmax(0,1fr) minmax(0,1.08fr)}}
+
+.list-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin:0 2px 10px}
+.list-head h2{font-family:var(--ff-display);font-size:19px;margin:0;font-weight:700}
+.count{font-family:var(--ff-mono);font-size:11.5px;color:var(--ink-3)}
+
+.rows{display:flex;flex-direction:column;gap:8px}
+.row{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;width:100%;text-align:left;
+  background:var(--panel);border:1px solid var(--line);border-left:3px solid transparent;border-radius:var(--r-s);
+  padding:13px 15px;transition:border-color .15s,background .15s}
+.row:hover{border-left-color:var(--ember-line);background:var(--panel-2)}
+.row[aria-current="true"]{border-left-color:var(--ember);background:var(--panel-2);border-color:var(--ember-line)}
+.row-main{min-width:0;display:flex;flex-direction:column;gap:2px}
+.row-top{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.row-tag{font-family:var(--ff-mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3)}
+.row-name{display:block;font-family:var(--ff-display);font-size:17px;font-weight:700;line-height:1.3;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row-by{display:block;font-size:12px;color:var(--ink-3);font-weight:300;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row-by b{font-weight:500;color:var(--ink-2)}
+.row-dial{text-align:right;font-family:var(--ff-mono);font-variant-numeric:tabular-nums;flex:none}
+.row-dial .n{font-size:18px;font-weight:600;color:var(--ember);letter-spacing:-.01em;white-space:nowrap}
+.row-dial .u{font-size:10px;color:var(--ink-3);letter-spacing:.06em;white-space:nowrap}
+.empty{padding:26px 16px;text-align:center;color:var(--ink-3);font-size:13.5px;font-weight:300;
+  border:1px dashed var(--line);border-radius:var(--r-s)}
+
+/* 추출 방식 배지 */
+.mbadge{font-family:var(--ff-mono);font-size:9.5px;letter-spacing:.14em;border:1px solid;border-radius:999px;
+  padding:2px 8px;white-space:nowrap}
+/* 이 레시피가 어느 배전도에 맞춰 만들어졌는지 */
+.fitbadge{font-family:var(--ff-mono);font-size:9.5px;letter-spacing:.06em;color:var(--ink-3);
+  display:inline-flex;align-items:center;gap:4px;white-space:nowrap;
+  border:1px solid transparent;border-radius:999px;padding:2px 7px 2px 5px}
+.fitbadge i{width:7px;height:7px;border-radius:50%;flex:none;box-shadow:0 0 0 1px rgba(0,0,0,.25) inset}
+.fitbadge.on{color:var(--ink);border-color:var(--line);background:var(--panel-3)}
+.meta-badge{font-family:var(--ff-mono);font-size:9.5px;letter-spacing:.04em;color:var(--ink-2);
+  display:inline-flex;align-items:center;white-space:nowrap;border:1px solid var(--line);border-radius:999px;
+  padding:2px 7px;background:var(--panel-2)}
+.meta-badge.wave{color:var(--water);border-color:var(--water-line);background:var(--water-dim)}
+.meta-badge.official{color:var(--good);border-color:var(--good-line);background:var(--good-dim)}
+.meta-badge.secondary,.meta-badge.preserved{color:var(--ink-2)}
+.meta-badge.adapted,.meta-badge.unverified{color:var(--ember);border-color:var(--ember-line);background:var(--ember-dim)}
+.m-handdrip{color:var(--ember);border-color:var(--ember-line);background:var(--ember-dim)}
+.m-pourover{color:var(--water);border-color:var(--water-line);background:var(--water-dim)}
+.m-immersion{color:var(--good);border-color:var(--good-line);background:var(--good-dim)}
+.m-hybrid{color:var(--ink-2);border-color:var(--line);background:var(--panel-2)}
+
+/* ── 상세 ───────────────────────────────────────────────── */
+.detail{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);
+  overflow:hidden;position:relative}
+@media(min-width:1080px){.detail{position:sticky;top:20px;max-height:calc(100vh - 40px);overflow-y:auto}}
+.d-bar{display:none}
+.d-back{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--ember);font-weight:500;
+  border:1px solid var(--ember-line);background:var(--ember-dim);border-radius:999px;padding:6px 14px 6px 11px}
+.d-head{padding:20px 20px 16px;border-bottom:1px solid var(--line);
+  background:linear-gradient(180deg,var(--ember-dim),transparent)}
+/* 모바일에서는 목록 위로 덮는 시트 — 레시피 이름이 두 번 보이지 않게.
+   고정되는 건 얇은 뒤로가기 바 하나뿐이고 본문은 전부 함께 스크롤됩니다 */
+@media(max-width:1079px){
+  .detail{position:fixed;inset:0;z-index:60;border:0;border-radius:0;background:var(--bg);
+    overflow-y:auto;-webkit-overflow-scrolling:touch;
+    transform:translateX(100%);visibility:hidden;transition:transform .22s ease,visibility .22s}
+  body.sheet .detail{transform:none;visibility:visible}
+  body.sheet{overflow:hidden}
+  .d-bar{display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:3;
+    padding:8px 14px;background:var(--bg);border-bottom:1px solid var(--line)}
+  .d-bar .bar-name{font-family:var(--ff-display);font-size:14px;font-weight:700;color:var(--ink-2);
+    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+  .d-head{padding:14px 15px 13px}
+  .d-head h3{font-size:22px}
+  .d-blurb{font-size:13px}
+}
+.d-head .row-top{margin-bottom:2px}
+.d-head .row-tag{color:var(--ember)}
+.d-head h3{font-family:var(--ff-display);font-size:clamp(23px,3vw,29px);font-weight:700;margin:4px 0 4px;line-height:1.2;text-wrap:balance}
+.d-by{font-size:13px;color:var(--ink-2);font-weight:300}
+.d-by b{font-weight:500;color:var(--ink)}
+.d-blurb{margin:10px 0 0;font-size:13.5px;color:var(--ink-2);font-weight:300;max-width:56ch}
+
+.tiles{display:grid;grid-template-columns:repeat(2,1fr);gap:1px;background:var(--line-soft);border-bottom:1px solid var(--line)}
+@media(min-width:520px){.tiles{grid-template-columns:repeat(4,1fr)}}
+.tile{background:var(--panel);padding:13px 14px;display:flex;flex-direction:column;gap:3px}
+.tile .k{font-family:var(--ff-mono);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-3)}
+.tile .v{font-family:var(--ff-mono);font-size:16px;font-weight:600;font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.tile .s{font-size:11px;color:var(--ink-3);font-weight:300}
+/* 분쇄 타일 — 누르면 계산 근거가 펼쳐집니다 */
+.tile-btn{cursor:pointer;text-align:left;transition:background .15s}
+.tile-btn:hover{background:var(--panel-2)}
+.tile-btn .v{color:var(--ember)}
+.tile-btn .k::after{content:" ▾";color:var(--ember);font-size:8px;vertical-align:1px}
+.tile-btn[aria-expanded="true"]{background:var(--panel-2)}
+.tile-btn[aria-expanded="true"] .k::after{content:" ▴"}
+.tilepanel{display:none;padding:14px 20px 16px;border-bottom:1px solid var(--line);background:var(--panel-2)}
+.tilepanel.on{display:block}
+.tilepanel .dialinfo{margin:0}
+
+.sec{padding:18px 20px;border-bottom:1px solid var(--line-soft)}
+.sec:last-child{border-bottom:0}
+.sec-label{font-family:var(--ff-mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-3);
+  margin:0 0 12px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+
+/* 분쇄 계기 */
+.gauge{display:flex;gap:16px;align-items:center;flex-wrap:wrap;
+  background:var(--panel-2);border:1px solid var(--line);border-radius:var(--r-s);padding:15px 17px}
+.gauge-n{font-family:var(--ff-mono);font-size:clamp(30px,5.6vw,40px);font-weight:600;line-height:1;color:var(--ember);
+  letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.gauge-meta{display:flex;flex-direction:column;gap:2px;min-width:0}
+.gauge-meta .g1{font-size:13px;font-weight:500}
+.gauge-meta .g2{font-family:var(--ff-mono);font-size:11.5px;color:var(--ink-3)}
+.callout{margin-top:12px;border:1px solid var(--ember-line);background:var(--ember-dim);border-radius:var(--r-s);
+  padding:11px 13px;font-size:12.5px;color:var(--ink-2);font-weight:300;display:flex;gap:9px}
+.callout b{color:var(--ink);font-weight:500}
+.callout.warn{border-color:color-mix(in srgb,var(--alert) 45%,transparent);background:var(--alert-dim)}
+.callout .ic{font-family:var(--ff-mono);color:var(--ember);flex:none;font-size:13px}
+.callout.warn .ic{color:var(--alert)}
+
+/* 타이머 */
+.timer{display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+  background:var(--panel-2);border:1px solid var(--line);border-radius:var(--r-s);padding:13px 15px}
+.clock{font-family:var(--ff-mono);font-size:34px;font-weight:600;font-variant-numeric:tabular-nums;letter-spacing:-.01em;line-height:1}
+.clock.run{color:var(--ember)}
+.tbtns{display:flex;gap:7px;margin-left:auto}
+.tbtn{border:1px solid var(--line);border-radius:999px;padding:7px 15px;font-size:12.5px;font-weight:500;
+  background:var(--panel);transition:border-color .15s,color .15s}
+.tbtn:hover{border-color:var(--ember-line);color:var(--ember)}
+.tbtn.primary{background:var(--ember-dim);border-color:var(--ember-line);color:var(--ember)}
+.t-now{font-size:12.5px;color:var(--ink-2);font-weight:300;flex-basis:100%;font-family:var(--ff-mono)}
+.t-now b{color:var(--ink);font-weight:500}
+
+/* 누적 물량 바 */
+.column{margin:14px 0 4px}
+.col-track{position:relative;height:10px;border-radius:999px;background:var(--panel-3);border:1px solid var(--line);overflow:hidden}
+.col-fill{position:absolute;inset:0 auto 0 0;width:0;background:linear-gradient(90deg,var(--ember),var(--ember-2));
+  transition:width .12s linear}
+.col-ticks{position:relative;height:9px;margin-top:4px}
+.col-ticks i{position:absolute;top:0;width:1px;height:5px;background:var(--line);transform:translateX(-.5px)}
+.col-read{display:flex;justify-content:space-between;font-family:var(--ff-mono);font-size:11.5px;color:var(--ink-3);
+  font-variant-numeric:tabular-nums;margin-top:2px}
+.col-read b{color:var(--ink);font-weight:600;font-size:13px}
+
+/* ── 물 붓는 모양 : 두 뷰 ──────────────────────────────── */
+.pour{display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap;
+  background:var(--panel-2);border:1px solid var(--line);border-radius:var(--r-s);padding:14px 15px}
+.views{display:flex;gap:10px;flex:none}
+.view{display:flex;flex-direction:column;gap:5px;align-items:center;margin:0}
+.view figcaption{font-family:var(--ff-mono);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-3)}
+.pd,.sv{width:116px;height:116px;display:block;background:var(--panel);border:1px solid var(--line-soft);border-radius:8px}
+.pd-rim{fill:none;stroke:var(--line);stroke-width:1.6}
+.pd-bed{fill:var(--panel-3);stroke:var(--line-soft);stroke-width:1}
+.pd-rib{fill:none;stroke:var(--line-soft);stroke-width:1;stroke-linecap:round}
+.pd-ghost{fill:none;stroke:var(--ember);stroke-opacity:.2;stroke-linecap:round;stroke-linejoin:round}
+.pd-path{fill:none;stroke:var(--ember);stroke-linecap:round;stroke-linejoin:round}
+.pd-dot{fill:var(--ember-2);opacity:0}
+.pd-empty{fill:none;stroke:var(--ink-3);stroke-width:1.4;stroke-dasharray:3 4;opacity:.55}
+.sv-body{fill:none;stroke:var(--line);stroke-width:1.7;stroke-linejoin:round;stroke-linecap:round}
+.sv-bed{fill:var(--panel-3);stroke:var(--line-soft);stroke-width:1}
+.sv-water{fill:var(--water);fill-opacity:.2;stroke:var(--water);stroke-opacity:.55;stroke-width:1}
+.sv-spout{fill:none;stroke:var(--ink-3);stroke-width:3.2;stroke-linecap:round}
+.sv-kettle{fill:var(--panel-3);stroke:var(--ink-3);stroke-width:1.2}
+.sv-stream{stroke:var(--ember);stroke-linecap:round}
+.sv-splash{fill:none;stroke:var(--ember);stroke-width:1.2;opacity:.5}
+.sv-dim{stroke:var(--ink-3);stroke-width:.8;stroke-dasharray:2 3;opacity:.55}
+.sv-hide{opacity:0}
+.pour-info{display:flex;flex-direction:column;gap:8px;min-width:0;flex:1 1 200px}
+.pour-step{font-family:var(--ff-mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--ember)}
+.pour-name{font-family:var(--ff-display);font-size:20px;font-weight:700;line-height:1.25;margin:0}
+.pour-desc{margin:0;font-size:13px;color:var(--ink-2);font-weight:300;line-height:1.55}
+.pour-context{margin:0;padding:7px 9px;border-left:2px solid var(--ember);background:var(--ember-dim);
+  color:var(--ink-2);font-size:12px;line-height:1.5;border-radius:0 6px 6px 0}
+.pour-attrs{display:flex;flex-wrap:wrap;gap:6px;margin-top:2px}
+.attr{font-family:var(--ff-mono);font-size:11px;border:1px solid var(--line);border-radius:999px;
+  padding:3px 9px;color:var(--ink-2);background:var(--panel);display:inline-flex;gap:6px}
+.attr b{color:var(--ink);font-weight:600}
+.replay{align-self:flex-start;font-size:12px;color:var(--ember);border:1px solid var(--ember-line);
+  border-radius:999px;padding:4px 12px;background:var(--ember-dim)}
+
+/* 타임라인 */
+.tl{display:flex;flex-direction:column;gap:2px}
+.step{display:grid;grid-template-columns:50px 1fr auto;gap:11px;align-items:center;width:100%;text-align:left;
+  padding:9px 10px;border-radius:var(--r-s);border:1px solid transparent;transition:background .15s,border-color .15s}
+.step:hover{background:var(--panel-2)}
+.step .at{font-family:var(--ff-mono);font-size:13px;color:var(--ink-3);font-variant-numeric:tabular-nums}
+.step .lb{font-size:13.5px;min-width:0;display:flex;align-items:flex-start;gap:2px;flex-direction:column}
+.step .lb .top{display:flex;align-items:center;gap:8px}
+.step .lb .k{width:6px;height:6px;border-radius:50%;background:var(--ink-3);flex:none}
+.step.pour .lb .k,.step.bloom .lb .k{background:var(--ember)}
+.step.bloom .lb .k{box-shadow:0 0 0 3px var(--ember-dim)}
+.step .pat{font-family:var(--ff-mono);font-size:10.5px;color:var(--ink-3);padding-left:14px;letter-spacing:.04em}
+.step .trigger{font-family:var(--ff-sans);font-size:10.5px;color:var(--water);padding-left:14px;line-height:1.4}
+.step .amt{font-family:var(--ff-mono);font-size:13px;font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}
+.step .amt b{font-weight:600}
+.step .amt .cum{color:var(--ink-3);font-size:11.5px}
+.step.on{background:var(--ember-dim);border-color:var(--ember-line)}
+.step.done{opacity:.5}
+.step[aria-pressed="true"]{border-color:var(--ember-line)}
+.step.act .amt{color:var(--ink-3);font-size:11.5px}
+
+/* 팁 */
+.tips{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:9px}
+.tips li{display:flex;gap:10px;font-size:13.5px;color:var(--ink-2);font-weight:300;line-height:1.55}
+.tips li::before{content:"—";color:var(--ember);font-family:var(--ff-mono);flex:none}
+.tips li b{color:var(--ink);font-weight:500}
+.src{font-size:11.5px;color:var(--ink-3);font-weight:300;margin:14px 0 0;line-height:1.5;
+  display:flex;flex-wrap:wrap;align-items:center;gap:6px}
+.src-text{min-width:0}
+.source-link{color:var(--water);text-decoration:none;border-bottom:1px solid var(--water-line);font-weight:500}
+.source-link:hover{color:var(--ink)}
+
+/* 분쇄 눈금 설명 — 항목마다 이름표를 붙여 구분 */
+.gauge-unit{font-family:var(--ff-mono);font-size:13px;color:var(--ink-3);letter-spacing:.1em;align-self:flex-end;
+  padding-bottom:4px;display:flex;flex-direction:column;gap:2px}
+.gauge-unit small{font-size:10.5px;letter-spacing:.02em;opacity:.85}
+.dialinfo{margin:11px 0 0;display:flex;flex-direction:column;font-size:12.5px}
+.dialinfo > div{display:flex;justify-content:space-between;align-items:baseline;gap:14px;padding:7px 2px;
+  border-bottom:1px dashed var(--line-soft)}
+.dialinfo > div:last-child{border-bottom:0}
+.dialinfo dt{color:var(--ink-3);font-weight:300;flex:none}
+.dialinfo dd{margin:0;font-family:var(--ff-mono);font-size:12px;color:var(--ink-2);text-align:right;
+  font-variant-numeric:tabular-nums;min-width:0}
+@media(max-width:640px){
+  .dialinfo > div{flex-direction:column;align-items:flex-start;gap:2px}
+  .dialinfo dd{text-align:left}
+}
+
+/* 모바일 여백·크기 조정 */
+@media(max-width:640px){
+  .wrap{padding:18px 14px 56px;gap:16px}
+  .mast{padding-bottom:14px}
+  .mast p{font-size:13px}
+  .sec{padding:15px 15px}
+  .d-head{padding:16px 15px 14px}
+  .tile{padding:11px 12px}
+  .pour{padding:12px}
+  .pd,.sv{width:104px;height:104px}
+  .views{gap:8px}
+  .step{grid-template-columns:44px 1fr auto;gap:8px;padding:8px 7px}
+  .step .lb{font-size:13px}
+  .timer{padding:11px 12px;gap:10px}
+  .clock{font-size:29px}
+  .appendix-body{padding:0 15px 18px}
+  details.appendix > summary{padding:14px 15px}
+}
+
+/* ── 부록 ───────────────────────────────────────────────── */
+details.appendix{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);overflow:hidden}
+details.appendix>summary{list-style:none;cursor:pointer;padding:16px 20px;display:flex;align-items:center;
+  justify-content:space-between;gap:12px;font-family:var(--ff-mono);font-size:11px;letter-spacing:.18em;
+  text-transform:uppercase;color:var(--ink-2)}
+details.appendix>summary::-webkit-details-marker{display:none}
+details.appendix>summary::after{content:"＋";font-size:15px;color:var(--ember)}
+details.appendix[open]>summary::after{content:"−"}
+details.appendix>summary:hover{color:var(--ink)}
+.appendix-body{padding:0 20px 22px;display:flex;flex-direction:column;gap:26px}
+.tblwrap{overflow-x:auto;border:1px solid var(--line);border-radius:var(--r-s)}
+.tbl{width:100%;min-width:560px;font-family:var(--ff-mono);font-size:12.5px;font-variant-numeric:tabular-nums}
+.tbl caption{caption-side:top;text-align:left;font-family:var(--ff-sans);font-size:14px;font-weight:500;
+  padding:0 0 9px;color:var(--ink)}
+.tbl th,.tbl td{padding:8px 12px;border-bottom:1px solid var(--line-soft);text-align:center}
+.tbl thead th{background:var(--panel-2);color:var(--ink-2);font-weight:500;font-size:11.5px;letter-spacing:.06em;
+  border-bottom:1px solid var(--line)}
+.tbl tbody th{background:var(--panel-2);color:var(--ink);font-weight:500;font-family:var(--ff-sans);font-size:13px}
+.tbl td.merge{background:var(--panel-2)}
+.tbl tr:last-child td,.tbl tr:last-child th{border-bottom:0}
+.tbl td.span{font-family:var(--ff-sans);font-size:13px;color:var(--ink-2);font-weight:300}
+
+.vs{display:grid;gap:16px;grid-template-columns:1fr}
+@media(min-width:640px){.vs{grid-template-columns:1fr 1fr}}
+.vscard{border:1px solid var(--line);border-radius:var(--r-s);padding:15px;background:var(--panel-2);
+  display:flex;gap:14px;align-items:flex-start}
+.vscard .sv{width:104px;height:104px;flex:none}
+.vscard h4{margin:0 0 4px;font-family:var(--ff-display);font-size:18px;font-weight:700}
+.vscard p{margin:0;font-size:12.5px;color:var(--ink-2);font-weight:300;line-height:1.55}
+.vscard ul{margin:8px 0 0;padding-left:15px;font-size:12px;color:var(--ink-3);font-weight:300;line-height:1.6}
+
+.patgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(158px,1fr));gap:14px}
+.patcard{border:1px solid var(--line);border-radius:var(--r-s);padding:12px;display:flex;gap:12px;align-items:center;
+  background:var(--panel-2)}
+.patcard .pd{width:64px;height:64px;flex:none;border:0;background:none}
+.patcard .pn{font-size:13.5px;font-weight:500;margin:0 0 2px}
+.patcard .pd2{font-size:11.5px;color:var(--ink-3);font-weight:300;line-height:1.45;margin:0}
+
+.foot{font-size:12px;color:var(--ink-3);font-weight:300;line-height:1.65;max-width:78ch;margin:0 2px}
+.foot b{color:var(--ink-2);font-weight:500}
+.foot a{color:var(--ink-2);text-decoration-color:var(--line)}
+
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+
+<div class="wrap">
+
+  <header class="mast">
+    <div>
+      <div class="eyebrow">Grind · Dripper · Pour</div>
+      <h1>브루 다이얼</h1>
+    </div>
+    <p>그라인더와 드리퍼를 고르면 유명 바리스타 레시피가 <b>내 그라인더 클릭수</b>로 환산됩니다. 단계마다 <b>위·옆에서 본 붓기 모양</b>과 핸드드립·푸어오버 구분까지.</p>
+  </header>
+
+  <section aria-label="브루 설정" style="display:flex;flex-direction:column;gap:10px">
+    <div class="bar">
+      <div class="ctl"><label for="selGrinder">그라인더</label><span class="selwrap"><select id="selGrinder"></select></span></div>
+      <div class="ctl"><label for="selDripper">드리퍼</label><span class="selwrap"><select id="selDripper"></select></span></div>
+      <div class="ctl" id="waveSizeCtl" hidden><label for="selWaveSize">웨이브 크기</label><span class="selwrap"><select id="selWaveSize"></select></span></div>
+      <div class="ctl"><label for="selMethod">추출 방식</label><span class="selwrap"><select id="selMethod"></select></span></div>
+      <div class="ctl"><label for="selRoast">배전도 <i class="rdot" id="roastDot"></i></label><span class="selwrap"><select id="selRoast"></select></span></div>
+      <div class="ctl"><label for="selProc">가공</label><span class="selwrap"><select id="selProc"></select></span></div>
+      <div class="ctl">
+        <label>원두량</label>
+        <div class="stepper">
+          <button type="button" id="doseDown" aria-label="원두량 1g 줄이기">−</button>
+          <div class="val" id="doseVal">20<span>g</span></div>
+          <button type="button" id="doseUp" aria-label="원두량 1g 늘리기">＋</button>
+        </div>
+      </div>
+      <div class="ctl"><label>분쇄 보정</label><span class="adj" id="adjOut">±0μm</span></div>
+    </div>
+    <div class="calib" id="calib">
+      <label>기준 눈금 <input type="number" id="calRef" step="0.5" min="0" max="200"></label>
+      <label>클릭당 μm <input type="number" id="calUm" step="1" min="5" max="200"></label>
+      <p class="note">평소 <b>중배전 워시드 드립</b>이 잘 나오는 눈금을 기준값에 넣으세요. 그 값이 900μm이 되고, 클릭당 μm으로 나머지를 계산합니다.</p>
+    </div>
+  </section>
+
+  <div class="cols">
+    <section aria-label="레시피 목록">
+      <div class="list-head">
+        <h2>레시피</h2>
+        <span class="count" id="listCount"></span>
+      </div>
+      <div class="rows" id="rows"></div>
+    </section>
+
+    <section class="detail" id="detail" aria-live="polite"></section>
+  </div>
+
+  <details class="appendix">
+    <summary>핸드드립 vs 푸어오버 · 물 붓는 모양 사전</summary>
+    <div class="appendix-body">
+      <div class="vs" id="vsGrid"></div>
+      <div class="patgrid" id="patGrid"></div>
+      <div>
+        <div class="tblwrap">
+          <table class="tbl">
+            <caption>배전도별로 실제 달라지는 것</caption>
+            <thead><tr><th>배전도</th><th>물 온도</th><th>분쇄</th><th>저어주기</th><th>뜸</th></tr></thead>
+            <tbody id="roastGuide"></tbody>
+          </table>
+        </div>
+        <p class="foot" style="margin-top:10px">붓는 횟수·간격·총 시간은 배전도에 따라 바꾸지 않습니다 — 원 레시피가 그렇게 하지 않기 때문입니다. 카스야 본인도 <b>“기술이랄 게 없다, 굵게 갈고 시간과 물량만 지켜라”</b>라고 말합니다.</p>
+      </div>
+    </div>
+  </details>
+
+  <details class="appendix">
+    <summary>분쇄도 환산표 · 원본 자료</summary>
+    <div class="appendix-body">
+      <div>
+        <div class="tblwrap">
+          <table class="tbl">
+            <caption>각 그라인더 클릭별 분쇄도</caption>
+            <thead><tr><th>분쇄도 (μm)</th><th>밀랩 M01</th><th>코만단테 MK4</th><th>K‑Ultra</th><th>페모북 A2</th></tr></thead>
+            <tbody>
+              <tr><td>450–550</td><td>3.0 – 3.8</td><td></td><td></td><td>0</td></tr>
+              <tr><td>550–600</td><td>3.9 – 4.2</td><td class="merge" rowspan="2">12 – 16</td><td></td><td></td></tr>
+              <tr><td>600–700</td><td>4.3 – 5.0</td><td>3.7 – 4.5</td><td>10</td></tr>
+              <tr><td>700–800</td><td>5.1 – 5.8</td><td>16 – 20</td><td>4.5 – 5.5</td><td>20</td></tr>
+              <tr><td>800–850</td><td>5.9 – 6.2</td><td class="merge" rowspan="2">20 – 24</td><td>5.5 – 6.0</td><td></td></tr>
+              <tr><td>850–900</td><td>6.3 – 6.6</td><td>6.0 – 7.0</td><td>30</td></tr>
+              <tr><td>900–1000</td><td>6.7 – 7.4</td><td>24 – 27</td><td>7.0 – 8.2</td><td>40</td></tr>
+              <tr><td>1000–1050</td><td>7.4 – 7.8</td><td>28 – 29</td><td>8.2 – 8.4</td><td>50</td></tr>
+              <tr><td>1050–1200</td><td>7.8 – 9.0</td><td>30 – 36</td><td>8.5 – 10.0</td><td></td></tr>
+              <tr><td>1200–1300</td><td>9.0 – 9.8</td><td>36 이상</td><td></td><td>60</td></tr>
+              <tr><td>1300 이상</td><td>9.9</td><td></td><td></td><td>70</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="foot" style="margin-top:10px">
+          <b>이 표를 검토한 결과</b> — 열마다 정확도가 다릅니다.
+          <b>밀랩 M01</b>은 눈금 1.0당 약 125μm로 처음부터 끝까지 매끄럽습니다.
+          <b>코만단테</b>는 클릭당 25–37μm으로, 알려진 사양(약 30μm/클릭)과 잘 맞습니다.
+          <b>K‑Ultra</b>는 600μm(3.7)에서 1200μm(10.0)까지 총 49클릭 = <b>클릭당 12.2μm</b>으로,
+          제조사 사양인 12.5μm/클릭과 거의 정확히 일치합니다 — 표 전체의 신뢰도를 뒷받침하는 지점입니다.
+          다만 <b>850–900μm 행(6.0→7.0)</b>만 클릭당 6.3μm으로 튑니다. 다른 행들과 맞추면 6.0→6.4 정도가 되어야 합니다.
+          <b>페모북 A2</b> 열은 제조사 스펙(한 바퀴 40클릭 · 푸어오버 50–80 · 프렌치프레스 80–120클릭)과 어긋나,
+          앱의 환산은 <b>제조사 스펙 쪽</b>을 씁니다. 나머지 세 열은 표 값을 그대로 쓰되 구간별로 선형보간하므로,
+          위의 튀는 행은 그 구간에서만 약간의 오차로 남습니다.
+        </p>
+      </div>
+      <div>
+        <div class="tblwrap">
+          <table class="tbl">
+            <caption>코만단테 MK4 니트로블레이드 기준 · 배전도, 공정별 추천 클릭수</caption>
+            <thead><tr><th>공정</th><th>약배전</th><th>중약배전</th><th>중배전</th><th>중강배전</th><th>강배전</th></tr></thead>
+            <tbody>
+              <tr><th>워시드</th><td>21–22</td><td>22–23</td><td>24–25</td><td>26–27</td><td>28–30</td></tr>
+              <tr><th>허니</th><td class="span" colspan="5">1–2 클릭 더 굵게</td></tr>
+              <tr><th>내추럴</th><td class="span" colspan="5">2–3 클릭 더 굵게</td></tr>
+              <tr><th>무산소 내추럴</th><td class="span" colspan="5">3–4 클릭 더 굵게</td></tr>
+              <tr><th>디카페인</th><td class="span" colspan="5">3–4 클릭 더 굵게</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </details>
+
+  <p class="foot">
+    <b>환산 방식</b> — 각 레시피의 목표 입도(μm)에 배전도·가공방식 보정을 더한 뒤, 환산표를 구간별 선형보간해 그라인더 눈금으로 되돌립니다.
+    밀랩 M01 · 코만단테 MK4 · K‑Ultra는 표의 값을 그대로 썼고, <b>페모북 A2</b>는 제조사 스펙(1회전 40클릭 · 브루잉별 권장 클릭수)에 맞춰 다시 잡았습니다.
+    <b>EK43s · 타임모어 C3 · 바라짜 엔코어</b>는 통용 눈금대를 기준으로 한 <b>근사값</b>입니다. 「내 그라인더」에서 직접 보정할 수 있습니다.<br>
+    <b>레시피 출처</b> — 전주연 <a href="https://coffee4m.com/%EC%B9%BC%EB%A6%AC%ED%83%80-%EC%9B%A8%EC%9D%B4%EB%B8%8C-%EB%93%9C%EB%A6%AC%ED%8D%BC-%EB%A0%88%EC%8B%9C%ED%94%BC/">coffee4m</a> ·
+    두 지아닝 <a href="https://www.timer.coffee/recipes/origami-dripper/jia-ning-du-origami-dripper-recipe/">timer.coffee</a> ·
+    WAC 2023 <a href="https://aeropress.com/blogs/w-a-c-aeropress-recipes/1st-tay-wipvasutt-thailand-2023">aeropress.com</a> ·
+    블루보틀 <a href="https://bluebottlecoffee.com/us/eng/brew-guides/chemex">Blue Bottle 브루 가이드</a> ·
+    코노 점드립 <a href="https://brunch.co.kr/@coffeepd/60">brunch</a>.
+    나머지는 공개된 영상·강연 자료를 정리한 것으로 실제 최신 버전과 다를 수 있습니다. 표시값은 출발점으로 쓰고 맛으로 마무리하세요.
+  </p>
+</div>
+
+<script>
+"use strict";
+
+const REDUCE = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+/* ── 그라인더 ──────────────────────────────────────────── */
+const GRINDERS = [
+  { id:"m01", name:"밀랩 M01", unit:"눈금", dec:1, hint:"0–10 눈금 · 원본 표",
+    curve:[[450,3.0],[550,3.85],[600,4.2],[700,5.0],[800,5.8],[850,6.2],[900,6.6],[1000,7.4],[1050,7.8],[1200,9.0],[1300,9.8],[1450,9.9]] },
+  { id:"c40", name:"코만단테 MK4", unit:"클릭", dec:0, hint:"니트로블레이드 · 원본 표",
+    curve:[[550,12],[600,14],[700,16],[800,20],[900,24],[1000,27.5],[1050,29],[1200,36],[1300,40]] },
+  { id:"kultra", name:"1Zpresso K‑Ultra", unit:"회전.클릭", dec:0, base:8, dial:8,
+    hint:"한 바퀴 8클릭 · 5.5 = 5바퀴 + 5클릭",
+    curve:[[600,31],[700,37],[800,45],[850,48],[900,56],[1000,66],[1050,68],[1200,80]] },
+  { id:"a2", name:"페모북 A2", unit:"클릭", dec:0, hint:"한 바퀴 40클릭 · 숫자 한 칸 4클릭",
+    dial:40,
+    bands:[{ label:"에어로프레스·모카포트", lo:10, hi:18 },
+           { label:"푸어오버·사이폰", lo:50, hi:80 },
+           { label:"프렌치프레스", lo:80, hi:120 }],
+    curve:[[400,8],[500,15],[600,32],[700,50],[800,60],[900,70],[1000,80],[1100,90],[1200,100],[1300,110],[1400,120]] },
+  { id:"ek43s", name:"EK43s", unit:"다이얼", dec:1, hint:"근사값 · 실측 권장",
+    curve:[[700,13],[800,13.8],[900,14.4],[1000,15],[1100,15.5],[1200,16],[1300,16.8]] },
+  { id:"c3", name:"타임모어 C3", unit:"클릭", dec:0, hint:"근사값 · 클릭당 약 33μm",
+    curve:[[400,7],[500,10],[600,13],[700,16],[800,19],[900,22],[1000,25],[1100,28],[1200,31],[1300,34],[1400,37]] },
+  { id:"encore", name:"바라짜 엔코어", unit:"눈금", dec:0, hint:"근사값 · 0–40 다이얼",
+    curve:[[400,6],[500,9],[600,12],[700,15],[800,18],[900,21],[1000,24],[1100,27],[1200,30],[1300,33],[1450,38]] }
+];
+function customGrinder(){
+  const c = state.custom, pts = [];
+  for (let um = 300; um <= 1500; um += 100) pts.push([um, Math.max(0, c.ref + (um - 900) / c.umPerClick)]);
+  return { id:"custom", name:"내 그라인더", unit:"클릭", dec:1,
+    hint:"기준 " + c.ref + " = 900μm · 클릭당 " + c.umPerClick + "μm", curve:pts };
+}
+
+/* ── 배전도 · 가공방식 보정 (μm) ───────────────────────── */
+const ROASTS = [
+  { id:"light",  label:"약배전",   d:-60, dot:"#E3C07A", bloom255:40,
+    cols:["높게 93–96℃","가늘게","강하게","길게"] },
+  { id:"mlight", label:"중약배전", d:-30, dot:"#D19E5C", bloom255:38,
+    cols:["92–94℃","약간 가늘게","약간 강하게","보통"] },
+  { id:"medium", label:"중배전",   d:0,   dot:"#BE7C43", bloom255:35,
+    cols:["88–92℃","기준","기준","기준"] },
+  { id:"mdark",  label:"중강배전", d:35,  dot:"#A05C33", bloom255:32,
+    cols:["86–90℃","약간 굵게","약간 약하게","짧게"] },
+  { id:"dark",   label:"강배전",   d:70,  dot:"#7E4527", bloom255:30,
+    cols:["낮게 83–88℃","굵게","최소로","짧게"] }
+];
+const PROCESSES = [
+  { id:"washed",    label:"워시드",        d:0,  note:"기준" },
+  { id:"honey",     label:"허니",          d:38, note:"1–2클릭 굵게" },
+  { id:"natural",   label:"내추럴",        d:63, note:"2–3클릭 굵게" },
+  { id:"anaerobic", label:"무산소 내추럴", d:88, note:"3–4클릭 굵게" },
+  { id:"decaf",     label:"디카페인",      d:88, note:"3–4클릭 굵게" }
+];
+
+const DRIPPERS = [
+  { id:"all", label:"전체" }, { id:"v60", label:"V60" }, { id:"wave", label:"칼리타 웨이브" },
+  { id:"origami", label:"오리가미" }, { id:"kono", label:"코노" }, { id:"nel", label:"융드립" },
+  { id:"switch", label:"하리오 스위치" },
+  { id:"clever", label:"클레버" }, { id:"chemex", label:"케멕스" },
+  { id:"frenchpress", label:"프렌치프레스" }, { id:"aeropress", label:"에어로프레스" }
+];
+const DRIPPER_LABEL = Object.fromEntries(DRIPPERS.map(d => [d.id, d.label]));
+const WAVE_SIZES = [
+  { id:"all", label:"전체" }, { id:"155", label:"155" }, { id:"185", label:"185" },
+  { id:"both", label:"155·185 공용만" }, { id:"unspecified", label:"미지정" }
+];
+const WAVE_SIZE_LABEL = { "155":"Wave 155", "185":"Wave 185", both:"155·185 공용", unspecified:"크기 미지정" };
+const ROAST_BASIS_LABEL = {
+  explicit:"원문 명시", roasterStyle:"로스터 성향", inferred:"조건 기반 제안",
+  all:"전 배전 대응", local:"로컬 분류", unspecified:"배전 미기재"
+};
+const SOURCE_KIND_LABEL = {
+  official:"공식 자료", secondary:"2차 정리", preserved:"보존 자료",
+  adapted:"응용·변형", unverified:"출처 미검증", unspecified:"출처 유형 미기재"
+};
+
+/* ── 추출 방식 ─────────────────────────────────────────── */
+const METHODS = {
+  handdrip:  { label:"핸드드립", sub:"정드립 계보", stream:"가늘게", drop:"낮게", dropCm:"2–3cm", gap:15,
+    short:"가는 물줄기 · 낮은 붓는 높이 · 작은 원을 여러 번",
+    desc:"커피층 바로 위에서 가는 물줄기로, 작은 원을 여러 번 나눠 붓습니다. 저어주기를 최소화해 진한 액을 뽑고 필요하면 가수해 마시는 일본식 계보." },
+  pourover:  { label:"푸어오버", sub:"서드웨이브", stream:"굵게", drop:"높게", dropCm:"5–8cm", gap:32,
+    short:"굵은 물줄기 · 높은 붓는 높이 · 넓은 원을 적은 횟수",
+    desc:"조금 높은 곳에서 굵은 물줄기로, 넓은 원을 그리며 적은 횟수에 붓습니다. 높이와 저어주기의 힘으로 고르게 뽑아내는 방식." },
+  immersion: { label:"침지식", sub:"이머전", stream:"굵게", drop:"자유", dropCm:"자유", gap:36,
+    short:"담가서 우려냅니다 · 붓는 기술보다 시간과 분쇄도가 맛을 정합니다",
+    desc:"물에 담가 우려냅니다. 붓는 기술이 거의 필요 없고 침지 시간과 분쇄도가 맛을 결정합니다." },
+  hybrid:    { label:"하이브리드", sub:"침지 → 투과", stream:"보통", drop:"보통", dropCm:"3–5cm", gap:24,
+    short:"밸브를 닫고 침지 → 열어서 투과",
+    desc:"밸브를 닫고 침지로 우린 뒤 열어서 투과로 내립니다. 두 방식의 중간." }
+};
+const METHOD_LIST = [
+  { id:"all", label:"전체" }, { id:"handdrip", label:"핸드드립" }, { id:"pourover", label:"푸어오버" },
+  { id:"immersion", label:"침지식" }, { id:"hybrid", label:"하이브리드" }
+];
+
+/* ── 물 붓는 모양 ──────────────────────────────────────── */
+const PATTERNS = {
+  bloom:    { label:"뜸 나선",     stream:"보통",   height:"낮게", rate:6,
+              desc:"중심에서 바깥으로 동심원을 그리며 가루를 남김없이 적십니다. <b>필터 벽은 건드리지 않습니다</b> — 벽을 때리면 물이 커피를 지나치지 않고 옆으로 새요. 물이 적어서 붓기만으로 전부 적시기는 어렵기 때문에, 대부분의 레시피가 곧바로 <b>스월이나 스푼 저어주기</b>을 함께 씁니다." },
+  drop:     { label:"점드립",     stream:"한 방울씩", height:"낮게", rate:1.5,
+              desc:"물줄기를 만들지 않고 중심에 물방울을 한 방울씩 떨어뜨립니다. 가장 느리고 가장 진한 정통 핸드드립." },
+  coin:     { label:"동전 서클",   stream:"가늘게", height:"낮게", rate:3.5,
+              desc:"500원 동전(실버달러) 크기의 아주 작은 동심원. 농축 추출에서 낮은 슬러리 수위를 유지할 때 쓰며, 한 점에 고정하는 센터 푸어와는 다릅니다." },
+  smallCir: { label:"작은 나선",   stream:"보통",   height:"보통", rate:5,
+              desc:"중심에서 반지름 절반까지만 나선을 그립니다. 가장자리를 남겨 농도를 끌어올릴 때." },
+  spiral:   { label:"나선",        stream:"보통",   height:"보통", rate:6,
+              desc:"중심에서 바깥 70%까지 천천히 나선을 그리며 나갑니다. 가장 기본이 되는 붓기." },
+  wide:     { label:"넓은 나선",   stream:"굵게",   height:"보통", rate:8,
+              desc:"바깥 85%까지 크게 돌아 커피층 전체에 물을 고르게 얹습니다. 벽면은 직접 때리지 않습니다." },
+  back:     { label:"왕복 나선",   stream:"보통",   height:"보통", rate:6,
+              desc:"중심에서 바깥으로 나선을 그린 뒤 다시 중심으로 되돌아옵니다. 테츠 카스야가 4:6에서 쓰는 움직임으로, 한 번의 붓기로 베드 전체를 고르게 지납니다." },
+  ring:     { label:"링",          stream:"보통",   height:"보통", rate:6,
+              desc:"중심을 비우고 중간 반경에만 원을 그립니다. 중앙이 과추출될 때 균형을 잡아줍니다." },
+  center:   { label:"센터 고정",   stream:"가늘게", height:"낮게", rate:4,
+              desc:"원을 그리지 않고 베드 중앙 한 점에 연속된 물줄기를 놓습니다. 점드립처럼 방울로 끊지 않으며, 유입량과 배출량을 맞춰 수위를 유지할 때 씁니다." },
+  inward:   { label:"역나선",      stream:"보통",   height:"보통", rate:6,
+              desc:"베드 바깥쪽에서 시작해 나선을 그리며 중앙으로 들어옵니다. 바깥에서 안쪽으로 이동한다는 원문이 있을 때만 사용합니다." },
+  spot:     { label:"마른 지점", stream:"가늘게", height:"낮게", rate:4,
+              desc:"정해진 원을 반복하지 않고 베드의 어둡고 마른 지점만 짧게 겨냥합니다. 이미 밝게 젖은 곳은 피하고 베드 상태를 우선합니다." },
+  edgeRinse:{ label:"가장자리 훑기", stream:"가늘게", height:"보통", rate:4,
+              desc:"필터와 커피층 경계를 한 바퀴만 짧게 훑어 주름에 걸린 가루를 내립니다. 필터 벽에 계속 붓는 패턴은 아닙니다." },
+  zigzag:   { label:"지그재그",     stream:"굵게",   height:"보통", rate:8,
+              desc:"좌우로 빠르게 왕복하며 전 베드를 적십니다. 뜸에서 마른 덩어리를 줄이기 위한 강한 전면 붓기입니다." },
+  edgeCenter:{ label:"가장자리 → 센터", stream:"가늘게", height:"낮게", rate:4,
+              desc:"필터와 베드 경계를 짧게 한 바퀴 훑은 뒤, 끊지 않고 중앙 고정 붓기로 전환하는 복합 동작입니다." },
+  flood:    { label:"한 번에",     stream:"굵게",   height:"높게", rate:10,
+              desc:"굵은 물줄기로 중앙에 한 번에 붓습니다. 침지식은 저어주기가 곧 균일함이라 세게 부어도 좋습니다." }
+};
+/* 물줄기 세기별 유량 (g/s) — 붓기 시간 계산용 */
+const RATE = { "한 방울씩":1.5, "가늘게":4, "보통":6, "굵게":9 };
+
+/* ── 레시피 ────────────────────────────────────────────── */
+const RECIPES = [
+  {
+    id:"kasuya46", name:"4:6 메소드", by:"테츠 카스야", role:"2016 월드 브루어스컵 챔피언",
+    dripper:"v60", method:"pourover", fit:"light", dose:20, ratio:15, temp:"93℃",
+    um:1100, tol:80, total:210,
+    blurb:"물을 5번에 나눠 붓되 앞 40%로 맛의 방향을, 뒤 60%로 농도를 잡는다. 굵게 갈아 물줄기로 조율하는 방식.",
+    steps: c => { const u = c.water/5; return [
+      { at:0,   kind:"bloom", label:"1차 붓기 · 뜸", to:u,   pat:"spiral" },
+      { at:45,  kind:"pour",  label:"2차 붓기", to:u*2, pat:"back" },
+      { at:90,  kind:"pour",  label:"3차 붓기", to:u*3, pat:"back" },
+      { at:130, kind:"pour",  label:"4차 붓기", to:u*4, pat:"back" },
+      { at:160, kind:"pour",  label:"5차 붓기", to:u*5, pat:"back" },
+      { at:210, kind:"end",   label:"추출 완료 · 드리퍼 분리" }]; },
+    tips:[
+      "<b>앞 2회(40%)가 맛의 방향</b> — 1차를 적게 부으면 산미가, 많이 부으면 단맛이 올라옵니다.",
+      "<b>뒤 3회(60%)가 농도</b> — 나누는 횟수를 늘리면 진해지고, 2회로 줄이면 가벼워집니다.",
+      "프렌치프레스에 가까울 만큼 굵게 가는 것이 전제입니다. 가늘게 갈면 과추출로 무너집니다.",
+      "각 단계는 드리퍼 물이 거의 빠진 뒤 시작합니다.",
+      "붓는 움직임은 <b>중심에서 바깥으로 나갔다가 다시 중심으로</b> 돌아오는 왕복 나선입니다. 필터 벽은 때리지 않습니다.",
+      "다만 카스야 본인은 <b>“붓는 기술이랄 게 없다”</b>고 말합니다 — 굵게 갈고 시간과 물량만 지키면 된다는 것이 4:6의 장점이라는 것. 움직임보다 <b>다음 붓기 타이밍</b>이 훨씬 중요합니다.",
+      "물 온도는 배전도에 따라 바꿉니다 — <b>약배전 93℃ · 중배전 88℃ · 강배전 83℃</b>. 위 온도 표시는 선택한 배전도에 맞춰 바뀝니다."],
+    source:"원 레시피 20g / 300g · 공개 강연·영상 자료 정리"
+  },
+  {
+    id:"onyx-osmotic", name:"오스모틱 플로우", by:"오닉스 커피랩", role:"Onyx Coffee Lab · 미국",
+    dripper:"v60", method:"pourover", fit:"light", dose:15, ratio:16.7, temp:"94℃", um:720, tol:60, total:150,
+    gap:16, dropCm:"2–3cm",
+    blurb:"주전자를 커피층 바로 위까지 낮추고, 물이 빠지는 속도와 같은 속도로 붓는다. 베드를 거의 흔들지 않는 미국식 저(低)저어주기 방식.",
+    steps: c => [
+      { at:0,   kind:"bloom", label:"뜸 · 원두량 ×3.3", to:c.dose*3.3, dur:10, pat:"bloom", stream:"보통" },
+      { at:45,  kind:"pour",  label:"절반까지 · 중앙에 천천히", to:c.water*0.5, dur:35, pat:"smallCir", stream:"가늘게", height:"낮게" },
+      { at:85,  kind:"pour",  label:"전량까지 · 중간 크기 원", to:c.water, dur:35, pat:"spiral", stream:"가늘게", height:"낮게" },
+      { at:150, kind:"end",   label:"추출 완료 (2:30 목표)" }],
+    tips:[
+      "<b>주전자 끝을 커피층 가까이</b> 내려 붓습니다. 높이를 없애 베드가 흔들리지 않게 하는 것이 이 방식의 전부입니다.",
+      "붓는 속도를 <b>물이 빠지는 속도와 같게</b> 맞춥니다. 수위가 오르지도 내리지도 않는 상태를 유지하세요.",
+      "저어주기가 거의 없으므로 분쇄는 <b>보통보다 살짝 가늘게</b> 갑니다.",
+      "오닉스의 일반 푸어오버는 1:15–1:16 · 18–20g · 뜸 45초 · 총 2:45–3:15입니다. 이 레시피는 그 변형입니다."],
+    source:"Onyx Coffee Lab 오스모틱 플로우 · 15g / 250g / 2:30 · 공개 브루 가이드"
+  },
+  {
+    id:"hoffmann-v60", name:"얼티밋 V60", by:"제임스 호프만", role:"2007 월드 바리스타 챔피언",
+    dripper:"v60", method:"pourover", fit:"light", dose:30, ratio:16.7, temp:"95–100℃", um:750, tol:60, total:210,
+    blurb:"뜸을 넉넉히 주고 스월로 베드를 정리한 뒤, 두 번 부어 끝낸다. 재현성이 높은 표준형.",
+    steps: c => [
+      { at:0,   kind:"bloom", label:"뜸 · 원두량 ×2", to:c.dose*2, pat:"spiral" },
+      { at:10,  kind:"act",   label:"드리퍼를 흔들어 스월 (가루 전부 적시기)" },
+      { at:45,  kind:"pour",  label:"전체의 60%까지 붓기", to:c.water*0.6, dur:30, pat:"wide" },
+      { at:75,  kind:"pour",  label:"100%까지 붓기", to:c.water, dur:30, pat:"smallCir" },
+      { at:105, kind:"act",   label:"가볍게 스월해 베드 평탄화" },
+      { at:210, kind:"end",   label:"추출 완료 (3:30 목표)" }],
+    tips:[
+      "물은 <b>끓기 직전까지 뜨겁게</b> — 약배전일수록 온도를 낮추지 않습니다.",
+      "뜸 직후 스월은 필수. 마른 가루가 남으면 추출이 어긋납니다.",
+      "총 추출이 3:30을 크게 넘으면 한 단계 굵게, 2:45 이하로 빠지면 가늘게 조정하세요.",
+      "마지막 스월은 <b>가볍게</b> — 과하면 미분이 벽에 붙어 배출이 느려집니다."],
+    source:"원 레시피 30g / 500g · 공개 영상 자료 정리"
+  },
+  {
+    id:"rao-v60", name:"라오 스핀", by:"스콧 라오", role:"커피 컨설턴트 · 저술가",
+    dripper:"v60", method:"pourover", fit:"mlight", dose:22, ratio:17, temp:"96℃", um:700, tol:50, total:200,
+    blurb:"뜸에서 스푼으로 완전히 적시고, 한 번에 이어서 부어 끝낸 뒤 드리퍼를 돌려 베드를 평평하게 만든다.",
+    steps: c => [
+      { at:0,   kind:"bloom", label:"뜸 · 원두량 ×3", to:c.dose*3, pat:"spiral" },
+      { at:12,  kind:"act",   label:"스푼으로 저어 전체 적시기" },
+      { at:45,  kind:"pour",  label:"끊김 없이 이어서 붓기", to:c.water, dur:45, pat:"spiral" },
+      { at:95,  kind:"act",   label:"드리퍼 회전 — 라오 스핀" },
+      { at:200, kind:"end",   label:"추출 완료 (3:00–3:30)" }],
+    tips:[
+      "핵심은 <b>균일한 추출</b> — 뜸에서 마른 가루를 남기지 않는 것이 절반입니다.",
+      "붓기는 끊지 말고 일정한 유량으로. 벽면을 직접 때리지 않습니다.",
+      "마지막 스핀으로 벽에 붙은 가루를 내려 베드를 수평으로 만듭니다.",
+      "베드가 기울거나 한쪽만 파였다면 스핀 타이밍·유량을 먼저 의심하세요."],
+    source:"원 레시피 22g / 375g · 공개 자료 정리"
+  },
+  {
+    id:"hedrick", name:"하이 익스트랙션", by:"랜스 헤드릭", role:"바리스타 · 브루잉 에듀케이터",
+    dripper:"v60", method:"pourover", fit:"light", dose:15, ratio:16.7, temp:"100℃", um:600, tol:50, total:225,
+    blurb:"아주 가늘게 갈고 저어주기를 최대로 밀어붙여 수율을 끌어올린다. 약배전 스페셜티에 특히 잘 맞는다.",
+    steps: c => [
+      { at:0,   kind:"bloom", label:"뜸 · 원두량 ×3", to:c.dose*3, pat:"spiral" },
+      { at:10,  kind:"act",   label:"스푼으로 위·아래 충분히 저어주기" },
+      { at:45,  kind:"pour",  label:"전체의 60%까지 붓기", to:c.water*0.6, dur:20, pat:"wide" },
+      { at:75,  kind:"pour",  label:"100%까지 붓기", to:c.water, dur:20, pat:"smallCir" },
+      { at:100, kind:"act",   label:"스핀으로 베드 평탄화" },
+      { at:225, kind:"end",   label:"추출 완료 (3:30–4:00)" }],
+    tips:[
+      "<b>가늘게 + 강하게 저어주기</b>이 전제입니다. 굵게 갈면 이 레시피는 밍밍해집니다.",
+      "미분이 많아 배출이 느려지므로 4분을 넘겨도 당황할 필요 없습니다.",
+      "떫거나 마르는 느낌이 나면 저어주기를 줄이지 말고 <b>물 온도를 먼저</b> 낮춰보세요.",
+      "필터는 미리 충분히 린싱하고 드리퍼·서버를 예열합니다."],
+    source:"원 레시피 15g / 250g · 공개 영상 자료 정리"
+  },
+  {
+    id:"winton8", name:"8회 붓기", by:"맷 윈튼", role:"2021 월드 브루어스컵 챔피언",
+    dripper:"v60", method:"pourover", fit:"mlight", dose:20, ratio:16, temp:"92℃", um:800, tol:60, total:270,
+    blurb:"같은 양을 30초마다 여덟 번. 베드 수위를 낮게 유지해 균일하고 투명한 잔을 만든다.",
+    steps: c => { const u = c.water/8, out = [];
+      for (let i = 0; i < 8; i++) out.push({ at:i*30, kind:i?"pour":"bloom",
+        label:i ? (i+1)+"차 붓기" : "1차 붓기 · 뜸", to:u*(i+1), pat:i?"smallCir":"spiral", height:"낮게" });
+      out.push({ at:270, kind:"end", label:"추출 완료 (4:30 목표)" }); return out; },
+    tips:[
+      "매번는 <b>정확히 30초 간격</b>으로. 물이 다 빠지기 전에 다음 붓기가 시작됩니다.",
+      "물높이를 낮게 유지하면 채널링이 줄고 클린컵이 살아납니다.",
+      "총 시간이 길어 온도 손실이 큽니다. 드리퍼·서버 예열을 반드시 하세요.",
+      "붓는 횟수를 6회로 줄이면 바디가, 10회로 늘리면 투명도가 올라갑니다."],
+    source:"공개된 8회 붓기 버전 기준 · 20g / 320g"
+  },
+  {
+    id:"kasuya-ice", name:"아이스 4:6", by:"테츠 카스야", role:"2016 월드 브루어스컵 챔피언",
+    dripper:"v60", method:"pourover", fit:"light", dose:20, ratio:9, iceMul:6, temp:"93℃", um:1050, tol:80, total:165,
+    blurb:"서버에 얼음을 먼저 깔고 물의 60%만 뜨겁게 붓는다. 급랭으로 향이 날아가지 않게 잡아두는 방식.",
+    steps: c => { const u = c.water/5; return [
+      { at:0,   kind:"act",   label:"서버에 얼음 " + Math.round(c.ice) + "g 먼저 담기" },
+      { at:0,   kind:"bloom", label:"1차 붓기 · 뜸", to:u,   pat:"spiral" },
+      { at:40,  kind:"pour",  label:"2차 붓기", to:u*2, pat:"back" },
+      { at:75,  kind:"pour",  label:"3차 붓기", to:u*3, pat:"back" },
+      { at:105, kind:"pour",  label:"4차 붓기", to:u*4, pat:"back" },
+      { at:130, kind:"pour",  label:"5차 붓기", to:u*5, pat:"back" },
+      { at:165, kind:"end",   label:"추출 완료 · 얼음이 남았으면 저어 녹이기" }]; },
+    tips:[
+      "얼음이 <b>총 물량의 40%</b>를 대신합니다. 뜨거운 물은 60%만 붓습니다.",
+      "핫보다 한두 클릭 가늘게 가는 편이 농도가 맞습니다 — 얼음이 녹으며 희석되기 때문입니다.",
+      "추출이 끝났는데 얼음이 다 녹았다면 얼음을 늘리거나 서버를 미리 칠링하세요.",
+      "산미가 살아나는 방식이라 워시드 약배전과 특히 잘 맞습니다."],
+    source:"4:6 메소드의 아이스 변형 · 20g / 온수 180g + 얼음 120g"
+  },
+  {
+    id:"hoffmann-ice", name:"아이스 V60", by:"제임스 호프만", role:"2007 월드 바리스타 챔피언",
+    dripper:"v60", method:"pourover", fit:"light", dose:30, ratio:10, iceMul:6.7, temp:"95–100℃", um:700, tol:60, total:150,
+    blurb:"얼음을 물의 일부로 계산해 넣는다. 뜨겁게 뽑아 곧바로 식히니 향은 남고 잡미는 줄어든다.",
+    steps: c => [
+      { at:0,   kind:"act",   label:"서버에 얼음 " + Math.round(c.ice) + "g 계량해 담기" },
+      { at:0,   kind:"bloom", label:"뜸 · 원두량 ×2", to:c.dose*2, pat:"spiral" },
+      { at:10,  kind:"act",   label:"스월로 전체 적시기" },
+      { at:45,  kind:"pour",  label:"전체의 60%까지 붓기", to:c.water*0.6, dur:25, pat:"wide" },
+      { at:75,  kind:"pour",  label:"100%까지 붓기", to:c.water, dur:25, pat:"smallCir" },
+      { at:150, kind:"end",   label:"배출 완료 · 얼음 저어 녹이기" }],
+    tips:[
+      "얼음은 <b>반드시 저울로 계량</b>합니다. 눈대중으로 넣으면 농도가 매번 달라집니다.",
+      "추출액이 뜨거운 채로 얼음에 떨어져야 급랭 효과가 납니다. 서버를 미리 얼리지는 마세요.",
+      "핫 레시피와 분쇄도는 같게 두고, 물량만 60%로 줄이는 것이 기본입니다.",
+      "다 녹지 않은 얼음은 그대로 잔에 옮겨 담아도 좋습니다."],
+    source:"원 레시피 30g / 온수 300g + 얼음 200g · 공개 영상 자료 정리"
+  },
+  {
+    id:"tcs-dark", name:"深煎り V60", by:"THE COFFEESHOP", role:"일본 · 강배전 전용 레시피",
+    dripper:"v60", method:"pourover", fit:"dark", dose:20, ratio:15, temp:"86℃", um:700, tol:60, total:160,
+    blurb:"강배전에 맞춘 86℃ 저온 추출. 흥미롭게도 약배전보다 오히려 살짝 가늘게 갈아, 원뿔 드리퍼의 추출 편차를 맛의 입체감으로 쓴다.",
+    steps: c => [
+      { at:0,   kind:"bloom", label:"1차 붓기 · 10초에 걸쳐", to:c.water*0.2, dur:10, pat:"bloom" },
+      { at:40,  kind:"pour",  label:"2차 붓기 · 15초에 걸쳐", to:c.water*(140/300), dur:15, pat:"spiral" },
+      { at:65,  kind:"pour",  label:"3차 붓기 · 15초에 걸쳐", to:c.water*(230/300), dur:15, pat:"spiral" },
+      { at:90,  kind:"pour",  label:"4차 붓기 · 10초에 걸쳐", to:c.water, dur:10, pat:"smallCir" },
+      { at:160, kind:"end",   label:"추출 완료 (약 2:40)" }],
+    tips:[
+      "강배전은 물이 뜨거우면 잡미와 아린맛이 먼저 나옵니다. <b>86℃로 낮추는 것</b>이 이 레시피의 핵심입니다.",
+      "<b>약배전보다 오히려 살짝 가늘게</b> 갑니다 — 원뿔 드리퍼의 추출 편차를 일부러 살려 맛에 입체감을 주는 방식으로, 「강배전은 굵게」라는 통념과 반대입니다. 그대로 한번 따라해 보세요.",
+      "로스팅한 지 얼마 안 된 원두는 가스가 많으니 1차 붓기 뒤 대기를 5–10초 늘립니다.",
+      "총 2분 40초로 짧게 끝냅니다. 길어지면 강배전 특유의 탄맛이 올라옵니다."],
+    source:"THE COFFEESHOP 深煎り V60 레시피 · 20g / 300ml / 86℃ / 2:40"
+  },
+  {
+    id:"sarutahiko-dark", name:"深煎り 4단 붓기", by:"사루타히코 커피", role:"일본 · 중강~강배전",
+    dripper:"v60", method:"handdrip", fit:"mdark", dose:17, ratio:11.8, temp:"85℃", um:800, tol:70, total:200,
+    blurb:"뜸 → 점적 → 가는 선 → 굵은 선. 한 잔 안에서 붓는 기법을 네 번 바꿔가며 강배전의 쓴맛을 깨끗하게 뽑아낸다.",
+    steps: c => [
+      { at:0,   kind:"bloom", label:"뜸 · 원을 그리며 4바퀴", to:c.water*0.15, dur:12, pat:"bloom", stream:"가늘게" },
+      { at:30,  kind:"pour",  label:"점적 · 5g씩 5–6회 중심에", to:c.water*0.3, dur:55, pat:"drop" },
+      { at:90,  kind:"pour",  label:"가는 선 · 가루가 부풀 정도로", to:c.water*0.62, dur:50, pat:"coin", stream:"가늘게" },
+      { at:150, kind:"pour",  label:"굵은 선 · 수위가 조금 오를 정도", to:c.water, dur:45, pat:"spiral", stream:"굵게" },
+      { at:200, kind:"end",   label:"추출 완료 (3:20)" }],
+    tips:[
+      "한 잔 안에서 붓는 기법이 <b>네 번</b> 바뀝니다 — 원 → 점적 → 가는 선 → 굵은 선. 단계를 눌러 모양을 확인해 보세요.",
+      "점적 구간이 농도를 만듭니다. 5g씩 <b>중심에만</b> 떨어뜨리고 가장자리는 건드리지 않습니다.",
+      "마지막 굵은 선은 수위가 <b>살짝</b> 오를 정도까지만. 넘치면 잡미가 함께 내려옵니다.",
+      "원문에 물 온도 표기가 없어 일본 강배전 통용값인 85℃를 기준으로 잡았습니다."],
+    source:"사루타히코 커피 深煎り/中深煎り 가이드 · 17g / 200ml / 3:20 · 온도는 추정치"
+  },
+  {
+    id:"daibo-nel", name:"융드립 점적", by:"大坊珈琲店 스타일", role:"일본 · 강배전 농축 (재현 레시피)",
+    dripper:"nel", method:"handdrip", fit:"dark", dose:20, ratio:6, temp:"80℃", um:750, tol:70, total:165,
+    blurb:"80℃ 저온에 점적으로만 내려 보통 커피의 3~5배 농도를 뽑는다. 뜸을 거의 주지 않는 것이 이 방식의 특징.",
+    steps: c => [
+      { at:0,   kind:"bloom", label:"20초에 걸쳐 물을 가루 위에 얹기", to:c.dose*1.5, dur:20, pat:"drop" },
+      { at:20,  kind:"act",   label:"25초 대기 — 뜸은 최소로" },
+      { at:45,  kind:"pour",  label:"점적 · 중심에서 の자를 그리며", to:c.water, dur:80, pat:"coin", stream:"한 방울씩" },
+      { at:165, kind:"end",   label:"추출 완료 · 120cc 농축액" }],
+    tips:[
+      "<b>80℃</b>는 오타가 아닙니다. 강배전을 아주 낮은 온도로 오래 내려 쓴맛 대신 단맛과 농도를 얻는 방식입니다.",
+      "<b>뜸을 거의 주지 않습니다</b> — 물을 얹고 25초만 기다린 뒤 바로 점적으로 들어갑니다.",
+      "보통 커피의 3~5배 농도로 나옵니다. 작은 잔에 그대로 마시거나 뜨거운 물로 희석해 드세요.",
+      "융(플란넬)은 종이보다 오일을 통과시켜 질감이 훨씬 두껍습니다. 사용 후 물에 담가 냉장 보관합니다.",
+      "大坊珈琲店의 정확한 원 레시피가 아니라 공개된 재현 자료를 정리한 것입니다."],
+    source:"大坊珈琲店 스타일 재현 레시피 · 20g / 120cc / 80℃ · 공개 자료 정리"
+  },
+  {
+    id:"jeon-wave", name:"칼리타 웨이브 핸드드립", by:"전주연", role:"2019 월드 바리스타 챔피언",
+    dripper:"wave", method:"handdrip", fit:"mdark", dose:20, ratio:10, temp:"90℃", um:1050, tol:70, total:130,
+    waveSize:"unspecified", waveSizeBasis:"unspecified", roastBasis:"explicit", sourceKind:"secondary",
+    sourceUrl:"https://coffee4m.com/%EC%B9%BC%EB%A6%AC%ED%83%80-%EC%9B%A8%EC%9D%B4%EB%B8%8C-%EB%93%9C%EB%A6%AC%ED%8D%BC-%EB%A0%88%EC%8B%9C%ED%94%BC/", dropCm:"출처 미지정",
+    refDials:{ c40:{ light:29, mlight:29, medium:29, mdark:29, dark:29 } },
+    blurb:"40g씩 다섯 번. 물량은 같게 두고 유량을 4 → 4 → 4 → 5 → 8g/s로 높인다.",
+    steps: c => { const u = c.water/5; return [
+      { at:0,   kind:"bloom", label:"1차 · 40g · 4g/s · 45초까지 뜸", to:u, dur:10, pat:"bloom", stream:"가늘게", flowRateGps:4 },
+      { at:45,  kind:"pour", label:"2차 · 중앙의 작은 원 · 4g/s", to:u*2, dur:10, pat:"smallCir", stream:"가늘게", flowRateGps:4 },
+      { at:70,  kind:"pour", label:"3차 · 앞보다 큰 원 · 4g/s", to:u*3, dur:10, pat:"spiral", stream:"가늘게", flowRateGps:4 },
+      { at:95,  kind:"pour", label:"4차 · 같은 원형 경로 · 5g/s", to:u*4, dur:8, pat:"spiral", stream:"보통", flowRateGps:5 },
+      { at:113, kind:"pour", label:"5차 · 같은 원형 경로 · 8g/s", to:u*5, dur:5, pat:"spiral", stream:"굵게", flowRateGps:8 },
+      { at:130, kind:"end",   label:"물이 다 빠질 때까지 · 추출액 160–180g" }]; },
+    tips:[
+      "분쇄도는 <b>코만단테 29클릭 · 펠로우 오드 3.75</b>, 물 온도는 미디엄 다크 기준 90℃입니다.",
+      "붓는 속도를 <b>4 → 4 → 4 → 5 → 8g/s</b>로 올리는 것이 뼈대입니다.",
+      "후반에 커지는 것은 물줄기 세기입니다. 마지막을 넓은 나선으로 그린다는 근거는 없어 기존 매핑을 바로잡았습니다.",
+      "웨이브 155/185와 실제 주전자 높이는 출처 미지정입니다."],
+    source:"전주연 칼리타 웨이브 레시피 · coffee4m 2차 정리 · 20g / 200g"
+  },
+  {
+    id:"lightup-wave", name:"라이트업 웨이브", by:"카와노 유마", role:"LIGHT UP COFFEE · 일본",
+    dripper:"wave", method:"handdrip", fit:"light", dose:15, ratio:16, temp:"90℃", um:900, tol:70, total:165,
+    totalRange:[150,180], waveSize:"155", waveSizeBasis:"recommended", roastBasis:"roasterStyle", sourceKind:"official",
+    sourceUrl:"https://lightupcoffee.com/blogs/brew-guide/drip-kalitawave", dropCm:"출처 미지정",
+    blurb:"35g으로 뜸을 들인 뒤 55g, 50g, 50g, 50g을 약 10초씩 원형으로 붓고 부드럽게 흔들어 마친다.",
+    steps: c => [
+      { at:0, kind:"bloom", label:"35g까지 붓고 0:30까지 뜸", to:c.water*(35/240), dur:10, pat:"bloom", stream:"가늘게" },
+      { at:30, kind:"pour", label:"90g까지 · 원형 · 약 10초", to:c.water*(90/240), dur:10, pat:"spiral", stream:"보통" },
+      { at:60, kind:"pour", label:"140g까지 · 원형 · 약 10초", to:c.water*(140/240), dur:10, pat:"spiral", stream:"보통" },
+      { at:90, kind:"pour", label:"190g까지 · 원형 · 약 10초", to:c.water*(190/240), dur:10, pat:"spiral", stream:"보통" },
+      { at:110, kind:"pour", label:"240g까지 · 원형 · 약 10초", to:c.water, dur:10, pat:"spiral", stream:"보통" },
+      { at:120, kind:"act", label:"드리퍼를 부드럽게 흔들어 베드 평탄화" },
+      { at:165, kind:"end", label:"배출 완료 · 2:30–3:00 범위" }],
+    tips:[
+      "공식 최신 가이드는 누적 <b>35 / 90 / 140 / 190 / 240g</b>, 시작 <b>0:00 / 0:30 / 1:00 / 1:30 / 1:50</b>입니다.",
+      "155와 약배전 적합은 각각 용량과 로스터 성향에 따른 권장값이며 레시피 본문 명시는 아닙니다.",
+      "기존 4회 붓기와 ‘뒤로 갈수록 빠르게’ 설명은 최신 공식판과 맞지 않아 제거했습니다."],
+    source:"LIGHT UP COFFEE 공식 Kalita Wave 가이드 · 15g / 240g / 90℃"
+  },
+  {
+    id:"wave255", name:"2·5·5 레시피", by:"칼리타 웨이브 농축·가수", role:"커피 브루잉 다이어리",
+    dripper:"wave", method:"handdrip", fit:"medium", roastSens:0.4, dose:20, ratio:5, dilute:5, temp:"92–94℃", um:1150, tol:100, total:180,
+    waveSize:"both", waveSizeBasis:"local", roastBasis:"all", sourceKind:"adapted", dropCm:"출처 미지정",
+    refDials:{ c40:{ light:28, mlight:28, medium:29, mdark:30, dark:30 },
+               ek43s:{ light:15, mlight:15, medium:15.5, mdark:16, dark:16 } },
+    blurb:"원두량의 2배로 뜸, 5배까지만 부어 농축액을 뽑고, 5배를 다시 가수한다. 핫·아이스 모두 같은 베이스로 간다.",
+    steps: c => [
+      { at:0, kind:"act", label:"드리퍼 예열 · 필터 린싱 없이 시작" },
+      { at:0, kind:"bloom", label:"뜸 · 원두량 ×2 · 동전 크기 원", to:c.dose*2, pat:"coin", stream:"가늘게", height:"낮게" },
+      { at:c.roast.bloom255, kind:"pour", label:"누적 원두량 ×5 · 60초 연속 · 수위 최대한 낮게", to:c.water, dur:60, pat:"coin", stream:"가늘게", height:"낮게", flowRateGps:1 },
+      { at:180, kind:"end", label:"추출 완료 (3분 이내 목표)" }],
+    tips:[
+      "<b>물 높이를 커피층 바로 위</b>까지만. 500원 동전 크기 서클로 물줄기는 가늘게 유지합니다.",
+      "뜸 시간은 배전도에 따라 달라집니다 — 약배전 40초 · 중배전 35초 · 강배전 30초. 기포가 계속 올라오면 50–60초까지 기다려도 좋습니다.",
+      "<b>Wave 155</b>는 15–20g, <b>Wave 185</b>는 30–50g 스케일에 사용합니다.",
+      "<b>핫</b> — 원두량 ×5의 가수(60–80g도 가능)를 75–80℃ 온수로. <b>아이스</b> — 서버를 얼음으로 칠링한 뒤 가수 30–60g, 가수 없이도 무방합니다.",
+      "공개 원출처를 확인하지 못한 로컬·응용 레시피입니다. 자동 계산되는 뜸 붓기 시간과 실제 주전자 높이는 출처값이 아닙니다."],
+    source:"로컬·응용 2·5·5 레시피 · 20g / 추출수 100g / 가수 100g"
+  },
+  {
+    id:"kurasu-wave", name:"쿠라스 웨이브 2023", by:"쿠라스 교토", role:"Kurasu Kyoto · 일본",
+    dripper:"wave", method:"handdrip", fit:"light", dose:14, ratio:200/14, temp:"92℃", um:1050, tol:80, total:130,
+    totalRange:[125,135], waveSize:"155", waveSizeBasis:"explicit", roastBasis:"explicit", sourceKind:"official",
+    sourceUrl:"https://jp.kurasu.kyoto/blogs/kurasu-journal/how-to-brew-with-kalita-wave-by-kurasu-kyoto-2023", dropCm:"출처 미지정",
+    blurb:"30g으로 전 베드를 적시고, 0:40에 강하게 30g을 더한 뒤 1:10부터 중앙 한 점에 가늘게 이어서 붓기한다.",
+    steps: c => [
+      { at:0, kind:"bloom", label:"30g · 전 베드 고르게 적시기", to:c.water*0.15, pat:"bloom", stream:"보통" },
+      { at:40, kind:"pour", label:"60g까지 · 전 베드에 빠르고 강하게", to:c.water*0.30, pat:"wide", stream:"굵게" },
+      { at:70, kind:"pour", label:"200g까지 · 센터 고정 · 유입량과 배출량 맞추기", to:c.water, pat:"center", stream:"가늘게", height:"낮게", triggerText:"2차 때 생긴 최고 수위선을 넘기지 않는다" },
+      { at:130, kind:"end",   label:"추출 완료 (2:05–2:15)" }],
+    tips:[
+      "마지막은 작은 원이 아니라 <b>원을 그리지 않는 중앙 고정 이어서 붓기</b>입니다.",
+      "공식 문맥은 14g/200g의 <b>Wave 155</b>이며, 2배 용량에는 185를 권장합니다.",
+      "약배전은 공식 명시지만 세 붓기의 정확한 붓기 시간과 μm는 미기재입니다.",
+      "스월·저어주기 없이 마칩니다."],
+    source:"Kurasu Kyoto 공식 Kalita Wave 2023 · 14g / 200g / 92℃ / 2:05–2:15"
+  },
+  {
+    id:"madcap-wave", name:"매드캡 웨이브 185", by:"매드캡 커피", role:"Madcap Coffee · 미국",
+    dripper:"wave", method:"pourover", fit:"medium", dose:21, ratio:355/21, temp:"97℃", um:880, tol:70, total:210,
+    totalRange:[195,225], waveSize:"185", waveSizeBasis:"explicit", roastBasis:"unspecified", sourceKind:"official",
+    sourceUrl:"https://www.madcapcoffee.com/blogs/news/how-we-brew-kalita-185-recipe", dropCm:"출처 미지정",
+    blurb:"처음 50g, 15초에 100g. 이후 수위가 베드 아래로 내려가기 시작할 때마다 약 50g씩 보충한다.",
+    steps: c => { const q = g => c.water*(g/355), cue = "수위가 커피층 아래로 내려가기 시작할 때"; return [
+      { at:0, kind:"bloom", label:"50g까지 · 중앙에서 바깥으로 느린 원", to:q(50), pat:"bloom" },
+      { at:15, kind:"pour", label:"100g까지 · 중앙에서 바깥으로 느린 원", to:q(100), pat:"spiral" },
+      { at:40, kind:"pour", label:"150g까지 · 수위 조건", to:q(150), pat:"spiral", triggerText:cue },
+      { at:65, kind:"pour", label:"200g까지 · 수위 조건", to:q(200), pat:"spiral", triggerText:cue },
+      { at:90, kind:"pour", label:"250g까지 · 수위 조건", to:q(250), pat:"spiral", triggerText:cue },
+      { at:115, kind:"pour", label:"300g까지 · 필터 주름을 딱 한 바퀴 훑기", to:q(300), pat:"edgeRinse", stream:"가늘게", triggerText:cue },
+      { at:140, kind:"pour", label:"355g까지 · 마지막 55g", to:c.water, pat:"spiral", triggerText:cue },
+      { at:210, kind:"end",   label:"배출 완료 (3:15–3:45)" }]; },
+    tips:[
+      "0:15 이후의 <b>25초 간격은 앱 대표 시각</b>입니다. 원문 트리거는 시계가 아니라 수위입니다.",
+      "250→300g에서만 필터 주름을 짧게 한 바퀴 훑고, 가장자리에 계속 붓지 않습니다.",
+      "일반 붓기는 중앙에서 시작해 천천히 바깥으로 원을 그립니다.",
+      "배전도는 원문 미지정이라 중배전은 앱의 중립 시작점입니다."],
+    source:"Madcap Coffee 공식 Kalita 185 · 21g / 355g / 207°F / 3:15–3:45"
+  },
+  {
+    id:"pierre-wave", name:"약배전 웨이브 185 · 검증 대기", by:"바리스타 피에르", role:"로컬 2차 요약 · 원출처 미확인",
+    dripper:"wave", method:"pourover", fit:"light", dose:25, ratio:16, temp:"96℃", um:780, tol:60, total:225,
+    waveSize:"185", waveSizeBasis:"local", roastBasis:"inferred", sourceKind:"unverified", dropCm:"출처 미지정",
+    blurb:"로컬 요약에서 확인되는 값은 25g/400g, 40초마다 100g씩 네 번, 약 3:45뿐이다.",
+    steps: c => { const u = c.water/4; return [
+      { at:0, kind:"bloom", label:"1차 · 100g · 경로/유량 미확인", to:u, pat:"bloom" },
+      { at:40, kind:"pour", label:"2차 · 누적 200g · 경로/유량 미확인", to:u*2, pat:"spiral" },
+      { at:80, kind:"pour", label:"3차 · 누적 300g · 경로/유량 미확인", to:u*3, pat:"spiral" },
+      { at:120, kind:"pour", label:"4차 · 누적 400g · 경로/유량 미확인", to:u*4, pat:"spiral" },
+      { at:225, kind:"end",   label:"추출 완료 (약 3:45)" }]; },
+    tips:[
+      "신뢰할 만한 원출처를 찾지 못했습니다. <b>96℃·780μm·나선 경로·화면의 붓기 시간은 앱 구현 가정</b>입니다.",
+      "원출처가 확인되기 전에는 공식 레시피가 아니라 검증 대기 카드로 다룹니다."],
+    source:"로컬 2차 요약 · 25g / 400g / 40초마다 100g / 약 3:45 · 원출처 미확인"
+  },
+  {
+    id:"rao-wave", name:"스콧 라오 웨이브 · 영상 정리본", by:"스콧 라오", role:"영상 기반 2차 정리",
+    dripper:"wave", method:"pourover", fit:"medium", dose:20, ratio:17, temp:"95℃", um:800, tol:60, total:260,
+    waveSize:"185", waveSizeBasis:"recommended", roastBasis:"unspecified", sourceKind:"secondary",
+    sourceUrl:"https://www.timer.coffee/recipes/kalita-wave/scott-rao-kalita-wave-recipe/", dropCm:"출처 미지정",
+    blurb:"60g 뜸, 0:45에 204g까지, 약 절반 배출되면 1:55에 340g까지. 필요할 때만 작게 저어주기하고 4:20에 마친다.",
+    steps: c => [
+      { at:0, kind:"bloom", label:"60g까지", to:c.water*(60/340), pat:"bloom" },
+      { at:10, kind:"act", label:"필요할 때만 작은 스핀 또는 스푼으로 마른 가루 적시기" },
+      { at:45, kind:"pour", label:"204g까지 · 이후 약 절반 내려갈 때까지 대기", to:c.water*0.6, pat:"spiral", triggerText:"다음 붓기는 슬러리가 약 절반 빠졌을 때" },
+      { at:115, kind:"pour", label:"340g까지 이어서 붓기", to:c.water, pat:"spiral", flowRateGps:5.7 },
+      { at:155, kind:"act", label:"붓기를 마치고 10초 뒤, 드리퍼를 부드럽게 한 번 스핀" },
+      { at:260, kind:"end", label:"배출 완료 · 4:20" }],
+    tips:[
+      "검증 가능한 2차 정리본은 <b>20g / 340g / 95℃ / 4:20</b>입니다.",
+      "원문 정리에는 동전 서클·연속 60초 붓기·배전도·주전자 높이가 없습니다. 화면의 나선과 자동 붓기 시간은 시각화 기본값입니다.",
+      "기존 22g/360g/3:30 변형 대신 영상 기반 정리본으로 교체했습니다."],
+    source:"Scott Rao Kalita Wave 영상 기반 Timer.Coffee 2차 정리 · 20g / 340g / 95℃ / 4:20"
+  },
+  {
+    id:"vibrant-wave155", name:"Vibrant Kalita Wave 155", by:"Vibrant Coffee Roasters", role:"공식 Wave 155 가이드",
+    dripper:"wave", method:"pourover", fit:"medium", dose:15, ratio:250/15, temp:"99℃", um:850, tol:70, total:120,
+    timerMode:"conditional", totalLabel:"조건부", waveSize:"155", waveSizeBasis:"explicit", roastBasis:"unspecified", sourceKind:"official",
+    sourceUrl:"https://www.vibrantcoffeeroasters.com/kalitawave155", dropCm:"출처 미지정",
+    blurb:"빠르고 강한 전 베드 뜸, 0:40–1:01의 5g/s 나선, 수위가 베드 위 약 1인치로 내려오면 4–5g/s 마지막 붓기.",
+    steps:c=>[
+      { at:0, kind:"bloom", label:"45g까지 · 빠르고 강하게 전 베드 · 나선 또는 지그재그", to:c.water*(45/250), pat:"zigzag", stream:"굵게" },
+      { at:6, kind:"act", label:"마른 덩어리가 남을 때만 스푼으로 뒤집어 적시기" },
+      { at:40, kind:"pour", label:"150g까지 · 0:40–1:01 · 5g/s 나선", to:c.water*0.60, dur:21, pat:"spiral", stream:"보통", flowRateGps:5 },
+      { at:80, kind:"pour", label:"250g까지 · 수위 조건 · 4–5g/s", to:c.water, dur:23, pat:"spiral", stream:"보통", flowRateRangeGps:[4,5], triggerText:"수위가 커피층 위 약 1인치(2.5cm)까지 내려오면", approx:true },
+      { at:103, kind:"act", label:"드리퍼를 부드럽게 스월" },
+      { at:120, kind:"end", label:"실제로는 다 내려옴 시 분리" }],
+    tips:[
+      "마지막 시작의 원문 트리거는 <b>1:20이 아니라 수위</b>입니다. 1:20은 타이머용 대표값입니다.",
+      "원문은 미분량에 따라 시간이 크게 달라지므로 총 시간을 좇지 말라고 합니다. 화면의 2:00은 시퀀스 표시용입니다.",
+      "레시피 본문은 배전도를 지정하지 않습니다. 850μm와 실제 붓는 높이는 앱 시작점/미기재 값입니다."],
+    source:"Vibrant 공식 Kalita Wave 155 · 15g / 250g / 210–211°F"
+  },
+  {
+    id:"coffee-collective-wave155", name:"Coffee Collective Small 155", by:"Coffee Collective", role:"덴마크 · 공식 브루 가이드",
+    dripper:"wave", method:"pourover", fit:"light", dose:16, ratio:250/16, temp:"92–95℃", um:900, tol:80, total:155,
+    timerMode:"pourEnd", waveSize:"155", waveSizeBasis:"explicit", roastBasis:"roasterStyle", sourceKind:"official",
+    sourceUrl:"https://coffeecollective.dk/pages/brew-guide/kalita-wave", dropCm:"출처 미지정",
+    blurb:"30g 뜸 뒤 0:30–1:45 동안 중앙→바깥→중앙 왕복을 반복하며 250g까지 끊김 없이 붓는다.",
+    steps:c=>[
+      { at:0, kind:"bloom", label:"30g까지 · 0:30까지 뜸", to:c.water*(30/250), pat:"bloom", stream:"가늘게" },
+      { at:30, kind:"pour", label:"250g까지 · 중앙→바깥→중앙 반복 · 1:45 붓기 종료", to:c.water, dur:75, durFixed:true, pat:"back", stream:"가늘게", flowRateGps:(250-30)/75 },
+      { at:155, kind:"end", label:"다 내려온 뒤 드리퍼 분리" }],
+    tips:[
+      "공식 사이즈는 <b>Wave 155</b>입니다.",
+      "약배전 적합은 Coffee Collective의 로스터 성향 근거이며 레시피 본문 배전 명시는 아닙니다.",
+      "1:45는 다 내려옴가 아니라 <b>붓기 종료</b>입니다. 마지막 quick stir는 서버/컵의 추출 음료를 섞는 동작입니다."],
+    source:"Coffee Collective 공식 Small Kalita · Wave 155 · 16g / 250g / 붓기 종료 1:45"
+  },
+  {
+    id:"coffee-collective-wave185", name:"Coffee Collective Large 185", by:"Coffee Collective", role:"덴마크 · 공식 브루 가이드",
+    dripper:"wave", method:"pourover", fit:"light", dose:32, ratio:500/32, temp:"92–95℃", um:950, tol:80, total:155,
+    timerMode:"pourEnd", waveSize:"185", waveSizeBasis:"explicit", roastBasis:"roasterStyle", sourceKind:"official",
+    sourceUrl:"https://coffeecollective.dk/pages/brew-guide/kalita-wave", dropCm:"출처 미지정",
+    blurb:"60g 뜸 뒤 0:30–1:45 동안 중앙→바깥→중앙 왕복을 반복하며 500g까지 끊김 없이 붓는다.",
+    steps:c=>[
+      { at:0, kind:"bloom", label:"60g까지 · 0:30까지 뜸", to:c.water*(60/500), pat:"bloom", stream:"보통" },
+      { at:30, kind:"pour", label:"500g까지 · 중앙→바깥→중앙 반복 · 1:45 붓기 종료", to:c.water, dur:75, durFixed:true, pat:"back", stream:"보통", flowRateGps:(500-60)/75 },
+      { at:155, kind:"end", label:"다 내려온 뒤 드리퍼 분리" }],
+    tips:[
+      "공식 사이즈는 <b>Wave 185</b>입니다.",
+      "Small을 단순 확대하면 안 됩니다. 두 버전 모두 본 붓기 시간은 같은 <b>75초</b>입니다.",
+      "최종 다 내려옴 시각은 미지정이며, quick stir는 서버/컵의 음료를 섞는 동작입니다."],
+    source:"Coffee Collective 공식 Large Kalita · Wave 185 · 32g / 500g / 붓기 종료 1:45"
+  },
+  {
+    id:"passenger-two-cup-wave", name:"Passenger Two-Cup Kalita", by:"Passenger Coffee", role:"공식 2컵 가이드",
+    dripper:"wave", method:"pourover", fit:"light", dose:30, ratio:470/30, temp:"99℃", um:950, tol:90, total:195,
+    totalRange:[150,240], waveSize:"185", waveSizeBasis:"recommended", roastBasis:"roasterStyle", sourceKind:"official",
+    sourceUrl:"https://drinkpassenger.com/guides/kalita-wave", dropCm:"출처 미지정",
+    blurb:"80g 빠른 전 베드 붓기, 270g까지 바깥→중앙 역나선, 가장자리를 잠깐 훑은 뒤 중앙 고정으로 470g까지 마친다.",
+    steps:c=>[
+      { at:0, kind:"bloom", label:"80g까지 · 빠른 전 베드 나선", to:c.water*(80/470), pat:"wide", stream:"굵게" },
+      { at:40, kind:"pour", label:"270g까지 · 바깥에서 중앙으로 들어오는 역나선 반복", to:c.water*(270/470), pat:"inward", stream:"보통" },
+      { at:80, kind:"pour", label:"370g까지 · 가장자리 안쪽을 훑고 멈춤 없이 중앙 고정", to:c.water*(370/470), pat:"edgeCenter", stream:"가늘게" },
+      { at:110, kind:"pour", label:"470g까지 · 중앙 한 점에 천천히 고정", to:c.water, pat:"center", stream:"가늘게", height:"낮게" },
+      { at:195, kind:"end", label:"배출 완료 · 2:30–4:00 범위의 중간값" }],
+    tips:[
+      "공식 30g/470g 2컵 레시피라 Wave 185를 권장하지만 페이지에서 모델 번호를 직접 명시한 것은 아닙니다.",
+      "후반은 동전 서클이 아니라 <b>중앙 고정 이어서 붓기</b>입니다. 종이 벽을 계속 때리지 않습니다.",
+      "초보자에게 스월·저어주기·탭을 하지 말라고 명시합니다.",
+      "약배전은 Passenger의 로스터 성향 근거이고, 950μm는 테스트가 필요한 앱 제안입니다."],
+    source:"Passenger 공식 Two-Cup Kalita · 30g / 470g / 210°F / 2:30–4:00"
+  },
+  {
+    id:"stumptown-wave", name:"Stumptown Kalita Wave", by:"Stumptown Coffee", role:"공식 브루 가이드",
+    dripper:"wave", method:"pourover", fit:"medium", dose:21, ratio:345/21, temp:"96℃", um:850, tol:70, total:173,
+    totalRange:[165,180], waveSize:"185", waveSizeBasis:"officialContext", roastBasis:"unspecified", sourceKind:"official",
+    sourceUrl:"https://www.stumptowncoffee.com/pages/brew-guide-kalita-wave", dropCm:"출처 미지정",
+    blurb:"60g을 10초에 적시고 저은 뒤 0:45–1:00에 200g. 이후 밝게 젖은 곳을 피하고 어둡고 마른 지점만 25–50g씩 보충한다.",
+    steps:c=>{ const p=c.water*(200/345), u=(c.water-p)/4; return [
+      { at:0, kind:"bloom", label:"60g까지 · 10초 · 전 베드 적시기", to:c.water*(60/345), dur:10, pat:"bloom", stream:"보통", flowRateGps:6 },
+      { at:10, kind:"act", label:"부드럽게 저어 마른 가루 없애기" },
+      { at:45, kind:"pour", label:"200g까지 · 15초 · 천천히 이동하는 나선", to:p, dur:15, pat:"spiral", stream:"굵게", flowRateGps:(200-60)/15 },
+      { at:75, kind:"pour", label:"후반 타깃 펄스 1/4", to:p+u, pat:"spot", stream:"가늘게", height:"낮게", approx:true },
+      { at:95, kind:"pour", label:"후반 타깃 펄스 2/4", to:p+u*2, pat:"spot", stream:"가늘게", height:"낮게", approx:true },
+      { at:115, kind:"pour", label:"후반 타깃 펄스 3/4", to:p+u*3, pat:"spot", stream:"가늘게", height:"낮게", approx:true },
+      { at:135, kind:"pour", label:"345g까지 · 타깃 펄스 4/4", to:c.water, pat:"spot", stream:"가늘게", height:"낮게", approx:true },
+      { at:173, kind:"end", label:"배출 완료 · 2:45–3:00" }]; },
+    tips:[
+      "원문은 후반을 <b>25–50g 펄스</b>라고만 하며 횟수·각 누적량·정확 시각은 고정하지 않습니다. 4회 균등 분할은 타이머용 가정입니다.",
+      "마른 지점 타깃은 고정된 작은 나선이 아니라 베드 상태를 보며 이동합니다.",
+      "0:45의 slow spiral은 주전자 이동이 느리다는 표현입니다. 140g/15초는 계산상 9.33g/s라 물줄기는 굵게 표시합니다."],
+    source:"Stumptown 공식 Kalita Wave · 21g / 345g / 205°F / 2:45–3:00"
+  },
+  {
+    id:"counterculture-quick-wave", name:"Quick + Easy Kalita", by:"Counter Culture Coffee", role:"공식 푸어오버의 Wave 적용",
+    dripper:"wave", method:"pourover", fit:"medium", dose:30, ratio:500/30, temp:"93℃", um:900, tol:80, total:225,
+    totalRange:[210,240], waveSize:"185", waveSizeBasis:"recommended", roastBasis:"unspecified", sourceKind:"official",
+    sourceUrl:"https://counterculturecoffee.com/pages/quick-easy-pour-over", dropCm:"출처 미지정",
+    blurb:"60g 뜸, 0:30에 200g, 1:00에 300g. 이후 30초 또는 수위 1cm 하강 중 먼저 오는 조건에 원형 펄스를 반복해 500g.",
+    steps:c=>[
+      { at:0, kind:"bloom", label:"60g까지 · 0:30까지 뜸", to:c.water*(60/500), pat:"bloom" },
+      { at:30, kind:"pour", label:"200g까지 · 원형 붓기", to:c.water*0.40, pat:"spiral" },
+      { at:60, kind:"pour", label:"300g까지 · 시간/수위 조건", to:c.water*0.60, pat:"spiral", triggerText:"30초 경과 또는 수위 약 1cm 하강 중 먼저" },
+      { at:90, kind:"pour", label:"후반 반복 1/2 · 400g까지", to:c.water*0.80, pat:"spiral", triggerText:"30초 경과 또는 수위 약 1cm 하강 중 먼저", approx:true },
+      { at:120, kind:"pour", label:"후반 반복 2/2 · 500g까지", to:c.water, pat:"spiral", triggerText:"30초 경과 또는 수위 약 1cm 하강 중 먼저", approx:true },
+      { at:225, kind:"end", label:"배출 완료 · 3:30–4:00" }],
+    tips:[
+      "원문이 확정하는 후반 정보는 <b>30초마다 또는 수위 1cm 하강 시 반복해 500g</b>뿐입니다. 400/500g 분할은 앱 가정입니다.",
+      "Wave 185는 30g/500g에 따른 권장이고 공식 페이지가 모델 번호를 명시한 것은 아닙니다.",
+      "배전 미지정이라 중배전은 앱 중립값, 900μm는 구현 제안입니다."],
+    source:"Counter Culture 공식 Quick + Easy Pour Over · Wave 적용 · 30g / 500g / 200°F / 3:30–4:00"
+  },
+  {
+    id:"onyx-monarch-wave185", name:"Monarch Kalita 185", by:"Onyx Coffee Lab", role:"Expressive Dark · 공식 레시피",
+    dripper:"wave", method:"pourover", fit:"dark", dose:25, ratio:16, temp:"93℃", um:600, tol:50, total:210,
+    waveSize:"185", waveSizeBasis:"explicit", roastBasis:"explicit", sourceKind:"official",
+    sourceUrl:"https://onyxcoffeelab.com/products/monarch", dropCm:"출처 미지정",
+    blurb:"50g 뜸 뒤 0:30의 Heavy Spiral로 160g, 이어 220/280/340/400g까지 단계적으로 붓는 강배전용 공식 카드.",
+    steps:c=>[
+      { at:0, kind:"bloom", label:"50g까지 · 뜸", to:c.water*(50/400), pat:"bloom" },
+      { at:30, kind:"pour", label:"160g까지 · Heavy Spiral", to:c.water*0.40, pat:"spiral", stream:"굵게", flowDescriptor:"강하게" },
+      { at:45, kind:"pour", label:"220g까지 · 나선", to:c.water*0.55, pat:"spiral" },
+      { at:65, kind:"pour", label:"280g까지 · 나선", to:c.water*0.70, pat:"spiral" },
+      { at:90, kind:"pour", label:"340g까지 · 나선", to:c.water*0.85, pat:"spiral" },
+      { at:120, kind:"pour", label:"400g까지 · 나선", to:c.water, pat:"spiral" },
+      { at:210, kind:"end", label:"배출 완료 · 3:30" }],
+    tips:[
+      "<b>Heavy Spiral</b>은 반경이 넓다는 뜻이 아니라 <b>나선 경로 + 강한 물줄기</b>입니다.",
+      "Wave 185, Expressive Dark, 600μm, 누적량과 시각은 공식 명시입니다. 허용폭과 자동 붓기 시간은 앱 제안입니다."],
+    source:"Onyx 공식 Monarch Kalita Wave 185 · 25g / 400g / 200°F / 600μm / 3:30"
+  },
+  {
+    id:"onyx-southern-wave185", name:"Southern Weather Kalita 185", by:"Onyx Coffee Lab", role:"Moderate · 공식 레시피",
+    dripper:"wave", method:"pourover", fit:"medium", dose:25, ratio:12, temp:"93℃", um:650, tol:50, total:150,
+    waveSize:"185", waveSizeBasis:"explicit", roastBasis:"explicit", sourceKind:"official",
+    sourceUrl:"https://onyxcoffeelab.com/products/southern-weather", dropCm:"출처 미지정",
+    blurb:"40g 뜸, 0:30에 중앙 고정으로 120g, 이후 180/240/300g까지 나선으로 붓고 2:30에 마친다.",
+    steps:c=>[
+      { at:0, kind:"bloom", label:"40g까지 · 뜸", to:c.water*(40/300), pat:"bloom" },
+      { at:30, kind:"pour", label:"120g까지 · 센터 고정 · 원을 그리지 않음", to:c.water*0.40, pat:"center", stream:"가늘게", height:"낮게" },
+      { at:50, kind:"pour", label:"180g까지 · 나선", to:c.water*0.60, pat:"spiral" },
+      { at:70, kind:"pour", label:"240g까지 · 나선", to:c.water*0.80, pat:"spiral" },
+      { at:90, kind:"pour", label:"300g까지 · 나선", to:c.water, pat:"spiral" },
+      { at:150, kind:"end", label:"배출 완료 · 2:30" }],
+    tips:[
+      "0:30은 점드립이나 동전 서클이 아니라 <b>연속 중앙 고정 붓기</b>입니다.",
+      "공식 페이지의 다른 중복 블록은 마지막을 Spiral-to-Center·3:00으로 적어 충돌합니다. 기본 카드는 대표 블록/인덱스의 나선·2:30을 따릅니다.",
+      "Wave 185, Moderate, 650μm는 공식 명시이고 허용폭과 자동 붓기 시간은 앱 제안입니다."],
+    source:"Onyx 공식 Southern Weather Kalita 185 · 대표 블록 25g / 300g / 200°F / 650μm / 2:30"
+  },
+  {
+    id:"george-howell-six-wave185", name:"6×65g Timed Pulses", by:"George Howell 방식", role:"Prima Coffee 보존·재현 자료",
+    dripper:"wave", method:"pourover", fit:"mlight", dose:25, ratio:15.6, temp:"94–96℃", um:670, tol:60, total:210,
+    waveSize:"185", waveSizeBasis:"preserved", roastBasis:"roasterStyle", sourceKind:"preserved",
+    sourceUrl:"https://prima-coffee.com/learn/article/brewing-guides/comparing-kalita-wave-recipes/33005", dropCm:"출처 미지정",
+    blurb:"65g씩 여섯 번. 매회 15초 동안 중앙→바깥→중앙으로 붓고 15초 쉬는 반복형.",
+    steps:c=>{ const u=c.water/6; return [
+      { at:0, kind:"bloom", label:"1차 65g · 15초 · 별도 뜸 표기는 없음", to:u, dur:15, pat:"back", stream:"가늘게", flowRateGps:65/15 },
+      { at:30, kind:"pour", label:"2차 65g · 15초", to:u*2, dur:15, pat:"back", stream:"가늘게", flowRateGps:65/15 },
+      { at:60, kind:"pour", label:"3차 65g · 15초", to:u*3, dur:15, pat:"back", stream:"가늘게", flowRateGps:65/15 },
+      { at:90, kind:"pour", label:"4차 65g · 15초", to:u*4, dur:15, pat:"back", stream:"가늘게", flowRateGps:65/15 },
+      { at:120, kind:"pour", label:"5차 65g · 15초", to:u*5, dur:15, pat:"back", stream:"가늘게", flowRateGps:65/15 },
+      { at:150, kind:"pour", label:"6차 65g · 15초", to:u*6, dur:15, pat:"back", stream:"가늘게", flowRateGps:65/15 },
+      { at:210, kind:"end", label:"배출 완료 · 약 3:30" }]; },
+    tips:[
+      "원문 범위는 25–28g / 390g입니다. 앱 기본은 25g입니다.",
+      "첫 65g은 프리인퓨전 역할을 하지만 출처가 별도 bloom이라고 부르지는 않습니다.",
+      "현재 공식 원문은 내려가 Prima Coffee가 비교·보존한 자료를 사용합니다. Encore 14→670μm는 앱 환산 제안입니다."],
+    source:"Prima Coffee의 George Howell Wave 보존·재현 · 25–28g / 390g / 6×65g / 3:30"
+  },
+  {
+    id:"sprudge-big-batch-wave185", name:"Sprudge Big Batch 185", by:"Sprudge", role:"대용량 Wave 가이드",
+    dripper:"wave", method:"pourover", fit:"medium", dose:40, ratio:16, temp:"96℃", um:900, tol:80, total:270,
+    pourEnd:210, waveSize:"185", waveSizeBasis:"explicit", roastBasis:"unspecified", sourceKind:"official",
+    sourceUrl:"https://sprudge.com/how-to-brew-with-a-kalita-wave-coffee-maker-162968.html", dropCm:"출처 미지정",
+    blurb:"80g을 적시고 부드럽게 저어주기한 뒤 0:30–3:30 동안 중앙→바깥 나선을 간헐적으로 반복해 수위를 유지하는 640g 배치.",
+    steps:c=>[
+      { at:0, kind:"bloom", label:"80g까지 · 전 베드 적시기", to:c.water*(80/640), pat:"bloom" },
+      { at:10, kind:"act", label:"젓가락 등으로 부드럽게 저어주기" },
+      { at:30, kind:"pour", label:"640g까지 · 3:30까지 간헐적 나선 · 수위 유지", to:c.water, dur:180, durFixed:true, pat:"spiral", stream:"보통", height:"보통", flowDescriptor:"간헐적으로", approx:true },
+      { at:210, kind:"act", label:"붓기 종료 · 마지막 배출 때 드리퍼를 가볍게 탭" },
+      { at:270, kind:"end", label:"배출 완료 · 약 4:30" }],
+    tips:[
+      "원문은 0:30–3:30을 <b>간헐적 붓기</b>라고 하며 펄스별 시각·물량은 주지 않습니다. 연속 애니메이션은 근사입니다.",
+      "수위를 유지하고 커피층을 노출하지 않는 것이 물량 분할보다 우선입니다.",
+      "배전도는 미지정, 900μm와 첫 붓기의 세부 시간은 앱 제안입니다."],
+    source:"Sprudge Kalita Wave 185 Big Batch · 40g / 640g / 205°F / 붓기 3:30 · 총 약 4:30"
+  },
+  {
+    id:"counterculture-flash-wave-adapted", name:"Flash Brew · Wave 적용", by:"Counter Culture Coffee", role:"현재 공식 가이드의 칼리타 적용",
+    dripper:"wave", method:"pourover", fit:"medium", dose:30, ratio:335/30, iceMul:5.5, temp:"93℃", um:850, tol:70, total:150,
+    timerMode:"conditional", totalLabel:"조건부", waveSize:"unspecified", waveSizeBasis:"unspecified", roastBasis:"unspecified", sourceKind:"adapted",
+    sourceUrl:"https://counterculturecoffee.com/pages/flash-brew", dropCm:"출처 미지정",
+    blurb:"서버에 얼음 165g을 먼저 담고, 30g 뜸→100g→200g 뒤 30초 또는 수위 1cm 조건으로 335g까지 원형 펄스.",
+    steps:c=>[
+      { at:0, kind:"act", label:"서버에 얼음 " + Math.round(c.ice) + "g 먼저 담기" },
+      { at:0, kind:"bloom", label:"온수 30g까지 · 전 베드 적시기", to:c.water*(30/335), pat:"bloom" },
+      { at:30, kind:"pour", label:"온수 100g까지 · 원형 붓기", to:c.water*(100/335), pat:"spiral" },
+      { at:60, kind:"pour", label:"온수 200g까지 · 원형 붓기", to:c.water*(200/335), pat:"spiral", triggerText:"30초 경과 또는 수위 약 1cm 하강 중 먼저" },
+      { at:90, kind:"pour", label:"후반 반복 1/2 · 400g까지", to:c.water*(267.5/335), pat:"spiral", triggerText:"30초 경과 또는 수위 약 1cm 하강 중 먼저", approx:true },
+      { at:120, kind:"pour", label:"온수 335g까지", to:c.water, pat:"spiral", triggerText:"30초 경과 또는 수위 약 1cm 하강 중 먼저", approx:true },
+      { at:150, kind:"end", label:"붓기 종료 · 얼음이 녹으면 저어 마무리" }],
+    tips:[
+      "현재판은 드리퍼를 <b>brewer of choice</b>라고 하므로 칼리타 전용 공식 레시피가 아니라 Wave 적용본입니다.",
+      "후반 두 펄스와 2:30은 타이머용 편집 가정입니다. 원문은 개별 누적량과 총 완료시간을 주지 않습니다.",
+      "구형 Kalita 185판(온수 365g + 추출 후 얼음 135g, 약 3:30)과 합치지 않았습니다."],
+    source:"Counter Culture 현재 공식 Flash Brew · Wave 적용 · 30g / 온수 335g + 선투입 얼음 165g"
+  },
+  {
+    id:"du-origami", name:"오리가미 챔피언 레시피", by:"두 지아닝", role:"2019 월드 브루어스컵 챔피언",
+    dripper:"origami", method:"pourover", fit:"light", dose:16, ratio:15, temp:"94℃", um:850, tol:70, total:106,
+    blurb:"웨이브 페이퍼를 끼운 오리가미로 1분 46초 만에 끝낸다. 짧고 빠른 세 번의 붓기.",
+    steps: c => [
+      { at:0,  kind:"bloom", label:"1차 붓기 · 원두량 ×3.75", to:c.water*0.25, dur:10, pat:"spiral" },
+      { at:18, kind:"pour",  label:"2차 붓기", to:c.water*(140/240), dur:14, pat:"wide" },
+      { at:38, kind:"pour",  label:"3차 붓기 · 전량까지", to:c.water, dur:18, pat:"spiral" },
+      { at:106, kind:"end",  label:"추출 완료 · 추출액 약 190g" }],
+    tips:[
+      "<b>웨이브 페이퍼</b>를 씁니다. 콘 페이퍼를 쓰면 배출이 달라져 시간이 늘어납니다.",
+      "대회에서는 굵게 한 번 갈아 채프를 걷어낸 뒤 다시 갈아 클래리티를 올렸습니다.",
+      "총 1:46으로 매우 빠릅니다. 4분을 넘긴다면 두세 클릭 굵게 잡으세요.",
+      "16g / 240g으로 추출액 약 190g — 작고 진한 한 잔에 맞춘 설계입니다."],
+    source:"두 지아닝 2019 WBrC 우승 레시피 · 16g / 240g / 94℃ · timer.coffee 정리"
+  },
+  {
+    id:"kasuya-origami", name:"4:6 오리가미", by:"테츠 카스야", role:"오리가미 드리퍼 공동 개발",
+    dripper:"origami", method:"pourover", fit:"medium", dose:20, ratio:15, temp:"92℃", um:1000, tol:80, total:200,
+    blurb:"4:6을 오리가미에 얹은 응용. 골이 깊어 배출이 빨라지는 만큼 V60보다 한두 클릭 가늘게 잡는다.",
+    steps: c => { const u = c.water/5; return [
+      { at:0,   kind:"bloom", label:"1차 붓기 · 뜸", to:u,   pat:"spiral" },
+      { at:45,  kind:"pour",  label:"2차 붓기", to:u*2, pat:"back" },
+      { at:85,  kind:"pour",  label:"3차 붓기", to:u*3, pat:"back" },
+      { at:120, kind:"pour",  label:"4차 붓기", to:u*4, pat:"back" },
+      { at:150, kind:"pour",  label:"5차 붓기", to:u*5, pat:"back" },
+      { at:200, kind:"end",   label:"추출 완료 · 드리퍼 분리" }]; },
+    tips:[
+      "<b>콘 페이퍼</b> 기준입니다. 웨이브 페이퍼를 쓰면 배출이 더 느려지니 한 클릭 굵게 잡으세요.",
+      "골(리브)이 깊어 공기 배출이 빨라 전체 추출이 V60보다 짧게 끝납니다.",
+      "세라믹 홀더는 예열 효과가 크고, 우드·레진 홀더는 온도 유지가 약합니다.",
+      "4:6의 조절 원리(앞 40% 맛 · 뒤 60% 농도)는 그대로 적용됩니다."],
+    source:"4:6 메소드의 오리가미 응용 버전 · 20g / 300g"
+  },
+  {
+    id:"kono-drip", name:"코노 점드립", by:"코노 정통 방식", role:"KONO 명인 드리퍼",
+    dripper:"kono", method:"handdrip", fit:"medium", dose:20, ratio:9, temp:"90℃", um:750, tol:70, total:240,
+    blurb:"물방울을 한 방울씩 떨어뜨려 시작한다. 가장 느리고 가장 진한, 융드립 계보의 정통 핸드드립.",
+    steps: c => [
+      { at:0,   kind:"bloom", label:"점드립 뜸 · 중심에 한 방울씩", to:c.water/6, dur:50, pat:"drop" },
+      { at:60,  kind:"pour",  label:"본 붓기 · 아주 가는 물줄기로 작은 원", to:c.water, dur:150, pat:"coin", stream:"가늘게" },
+      { at:240, kind:"end",   label:"추출 완료 · 원액 90–100ml" }],
+    tips:[
+      "코노는 <b>배출구가 크고 리브가 짧아</b> 물이 빨리 빠집니다. 분쇄를 가늘게 잡아 속도를 늦춥니다.",
+      "점드립은 물줄기를 만들지 않고 <b>물방울로</b> 떨어뜨립니다. 중심만 적시며 천천히 부풀립니다.",
+      "원액 90–100ml를 뽑고 뜨거운 물 100ml를 더해 밸런스를 맞추는 것이 정통 방식입니다.",
+      "서두르면 이 레시피의 의미가 없습니다. 4분 이상 걸려도 정상입니다."],
+    source:"코노 드리퍼 점드립 방식 · 20g / 180ml / 90℃ · 공개 자료 정리"
+  },
+  {
+    id:"switch-hybrid", name:"스위치 하이브리드", by:"웬델린 반 부닉", role:"바리스타 · 브루잉 컨설턴트",
+    dripper:"switch", method:"hybrid", fit:"mlight", dose:20, ratio:15, temp:"96℃", um:850, tol:70, total:165,
+    blurb:"밸브를 닫아 침지로 성분을 뽑고, 열어서 투과로 마무리한다. 침지의 단맛과 드립의 투명도를 함께 가져간다.",
+    steps: c => [
+      { at:0,   kind:"act",   label:"밸브 닫기 (침지 모드)" },
+      { at:0,   kind:"bloom", label:"뜸 · 원두량 ×3", to:c.dose*3, pat:"spiral" },
+      { at:10,  kind:"act",   label:"스월로 전체 적시기" },
+      { at:45,  kind:"pour",  label:"전량까지 붓기 · 밸브 닫힌 상태", to:c.water, dur:30, pat:"wide" },
+      { at:105, kind:"act",   label:"밸브 열기 (투과 시작)", drain:true },
+      { at:165, kind:"end",   label:"배출 완료" }],
+    tips:[
+      "침지 구간이 길수록 바디가 올라갑니다. 밸브 여는 시점을 ±20초로 조절해보세요.",
+      "밸브를 열기 직전 <b>스월은 금물</b> — 미분이 떠 배출이 막힙니다.",
+      "배출이 2분 넘게 걸리면 한 단계 굵게 갈아야 합니다.",
+      "약배전에는 침지를 길게, 강배전에는 짧게 가져가는 편이 안전합니다."],
+    source:"공개된 하이브리드 버전 기준 · 20g / 300g"
+  },
+  {
+    id:"switch-immersion", name:"스위치 풀 이머전", by:"하리오 공식", role:"HARIO Switch 권장 방식",
+    dripper:"switch", method:"immersion", fit:"medium", dose:20, ratio:15, temp:"93℃", um:950, tol:80, total:210,
+    blurb:"밸브를 닫고 전량을 한 번에 부어 완전 침지로 뽑는다. 손이 거의 가지 않아 재현성이 가장 높다.",
+    steps: c => [
+      { at:0,   kind:"act",  label:"밸브 닫기 · 필터 린싱 후 원두 담기" },
+      { at:0,   kind:"pour", label:"전량 한 번에 붓기", to:c.water, dur:20, pat:"flood" },
+      { at:25,  kind:"act",  label:"스푼으로 3회 저어 전체 적시기" },
+      { at:180, kind:"act",  label:"밸브 열기 (배출 시작)", drain:true },
+      { at:210, kind:"end",  label:"배출 완료" }],
+    tips:[
+      "침지식이라 <b>붓는 기술이 거의 필요 없습니다</b>. 굵은 물줄기로 한 번에 부어도 됩니다.",
+      "침지 시간(기본 3분)이 농도를 결정합니다. 연하면 30초씩 늘려보세요.",
+      "투과식보다 굵게 갈아야 합니다. V60 기준보다 두세 클릭 굵게.",
+      "밸브를 연 뒤 배출이 1분을 넘기면 다음엔 더 굵게 가세요."],
+    source:"하리오 스위치 권장 침지 방식 기준 · 20g / 300g"
+  },
+  {
+    id:"hoffmann-clever", name:"클레버 침지", by:"제임스 호프만", role:"2007 월드 바리스타 챔피언",
+    dripper:"clever", method:"immersion", fit:"medium", dose:30, ratio:16.6, temp:"95℃", um:1050, tol:80, total:330,
+    blurb:"침지의 관대함과 종이 필터의 깨끗함을 한 번에. 실패할 구석이 거의 없는 방식.",
+    steps: c => [
+      { at:0,   kind:"act",  label:"필터 린싱 · 드리퍼 예열 후 원두 담기" },
+      { at:0,   kind:"pour", label:"전량 한 번에 붓기", to:c.water, dur:25, pat:"flood" },
+      { at:30,  kind:"act",  label:"스푼으로 저어 전체 적시기 · 뚜껑 덮기" },
+      { at:240, kind:"act",  label:"컵 위에 올려 배출 시작", drain:true },
+      { at:330, kind:"end",  label:"배출 완료 (마지막 방울까지 기다리지 않기)" }],
+    tips:[
+      "물을 붓고 <b>한 번만 젓고 그대로 둡니다</b>. 중간에 건드릴수록 미분이 떠 배출이 막힙니다.",
+      "침지 4분이 기본. 강배전은 3분, 약배전은 4분 30초까지 늘려도 좋습니다.",
+      "굵게 갈아야 배출이 막히지 않습니다. 프렌치프레스보다 살짝 가는 정도.",
+      "마지막 몇 방울은 잡미가 강하니 완전히 떨어지기 전에 내려놓으세요."],
+    source:"클레버 드리퍼 침지 방식 · 30g / 500g · 공개 영상 자료 정리"
+  },
+  {
+    id:"bluebottle-chemex", name:"블루보틀 케멕스", by:"블루보틀", role:"Blue Bottle 브루 가이드",
+    dripper:"chemex", method:"pourover", fit:"medium", dose:50, ratio:14, temp:"93℃", um:900, tol:70, total:240,
+    blurb:"1 : 14의 진한 비율에 네 번에 나눠 붓는다. 뜸을 55초까지 길게 가져가는 것이 이 가이드의 특징.",
+    steps: c => [
+      { at:0,   kind:"bloom", label:"뜸 · 원두량 ×2 (10g/s 나선)", to:c.dose*2, dur:10, pat:"spiral" },
+      { at:55,  kind:"pour",  label:"2차 붓기 · 전체의 43%까지", to:c.water*0.43, dur:20, pat:"wide" },
+      { at:105, kind:"pour",  label:"3차 붓기 · 71%까지", to:c.water*0.71, dur:20, pat:"spiral" },
+      { at:155, kind:"pour",  label:"4차 붓기 · 100%까지", to:c.water, dur:20, pat:"smallCir" },
+      { at:240, kind:"end",   label:"추출 완료 (약 4:00)" }],
+    tips:[
+      "분쇄는 <b>바닷소금 굵기</b> — 프렌치프레스보다 조금 가늘게.",
+      "뜸을 최대 55초까지 길게 잡아 가스를 충분히 빼는 것이 이 가이드의 핵심입니다.",
+      "붓는 속도는 초당 약 10g. 중심에서 시작해 느린 나선으로 퍼집니다.",
+      "필터는 세 겹인 쪽을 주둥이 방향으로 놓고, 공기 통로를 막지 않도록 주의하세요."],
+    source:"블루보틀 케멕스 브루 가이드 · 1 : 14 · 원 레시피 50g / 700g"
+  },
+  {
+    id:"chemex", name:"케멕스 클래식", by:"케멕스 공식", role:"Chemex Corporation",
+    dripper:"chemex", method:"pourover", fit:"medium", dose:30, ratio:16.6, temp:"94℃", um:950, tol:80, total:270,
+    blurb:"두꺼운 전용 필터가 오일을 걸러 극도로 맑은 잔을 만든다. 여러 번 나눠 부어 수위를 유지하는 것이 요령.",
+    steps: c => [
+      { at:0,   kind:"bloom", label:"뜸 · 원두량 ×2", to:c.dose*2, pat:"spiral" },
+      { at:45,  kind:"pour",  label:"전체의 50%까지 붓기", to:c.water*0.5, dur:30, pat:"wide" },
+      { at:105, kind:"pour",  label:"75%까지 붓기", to:c.water*0.75, dur:25, pat:"spiral" },
+      { at:150, kind:"pour",  label:"100%까지 붓기", to:c.water, dur:25, pat:"smallCir" },
+      { at:270, kind:"end",   label:"추출 완료 (4:30 목표)" }],
+    tips:[
+      "필터는 <b>세 겹인 쪽을 주둥이 방향</b>으로 놓고 뜨거운 물로 충분히 린싱합니다.",
+      "두꺼운 필터 때문에 배출이 느립니다. V60보다 굵게 시작하세요.",
+      "붓기할 때 필터와 유리 사이 공기 통로를 막지 않도록 주의합니다.",
+      "총 시간이 5분을 넘어가면 굵기를 올리고, 3분대로 끝나면 낮추세요."],
+    source:"케멕스 공식 권장 비율(1:16–17) 기준 · 30g / 500g"
+  },
+  {
+    id:"hoffmann-fp", name:"프렌치프레스 테크닉", by:"제임스 호프만", role:"2007 월드 바리스타 챔피언",
+    dripper:"frenchpress", method:"immersion", fit:"medium", dose:30, ratio:16.6, temp:"100℃", tempFixed:true, um:1200, tol:100, total:540,
+    blurb:"누르지 않는 프렌치프레스. 4분에 크러스트를 깨고 미분을 걷어낸 뒤, 오래 기다렸다 가만히 따른다.",
+    steps: c => [
+      { at:0,   kind:"pour", label:"전량 한 번에 붓기", to:c.water, dur:20, pat:"flood" },
+      { at:240, kind:"act",  label:"크러스트 깨기 — 스푼으로 3회 저음" },
+      { at:270, kind:"act",  label:"떠 있는 거품·미분을 스푼 2개로 걷어내기" },
+      { at:300, kind:"act",  label:"뚜껑 덮고 5–8분 그대로 대기" },
+      { at:540, kind:"end",  label:"플런저는 표면까지만 · 천천히 따르기", drain:true }],
+    tips:[
+      "플런저를 <b>끝까지 누르지 않습니다</b>. 표면에 살짝 걸치는 정도로만 두세요.",
+      "미분을 걷어내는 단계가 이 방식의 핵심입니다. 잔의 탁함이 확연히 줄어듭니다.",
+      "굵게 갈수록 컵이 깨끗해집니다. 가장 굵은 쪽에서 시작하세요.",
+      "마지막 잔은 따르지 말고 남기면 침전물이 따라 나오지 않습니다."],
+    source:"원 레시피 1L당 66g 기준 환산 · 공개 영상 자료 정리"
+  },
+  {
+    id:"wac2023", name:"WAC 우승 레시피", by:"테이 윕바수트", role:"2023 월드 에어로프레스 챔피언",
+    dripper:"aeropress", method:"immersion", fit:"light", dose:18, ratio:5.6, dilute:4.4, temp:"95℃", um:700, tol:80, total:125,
+    blurb:"18g을 갈아 16g만 먼저 넣고, 브루잉 중간에 남은 2g을 더 넣는다. 향을 되살리는 반칙 같은 한 수.",
+    steps: c => [
+      { at:0,   kind:"act",  label:"원두 " + Math.round(c.dose) + "g 분쇄 · " + Math.round(c.dose*16/18) + "g만 챔버에 담기" },
+      { at:0,   kind:"pour", label:"물 전량 붓기", to:c.water, dur:12, pat:"flood" },
+      { at:30,  kind:"act",  label:"원을 그리며 5초간 저어주기" },
+      { at:45,  kind:"act",  label:"남겨둔 원두 " + Math.round(c.dose*2/18) + "g 추가 투입" },
+      { at:55,  kind:"act",  label:"다시 5초간 저어주기" },
+      { at:95,  kind:"act",  label:"플런저 삽입 · 약 30초에 걸쳐 프레스", drain:true },
+      { at:125, kind:"end",  label:"추출 완료 · 추출액 약 " + Math.round(c.dose*75/18) + "g" }],
+    tips:[
+      "<b>원두를 두 번에 나눠 넣는 것</b>이 이 레시피의 정체성입니다. 뒤에 넣은 2g이 향을 되살립니다.",
+      "바이패스가 필수입니다 — 추출액에 <b>상온수</b>를 더해 115g, 다시 <b>온수</b>를 더해 155g까지 (18g 기준).",
+      "저어주기는 정확히 5초씩 두 번. 더 오래 저으면 잡미가 올라옵니다.",
+      "프레스는 30초에 걸쳐 천천히. 힘이 아니라 시간입니다.",
+      "원문에 물 온도가 명시되지 않아 95℃를 기준값으로 잡았습니다."],
+    source:"2023 월드 에어로프레스 챔피언십 우승 레시피 · 18g / 100g · aeropress.com"
+  },
+  {
+    id:"hoffmann-ap", name:"에어로프레스 정석", by:"제임스 호프만", role:"2007 월드 바리스타 챔피언",
+    dripper:"aeropress", method:"immersion", fit:"medium", dose:11, ratio:18, temp:"100℃", tempFixed:true, um:700, tol:70, total:180,
+    blurb:"거의 손대지 않는 방식. 물을 붓고 2분 두었다가 스월 한 번, 그리고 아주 천천히 누른다.",
+    steps: c => [
+      { at:0,   kind:"pour", label:"전량 붓기 · 저어주지 않음", to:c.water, dur:15, pat:"flood" },
+      { at:120, kind:"act",  label:"에어로프레스를 부드럽게 스월" },
+      { at:150, kind:"act",  label:"플런저 삽입 후 30초에 걸쳐 천천히 프레스", drain:true },
+      { at:180, kind:"end",  label:"추출 완료 · 기호에 따라 가수" }],
+    tips:[
+      "표준(비역방향) 세팅이며, 필터는 한 장으로 충분합니다.",
+      "프레스는 <b>힘이 아니라 시간</b>입니다. 30초를 목표로 균일하게 미세요.",
+      "쓴맛이 앞서면 물 온도를 낮추기보다 <b>프레스 속도를 더 늦춰</b> 보세요.",
+      "농도가 진하면 뜨거운 물 30–60g을 가수해 마십니다."],
+    source:"원 레시피 11g / 200g · 공개 영상 자료 정리"
+  }
+];
+
+/* ── 상태 ─────────────────────────────────────────────── */
+const LS = "brew-dial-v3";
+const state = {
+  grinder:"c40", dripper:"all", waveSize:"all", method:"all", roast:"medium", process:"washed", dose:20,
+  selected:"kasuya46", sound:true, custom:{ ref:24, umPerClick:30 }
+};
+try { const raw = localStorage.getItem(LS); if (raw) Object.assign(state, JSON.parse(raw)); } catch (e) {}
+if (!state.custom || typeof state.custom.ref !== "number") state.custom = { ref:24, umPerClick:30 };
+if (!WAVE_SIZES.some(x => x.id === state.waveSize)) state.waveSize = "all";
+function save(){ try { localStorage.setItem(LS, JSON.stringify(state)); } catch (e) {} }
+
+const byId = (arr, id) => arr.find(x => x.id === id) || arr[0];
+const grinder = () => state.grinder === "custom" ? customGrinder() : byId(GRINDERS, state.grinder);
+const roast   = () => byId(ROASTS, state.roast);
+const proc    = () => byId(PROCESSES, state.process);
+
+/* ── 환산 ─────────────────────────────────────────────── */
+function micronToDial(g, um){
+  const c = g.curve, first = c[0], last = c[c.length - 1];
+  if (um <= first[0]) return { v:first[1], flag:"under" };
+  if (um >= last[0])  return { v:last[1],  flag:"over" };
+  for (let i = 0; i < c.length - 1; i++){
+    const [x1,y1] = c[i], [x2,y2] = c[i+1];
+    if (um >= x1 && um <= x2) return { v: y1 + (y2 - y1) * (um - x1) / (x2 - x1), flag:null };
+  }
+  return { v:last[1], flag:"over" };
+}
+function fmtDial(g, v){
+  if (g.base){ const t = Math.max(0, Math.round(v)); return Math.floor(t/g.base) + "." + (t % g.base); }
+  const n = Math.max(0, v);
+  return g.dec === 0 ? String(Math.round(n)) : n.toFixed(1);
+}
+const roastIdx = id => Math.max(0, ROASTS.findIndex(x => x.id === id));
+/* 보정은 '중배전'이 아니라 각 레시피가 설계된 배전도를 기준으로 계산합니다 */
+function deltas(r){
+  const fit = r.fit || "medium";
+  const sens = r.roastSens == null ? 1 : r.roastSens;
+  const dR = (ROASTS[roastIdx(state.roast)].d - ROASTS[roastIdx(fit)].d) * sens;
+  const fitP = r.fitProcess || "washed";
+  const base = PROCESSES.find(x => x.id === fitP) || PROCESSES[0];
+  const dP = proc().d - base.d;
+  return { dR, dP, fit, fitLabel: ROASTS[roastIdx(fit)].label, sens };
+}
+function grindFor(r){
+  const D = deltas(r);
+  const dR = D.dR, dP = D.dP, um = Math.max(300, r.um + dR + dP), g = grinder();
+  const lo = micronToDial(g, um - r.tol), hi = micronToDial(g, um + r.tol);
+  const loS = fmtDial(g, lo.v), hiS = fmtDial(g, hi.v);
+  let rot = "";
+  if (g.dial){
+    const f = v => { const n = Math.max(0, Math.round(v)), t = Math.floor(n/g.dial), c = n % g.dial;
+      return t ? t + "바퀴 + " + c + "클릭" : c + "클릭"; };
+    rot = f(lo.v) === f(hi.v) ? f(lo.v) : f(lo.v) + "  →  " + f(hi.v);
+  }
+  let band = "";
+  if (g.bands){
+    const mid = (lo.v + hi.v)/2;
+    const hit = g.bands.find(b => mid >= b.lo && mid <= b.hi);
+    band = hit ? hit.label : "권장 구간 사이";
+  }
+  return { um, base:r.um, dR, dP, g, rot, band, lo:lo.v, hi:hi.v, fit:D.fit, fitLabel:D.fitLabel, sens:D.sens,
+    text: loS === hiS ? loS : loS + " – " + hiS,
+    flag: lo.flag && hi.flag ? lo.flag : null };
+}
+
+/* ── 포맷 ─────────────────────────────────────────────── */
+const mmss = s => Math.floor(s/60) + ":" + String(Math.floor(s%60)).padStart(2,"0");
+const gram = n => Math.round(n) + "g";
+const fmtRatio = v => (Math.round(v * 10) / 10).toFixed(1).replace(/\.0$/, "");
+const signed = n => (n > 0 ? "+" : n < 0 ? "−" : "±") + Math.abs(Math.round(n));
+
+/* 물 온도 — 기준 배전도에서 한 단계 멀어질 때마다 2.5℃씩 낮추거나 올립니다.
+   이 규칙을 카스야 4:6(약배전 93℃)에 적용하면 그가 공개한 중배전 88℃ · 강배전 83℃가 그대로 재현됩니다. */
+function tempShift(r){ return (roastIdx(state.roast) - roastIdx(r.fit || "medium")) * -2.5; }
+function tempFor(r){
+  const shift = tempShift(r);
+  const nums = (r.temp.match(/\d+(?:\.\d+)?/g) || []).map(Number);
+  if (!nums.length || !shift || r.tempFixed) return r.temp;
+  /* 조정된 값은 실제로 쓰이는 추출 구간(80–97℃) 안으로 묶습니다 */
+  const adj = nums.map(n => Math.round(Math.min(97, Math.max(80, n + shift))));
+  return (adj.length > 1 ? adj[0] + "–" + adj[1] : adj[0]) + "℃";
+}
+function ctxFor(r){
+  const dose = state.dose;
+  return { dose, water: dose * r.ratio, ice: r.iceMul ? dose * r.iceMul : 0, roast: roast() };
+}
+function stepsFor(r){
+  const c = ctxFor(r);
+  let cum = 0, lastH = null;
+  const out = r.steps(c).map(s => {
+    const to = (typeof s.to === "number") ? s.to : cum;
+    const add = to - cum; cum = to;
+    const prevHeight = lastH;
+    // 뜸은 중심에서 바깥까지 넓게 도는 전용 궤적을 씁니다
+    const pat = (s.kind === "bloom" && s.pat === "spiral") ? "bloom" : s.pat;
+    if (pat) lastH = s.height || (PATTERNS[pat] && PATTERNS[pat].height) || "보통";
+    return Object.assign({}, s, { pat, to, add, prevHeight });
+  });
+  // 붓기 시간 — 명시값 우선, 없으면 물줄기 세기로 계산하고 다음 단계를 넘지 않게 자릅니다
+  const scale = r.dose ? c.dose / r.dose : 1;   // 원두량을 키우면 붓는 시간도 같이 늘어납니다
+  out.forEach((s, i) => {
+    if (!s.pat) return;
+    if (s.add <= 0){ s.dur = s.dur || 3; return; }
+    const p = PATTERNS[s.pat];
+    const rangeRate = Array.isArray(s.flowRateRangeGps) ? (s.flowRateRangeGps[0] + s.flowRateRangeGps[1])/2 : 0;
+    const rate = (typeof s.flowRateGps === "number" && s.flowRateGps > 0 ? s.flowRateGps : 0) || rangeRate || RATE[s.stream] || (p && p.rate) || 6;
+    let nextPourAt = r.total || s.at + 30;
+    for (let j = i + 1; j < out.length; j++){ if (out[j].pat){ nextPourAt = out[j].at; break; } }
+    const hasSourceDur = typeof s.dur === "number" && s.dur > 0;
+    const d = hasSourceDur ? s.dur * (s.durFixed ? 1 : scale) : Math.max(3, s.add / rate);
+    s.dur = Math.max(2, Math.round(Math.min(d, Math.max(2, nextPourAt - s.at))));
+    s.durEstimated = !hasSourceDur;
+  });
+  return out;
+}
+
+/* ── 위에서 본 궤적 ───────────────────────────────────── */
+const CX = 60, CY = 60, TAU = Math.PI * 2;
+function spiralD(r0, r1, a0, a1, n){
+  n = n || 140; let d = "";
+  for (let i = 0; i <= n; i++){
+    const t = i/n, a = a0 + (a1-a0)*t, r = r0 + (r1-r0)*t;
+    d += (i ? "L" : "M") + (CX + r*Math.cos(a)).toFixed(2) + "," + (CY + r*Math.sin(a)).toFixed(2);
+  }
+  return d;
+}
+function patternPath(key){
+  const s = -Math.PI/2;
+  switch (key){
+    case "bloom":    return spiralD(1.5, 30, s, s + TAU*2.5, 170);
+    case "drop":     return spiralD(3, 3, s, s + TAU, 40);
+    case "coin":     return spiralD(8, 8, s, s + TAU*1.6, 70);
+    case "smallCir": return spiralD(1.5, 17, s, s + TAU*2.2, 120);
+    case "spiral":   return spiralD(1.5, 26, s, s + TAU*3, 170);
+    case "wide":     return spiralD(1.5, 32, s, s + TAU*3.4, 190);
+    case "back": {   // 중심 → 바깥 → 다시 중심
+      const out = spiralD(1.5, 29, s, s + TAU*2.4, 150);
+      const rtn = spiralD(29, 5, s + TAU*2.4, s + TAU*4.2, 110);
+      return out + "L" + rtn.slice(1);
+    }
+    case "ring":     return spiralD(20, 20, s, s + TAU, 80);
+    case "center":   return spiralD(1.4, 1.4, s, s + TAU*1.2, 40);
+    case "inward":  return spiralD(30, 1.5, s, s + TAU*3, 170);
+    case "spot":     return "M42,42 L49,38 L46,47 L73,45 L78,51 L69,54 L45,72 L38,68 L47,63 L74,71";
+    case "edgeRinse":return spiralD(32, 32, s, s + TAU, 90);
+    case "zigzag":   return "M31,38 L89,38 L31,49 L89,49 L31,60 L89,60 L31,71 L89,71 L31,82 L89,82";
+    case "edgeCenter": {
+      const edge = spiralD(32, 32, s, s + TAU, 90);
+      return edge + "L60,60";
+    }
+    case "flood":    return spiralD(10, 10, s, s + TAU, 60);
+    default:         return "";
+  }
+}
+function ribs(dripper){
+  let out = "";
+  const line = (x1,y1,x2,y2) => '<line class="pd-rib" x1="'+x1.toFixed(1)+'" y1="'+y1.toFixed(1)+
+    '" x2="'+x2.toFixed(1)+'" y2="'+y2.toFixed(1)+'"/>';
+  if (dripper === "v60" || dripper === "switch" || dripper === "kono"){
+    const n = dripper === "kono" ? 8 : 12;
+    for (let i = 0; i < n; i++){
+      const a = i/n * TAU;
+      out += '<path class="pd-rib" d="' + spiralD(dripper === "kono" ? 30 : 17, 51, a, a + (dripper === "kono" ? 0.2 : 0.55), 10) + '"/>';
+    }
+  } else if (dripper === "origami"){
+    for (let i = 0; i < 20; i++){
+      const a = i/20 * TAU;
+      out += line(CX + 20*Math.cos(a), CY + 20*Math.sin(a), CX + 52*Math.cos(a), CY + 52*Math.sin(a));
+    }
+  } else if (dripper === "wave"){
+    for (let i = 0; i < 20; i++){
+      const a = i/20 * TAU;
+      out += '<path class="pd-rib" d="' + spiralD(46, 52, a, a + 0.16, 6) + '"/>';
+      out += '<path class="pd-rib" d="' + spiralD(52, 46, a + 0.16, a + 0.31, 6) + '"/>';
+    }
+    out += '<circle class="pd-rib" cx="60" cy="60" r="24" stroke-dasharray="3 4"/>';
+  } else if (dripper === "nel"){
+    /* 융(플란넬)은 리브가 없는 천 — 결만 옅게 */
+    for (let i = 0; i < 3; i++) out += '<circle class="pd-rib" cx="60" cy="60" r="' + (30 + i*8) + '" stroke-dasharray="1 3"/>';
+  } else if (dripper === "chemex"){
+    out += '<circle class="pd-rib" cx="60" cy="60" r="47" stroke-width="3"/>';
+  } else if (dripper === "clever"){
+    for (let i = 0; i < 14; i++){
+      const a = i/14 * TAU;
+      out += line(CX + 30*Math.cos(a), CY + 30*Math.sin(a), CX + 51*Math.cos(a), CY + 51*Math.sin(a));
+    }
+  } else {
+    out += '<circle class="pd-rib" cx="60" cy="60" r="46"/>';
+    out += '<circle class="pd-rib" cx="60" cy="60" r="30" stroke-dasharray="2 5"/>';
+  }
+  if (dripper === "switch" || dripper === "clever") out += '<circle class="pd-rib" cx="60" cy="60" r="7" stroke-width="1.6"/>';
+  return out;
+}
+function topSVG(dripper, patKey, o){
+  o = o || {};
+  const w = o.stroke || 2.6, d = patKey ? patternPath(patKey) : "";
+  let s = '<svg class="' + (o.cls || "pd") + '" viewBox="0 0 120 120" role="img" aria-label="' +
+    (patKey && PATTERNS[patKey] ? PATTERNS[patKey].label + " 붓는 궤적, 위에서 본 모습" : "물을 붓지 않는 단계") + '">' +
+    '<circle class="pd-rim" cx="60" cy="60" r="53"/>' + ribs(dripper) +
+    '<circle class="pd-bed" cx="60" cy="60" r="40"/>';
+  if (d){
+    s += '<path class="pd-ghost" style="stroke-width:' + w + '" d="' + d + '"/>' +
+         '<path class="pd-path" ' + (o.id ? 'id="' + o.id + '" ' : "") + 'style="stroke-width:' + w + '" d="' + d + '"/>' +
+         '<circle class="pd-dot" ' + (o.dotId ? 'id="' + o.dotId + '" ' : "") + 'r="4.2" cx="60" cy="60"/>';
+  } else {
+    s += '<circle class="pd-empty" cx="60" cy="60" r="14"/>';
+  }
+  return s + "</svg>";
+}
+
+/* ── 옆에서 본 단면 ───────────────────────────────────── */
+const BODY = {
+  cone: { rimY:38, botY:96, topL:16, topR:104, botL:48, botR:72, bedTop:70 },
+  flat: { rimY:38, botY:90, topL:20, topR:100, botL:41, botR:79, bedTop:70 },
+  flask:{ rimY:34, botY:78, topL:18, topR:102, botL:50, botR:70, bedTop:58 },
+  cyl:  { rimY:32, botY:104, topL:28, topR:92, botL:28, botR:92, bedTop:72 }
+};
+const DRIPPER_BODY = { v60:"cone", origami:"cone", kono:"cone", nel:"cone", switch:"cone", clever:"cone",
+  wave:"flat", chemex:"flask", frenchpress:"cyl", aeropress:"cyl" };
+const STREAM_W = { "한 방울씩":1.2, "가늘게":1.8, "보통":2.8, "굵게":4.2 };
+const WATER_H  = { "낮게":4, "보통":10, "높게":17 };
+
+function wallX(b, y){
+  const t = (y - b.rimY) / (b.botY - b.rimY);
+  return [b.topL + (b.botL - b.topL)*t, b.topR + (b.botR - b.topR)*t];
+}
+/* 물 표면 높이(px)로 수면 폴리곤 만들기 — 프레임마다 갱신됩니다 */
+function waterPathD(bk, px){
+  const b = BODY[bk];
+  if (!(px > 0.4)) return "";
+  const [l1, r1] = wallX(b, b.bedTop);
+  const top = b.bedTop - px;
+  const [l3, r3] = wallX(b, top);
+  return "M" + l3.toFixed(1) + "," + top.toFixed(1) + " L" + r3.toFixed(1) + "," + top.toFixed(1) +
+    " L" + r1.toFixed(1) + "," + b.bedTop + " L" + l1.toFixed(1) + "," + b.bedTop + " Z";
+}
+function bodySVG(dripper){
+  const bk = DRIPPER_BODY[dripper] || "cone", b = BODY[bk];
+  let body;
+  if (bk === "cyl"){
+    body = '<path class="sv-body" d="M' + b.topL + "," + b.rimY + " L" + b.topL + "," + (b.botY-6) +
+      " Q" + b.topL + "," + b.botY + " " + (b.topL+6) + "," + b.botY + " L" + (b.topR-6) + "," + b.botY +
+      " Q" + b.topR + "," + b.botY + " " + b.topR + "," + (b.botY-6) + " L" + b.topR + "," + b.rimY + '"/>' +
+      '<line class="sv-body" x1="60" y1="10" x2="60" y2="' + (b.rimY-4) + '"/>' +
+      '<rect class="sv-body" x="' + (b.topL+6) + '" y="' + (b.rimY-6) + '" width="' + (b.topR-b.topL-12) + '" height="5" rx="2"/>';
+  } else {
+    body = '<path class="sv-body" d="M' + b.topL + "," + b.rimY + " L" + b.topR + "," + b.rimY +
+      " L" + b.botR + "," + b.botY + " M" + b.botL + "," + b.botY + " L" + b.topL + "," + b.rimY + '"/>';
+  }
+  if (bk === "flask") body += '<path class="sv-body" d="M' + b.botL + "," + b.botY +
+    " C" + (b.botL-16) + ",90 " + (b.botL-14) + ",108 " + (b.botL+2) + ",110 L" + (b.botR-2) + ",110 C" +
+    (b.botR+14) + ",108 " + (b.botR+16) + ",90 " + b.botR + "," + b.botY + '"/>';
+  if (dripper === "switch" || dripper === "clever")
+    body += '<circle class="sv-body" cx="60" cy="' + (b.botY+5) + '" r="5"/>';
+  return body;
+}
+let sideGeom = { spoutY:20, bedTop:70, bk:"cone" };
+
+/* 옆에서 본 단면. 주전자는 방향을 뒤집지 않고 좌우로만 움직입니다(한 손 붓기) */
+function sideSVG(dripper, method, step, o){
+  o = o || {};
+  const bk = DRIPPER_BODY[dripper] || "cone", b = BODY[bk];
+  const m = METHODS[method] || METHODS.pourover;
+  const pat = step && step.pat ? PATTERNS[step.pat] : null;
+  const waterPx = o.waterPx || 0;
+  const streamKey = (step && step.stream) || (pat && pat.stream) || m.stream;
+  const sw = STREAM_W[streamKey] || 2.8;
+  /* 주전자 높이는 물 높이가 아니라 커피 베드를 기준으로 고정합니다 */
+  const spoutY = Math.max(10, b.bedTop - (o.gap || m.gap));
+  sideGeom = { spoutY, bedTop:b.bedTop, bk };
+  const surfaceY = b.bedTop - waterPx;
+
+  const [l1, r1] = wallX(b, b.bedTop), [l2, r2] = wallX(b, b.botY);
+  const bed = "M" + l1.toFixed(1) + "," + b.bedTop + " L" + r1.toFixed(1) + "," + b.bedTop +
+    " L" + (r2-1).toFixed(1) + "," + b.botY + " L" + (l2+1).toFixed(1) + "," + b.botY + " Z";
+
+  let pour = "";
+  if (pat){
+    pour =
+      '<g class="sv-pourgrp" ' + (o.grpId ? 'id="' + o.grpId + '" ' : "") +
+        'transform="translate(60,' + spoutY.toFixed(1) + ')">' +
+        '<rect class="sv-kettle" x="-33" y="-22" width="18" height="13" rx="3"/>' +
+        '<path class="sv-spout" d="M-15,-14 C-8,-14 -2.5,-8 0,-1"/>' +
+      "</g>" +
+      '<line class="sv-stream" ' + (o.streamId ? 'id="' + o.streamId + '" ' : "") +
+        'x1="60" y1="' + spoutY.toFixed(1) + '" x2="60" y2="' + surfaceY.toFixed(1) +
+        '" style="stroke-width:' + sw + ';opacity:0"/>' +
+      '<ellipse class="sv-splash" ' + (o.splashId ? 'id="' + o.splashId + '" ' : "") +
+        'cx="60" cy="' + surfaceY.toFixed(1) + '" rx="' + (3.5 + sw) + '" ry="1.8" style="opacity:0"/>' +
+      '<line class="sv-dim" x1="110" y1="' + spoutY.toFixed(1) + '" x2="110" y2="' + b.bedTop + '"/>' +
+      '<line class="sv-dim" x1="106" y1="' + spoutY.toFixed(1) + '" x2="114" y2="' + spoutY.toFixed(1) + '"/>' +
+      '<line class="sv-dim" x1="106" y1="' + b.bedTop + '" x2="114" y2="' + b.bedTop + '"/>';
+  }
+  return '<svg class="' + (o.cls || "sv") + '" viewBox="0 0 120 120" role="img" aria-label="' +
+    (pat ? m.label + " 붓기, 옆에서 본 단면" : "물을 붓지 않는 단계, 옆에서 본 단면") + '">' +
+    bodySVG(dripper) + '<path class="sv-bed" d="' + bed + '"/>' +
+    '<path class="sv-water" ' + (o.waterId ? 'id="' + o.waterId + '" ' : "") +
+      'd="' + waterPathD(bk, waterPx) + '"/>' + pour + "</svg>";
+}
+
+/* ── 컨트롤 ───────────────────────────────────────────── */
+function refreshAll(){ renderControls(); renderList(); renderDetail(); }
+
+function waveSizeMatches(r, wanted){
+  if (wanted === "all") return true;
+  const actual = r.waveSize || "unspecified";
+  if (wanted === "155") return actual === "155" || actual === "both";
+  if (wanted === "185") return actual === "185" || actual === "both";
+  return actual === wanted;
+}
+function countFor(dripperId, methodId, waveSizeId){
+  const wanted = dripperId === "wave" ? (waveSizeId || "all") : "all";
+  return RECIPES.filter(r =>
+    (dripperId === "all" || r.dripper === dripperId) &&
+    (methodId === "all" || r.method === methodId) &&
+    waveSizeMatches(r, wanted)).length;
+}
+function visible(){
+  const wanted = state.dripper === "wave" ? state.waveSize : "all";
+  return RECIPES.filter(r =>
+    (state.dripper === "all" || r.dripper === state.dripper) &&
+    (state.method === "all" || r.method === state.method) &&
+    waveSizeMatches(r, wanted));
+}
+
+function fillSelect(id, items, current, onChange){
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.innerHTML = items.map(i =>
+    '<option value="' + i.id + '"' + (i.id === current ? " selected" : "") + (i.n === 0 ? " disabled" : "") + ">" +
+    i.label + (i.n != null ? " (" + i.n + ")" : "") + "</option>").join("");
+  el.value = current;
+  el.onchange = () => onChange(el.value);
+}
+function renderControls(){
+  fillSelect("selGrinder",
+    GRINDERS.map(g => ({ id:g.id, label:g.name })).concat([{ id:"custom", label:"내 그라인더 (직접 보정)" }]),
+    state.grinder, v => { state.grinder = v; save(); refreshAll(); });
+
+  const cal = document.getElementById("calib");
+  cal.classList.toggle("on", state.grinder === "custom");
+  document.getElementById("calRef").value = state.custom.ref;
+  document.getElementById("calUm").value = state.custom.umPerClick;
+
+  fillSelect("selDripper", DRIPPERS.map(d => ({ id:d.id, label:d.label, n:countFor(d.id, state.method, d.id === "wave" ? state.waveSize : "all") })),
+    state.dripper, v => { state.dripper = v; ensureSelection(); save(); stopTimer(); refreshAll(); });
+
+  const waveCtl = document.getElementById("waveSizeCtl");
+  waveCtl.hidden = state.dripper !== "wave";
+  fillSelect("selWaveSize", WAVE_SIZES.map(s => ({ id:s.id, label:s.label, n:countFor("wave", state.method, s.id) })),
+    state.waveSize, v => { state.waveSize = v; ensureSelection(); save(); stopTimer(); refreshAll(); });
+
+  fillSelect("selMethod", METHOD_LIST.map(m => ({ id:m.id, label:m.label, n:countFor(state.dripper, m.id, state.dripper === "wave" ? state.waveSize : "all") })),
+    state.method, v => { state.method = v; ensureSelection(); save(); stopTimer(); refreshAll(); });
+
+  fillSelect("selRoast", ROASTS.map(r => ({ id:r.id, label:r.label })),
+    state.roast, v => { state.roast = v; save(); refreshAll(); });
+  document.getElementById("roastDot").style.background = roast().dot;
+
+  fillSelect("selProc", PROCESSES.map(p => ({ id:p.id, label:p.label })),
+    state.process, v => { state.process = v; save(); refreshAll(); });
+
+  document.getElementById("doseVal").innerHTML = state.dose + "<span>g</span>";
+
+  /* 보정량은 레시피마다 다릅니다 — 지금 선택한 레시피 기준으로 보여줍니다 */
+  const sel = byId(RECIPES, state.selected), D = deltas(sel);
+  const adj = D.dR + D.dP;
+  document.getElementById("adjOut").innerHTML = signed(adj) + "μm" +
+    "<small>" + (adj ? sel.name + " 기준" : D.fitLabel + " 설계 · 그대로") + "</small>";
+}
+
+/* 모바일: 상세를 시트로 열고 닫기 */
+const isNarrow = () => window.innerWidth < 1080;
+function openSheet(){ if (isNarrow()) document.body.classList.add("sheet"); }
+function closeSheet(){ document.body.classList.remove("sheet"); }
+window.addEventListener("keydown", e => { if (e.key === "Escape") closeSheet(); });
+window.addEventListener("resize", () => { if (!isNarrow()) closeSheet(); });
+function ensureSelection(){
+  const vis = visible();
+  if (vis.length && !vis.some(r => r.id === state.selected)) state.selected = vis[0].id;
+  if (!vis.length) state.selected = "";
+}
+function mbadge(method){
+  const m = METHODS[method];
+  return '<span class="mbadge m-' + method + '">' + m.label + "</span>";
+}
+function waveBadge(r){
+  if (r.dripper !== "wave") return "";
+  const key = r.waveSize || "unspecified";
+  const basis = r.waveSizeBasis ? " · " + r.waveSizeBasis : "";
+  return '<span class="meta-badge wave" title="사이즈 근거' + basis + '">' + (WAVE_SIZE_LABEL[key] || WAVE_SIZE_LABEL.unspecified) + "</span>";
+}
+function fitBadge(r){
+  const f = ROASTS[roastIdx(r.fit || "medium")];
+  const basis = r.roastBasis;
+  const text = basis === "all" ? "전 배전 대응" : f.label + (basis ? " · " + (ROAST_BASIS_LABEL[basis] || basis) : " 레시피");
+  return '<span class="fitbadge' + (r.fit === state.roast ? " on" : "") + '"><i style="background:' + f.dot + '"></i>' + text + "</span>";
+}
+function safeHttpUrl(raw){
+  if (!raw) return "";
+  try { const u = new URL(raw); return u.protocol === "https:" || u.protocol === "http:" ? u.href : ""; }
+  catch (e) { return ""; }
+}
+function sourceBlock(r){
+  const kind = r.sourceKind || "";
+  const url = safeHttpUrl(r.sourceUrl);
+  return '<p class="src">' +
+    (kind ? '<span class="meta-badge ' + kind + '">' + (SOURCE_KIND_LABEL[kind] || kind) + "</span>" : "") +
+    '<span class="src-text">' + r.source + "</span>" +
+    (url ? '<a class="source-link" href="' + url + '" target="_blank" rel="noopener noreferrer">원문 보기 ↗</a>' : "") +
+    "</p>";
+}
+function timeValue(r){
+  if (r.totalLabel) return r.totalLabel;
+  if (Array.isArray(r.totalRange)) return mmss(r.totalRange[0]) + "–" + mmss(r.totalRange[1]);
+  return mmss(r.total);
+}
+function timeKey(r){ return r.timerMode === "pourEnd" ? "붓기 종료" : r.timerMode === "conditional" ? "완료 기준" : "목표 시간"; }
+function timeSub(r){
+  if (r.timerMode === "pourEnd") return "이후 다 내려옴 시 드리퍼 분리";
+  if (r.timerMode === "conditional") return "타이머는 " + mmss(r.total) + "까지 참고 표시";
+  return "다 내려올 때까지";
+}
+
+/* ── 리스트 ───────────────────────────────────────────── */
+function renderList(){
+  const wrap = document.getElementById("rows"), vis = visible();
+  wrap.textContent = "";
+  document.getElementById("listCount").textContent = vis.length + "개 · " + grinder().name + " 기준";
+  if (!vis.length){
+    wrap.innerHTML = '<p class="empty">해당하는 레시피가 없습니다. 드리퍼나 추출 방식을 「전체」로 바꿔보세요.</p>';
+    return;
+  }
+  vis.forEach(r => {
+    const gr = grindFor(r), c = ctxFor(r);
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "row";
+    b.setAttribute("aria-current", state.selected === r.id ? "true" : "false");
+    b.innerHTML =
+      '<span class="row-main">' +
+        '<span class="row-top"><span class="row-tag">' + DRIPPER_LABEL[r.dripper] + "</span>" + waveBadge(r) + mbadge(r.method) + fitBadge(r) +
+        "</span>" +
+        '<span class="row-name">' + r.name + "</span>" +
+        '<span class="row-by"><b>' + r.by + "</b> · 1 : " + fmtRatio(r.ratio) + " → " + gram(c.water) +
+          (c.ice ? " + 얼음 " + gram(c.ice) : "") + (r.dilute ? " + 가수 " + gram(state.dose*r.dilute) : "") +
+        "</span>" +
+      "</span>" +
+      '<span class="row-dial"><span class="n">' + gr.text + '</span><br><span class="u">' +
+        gr.g.unit + " · " + Math.round(gr.um) + "μm</span></span>";
+    b.addEventListener("click", () => {
+      state.selected = r.id; save(); stopTimer(); renderList(); renderDetail(); openSheet();
+    });
+    wrap.appendChild(b);
+  });
+}
+
+/* ── 소리 ─────────────────────────────────────────────── */
+const snd = { ctx:null };
+function audioCtx(){
+  if (!snd.ctx){
+    const C = window.AudioContext || window.webkitAudioContext;
+    if (!C) return null;
+    try { snd.ctx = new C(); } catch (e) { return null; }
+  }
+  if (snd.ctx.state === "suspended") snd.ctx.resume();
+  return snd.ctx;
+}
+function tone(freq, dur, delay, vol, type){
+  if (!state.sound) return;
+  const c = audioCtx();
+  if (!c) return;
+  const t0 = c.currentTime + (delay || 0);
+  const o = c.createOscillator(), g = c.createGain();
+  o.type = type || "sine";
+  o.frequency.setValueAtTime(freq, t0);
+  g.gain.setValueAtTime(0.0001, t0);
+  g.gain.exponentialRampToValueAtTime(vol || 0.16, t0 + 0.012);
+  g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+  o.connect(g); g.connect(c.destination);
+  o.start(t0); o.stop(t0 + dur + 0.03);
+}
+const sTick  = () => tone(1320, 0.06, 0, 0.09, "triangle");          // 카운트다운
+const sPour  = () => { tone(880, 0.13, 0, 0.17); tone(1318.5, 0.18, 0.09, 0.15); }; // 붓기 시작
+const sStop  = () => tone(587.3, 0.14, 0, 0.11, "triangle");          // 붓기 끝
+const sAct   = () => tone(740, 0.10, 0, 0.10, "triangle");            // 동작 단계
+const sEnd   = () => { tone(659.3, 0.2, 0, 0.16); tone(880, 0.2, 0.16, 0.16); tone(1174.7, 0.4, 0.32, 0.16); };
+
+/* ── 타이머 + 애니메이션 ──────────────────────────────── */
+let timer = { running:false, start:0, elapsed:0 };
+let preview = { playing:false, t0:0, dur:3 };
+let view = { idx:-1, bk:"cone", spoutY:20, prevPx:0, targetPx:0, dur:3, hasPat:false };
+let fired = { step:-1, ticks:{}, stops:{} };
+let raf = 0, shownStep = -1;
+
+function ensureLoop(){ if (!raf) raf = requestAnimationFrame(tickAll); }
+function tickAll(){
+  if (timer.running || timer.elapsed > 0) paintTimer();
+  else if (preview.playing) paintPreview();
+  raf = (timer.running || preview.playing) ? requestAnimationFrame(tickAll) : 0;
+}
+function resetSounds(){ fired = { step:-1, ticks:{}, stops:{} }; }
+function stopTimer(){ timer.running = false; timer.elapsed = 0; shownStep = -1; resetSounds(); }
+function toggleTimer(){
+  if (timer.running){
+    timer.elapsed += (performance.now() - timer.start)/1000;
+    timer.running = false; paintTimer();
+  } else {
+    audioCtx();                       // 사용자 조작 시점에 오디오 잠금 해제
+    preview.playing = false;
+    timer.start = performance.now(); timer.running = true;
+    ensureLoop();
+  }
+  updateTimerButtons();
+}
+const elapsedNow = () => timer.running ? timer.elapsed + (performance.now() - timer.start)/1000 : timer.elapsed;
+
+function liveWater(steps, t){
+  let w = 0;
+  for (const s of steps){
+    if (t >= s.at + (s.dur || 0)) w = s.to;
+    else if (t > s.at && s.dur) w = (s.to - s.add) + s.add * ((t - s.at)/s.dur);
+  }
+  return w;
+}
+/* 시각 t에서의 드리퍼 수위(px) — 붓는 동안 차오르고, 끝나면 빠집니다 */
+function waterPxAt(steps, t, r, isImm){
+  let lvl = 0;
+  for (let i = 0; i < steps.length; i++){
+    const s = steps[i];
+    if (t < s.at) break;
+    const nextAt = steps[i+1] ? steps[i+1].at : (r.total || s.at + 30);
+    if (s.pat && s.add > 0){
+      const key = s.height || (PATTERNS[s.pat] && PATTERNS[s.pat].height) || "보통";
+      const tgt = isImm ? 24 : (WATER_H[key] || 10);
+      const d = s.dur || 6;
+      if (t < s.at + d){ lvl = lvl + (Math.max(tgt, lvl) - lvl) * ((t - s.at)/d); break; }
+      lvl = Math.max(tgt, lvl);
+      if (!isImm){
+        const dd = Math.max(5, nextAt - (s.at + d));
+        lvl = lvl * Math.max(0, 1 - (t - (s.at + d))/dd);
+      }
+    } else if (s.drain){
+      const dd = Math.max(6, nextAt - s.at);
+      lvl = lvl * Math.max(0, 1 - (t - s.at)/dd);
+    }
+  }
+  return lvl;
+}
+
+/* 한 프레임 그리기. p = 이 단계 붓기의 진행도(0–1), streamOn = 지금 물이 나오는가 */
+function renderPourFrame(p, streamOn, waterPx){
+  const wat = document.getElementById("svWater");
+  if (wat) wat.setAttribute("d", waterPathD(view.bk, waterPx));
+  const surfaceY = (BODY[view.bk] ? BODY[view.bk].bedTop : 70) - waterPx;
+  const path = document.getElementById("pdPath");
+  if (!path || !path.getTotalLength) return;
+  const L = path.getTotalLength(), q = Math.max(0, Math.min(1, p));
+  path.style.strokeDasharray = streamOn ? L : "none";
+  path.style.strokeDashoffset = streamOn ? L * (1 - q) : 0;
+  const pt = path.getPointAtLength(L * q);
+  const dot = document.getElementById("pdDot");
+  if (dot){
+    dot.setAttribute("cx", pt.x.toFixed(2)); dot.setAttribute("cy", pt.y.toFixed(2));
+    dot.style.opacity = streamOn ? "1" : "0";
+  }
+  /* 주전자는 좌우로만 이동 — 뒤집지 않습니다 */
+  const x = 60 + (pt.x - CX) * 0.5;
+  const grp = document.getElementById("svGrp");
+  if (grp) grp.setAttribute("transform", "translate(" + x.toFixed(2) + "," + view.spoutY.toFixed(1) + ")");
+  const st = document.getElementById("svStream");
+  if (st){
+    st.setAttribute("x1", x.toFixed(2)); st.setAttribute("x2", x.toFixed(2));
+    st.setAttribute("y2", surfaceY.toFixed(1));
+    st.style.opacity = streamOn ? "1" : "0";
+    st.style.strokeDasharray = streamOn ? "7 5" : "none";
+    st.style.strokeDashoffset = streamOn ? (-(performance.now()/22) % 12).toFixed(1) : "0";
+  }
+  const sp = document.getElementById("svSplash");
+  if (sp){
+    sp.setAttribute("cx", x.toFixed(2)); sp.setAttribute("cy", surfaceY.toFixed(1));
+    sp.style.opacity = streamOn ? "0.5" : "0";
+  }
+}
+function paintPreview(){
+  const p = (performance.now() - preview.t0)/1000 / preview.dur;
+  if (p >= 1){ preview.playing = false; renderPourFrame(1, false, view.targetPx); return; }
+  renderPourFrame(p, true, view.prevPx + (view.targetPx - view.prevPx) * p);
+}
+function startPreview(){
+  if (REDUCE || !view.hasPat){ renderPourFrame(1, false, view.targetPx); return; }
+  preview.playing = true;
+  preview.t0 = performance.now();
+  preview.dur = Math.min(Math.max(view.dur, 1.8), 8);   // 미리보기는 최대 8초로 압축
+  ensureLoop();
+}
+
+function paintTimer(){
+  const r = byId(RECIPES, state.selected), clock = document.getElementById("clock");
+  if (!clock) return;
+  const steps = stepsFor(r), c = ctxFor(r), t = elapsedNow();
+  const isImm = r.method === "immersion";
+  clock.textContent = mmss(t);
+  clock.classList.toggle("run", timer.running);
+
+  let curIdx = -1;
+  steps.forEach((s, i) => { if (t >= s.at) curIdx = i; });
+  document.querySelectorAll("#tl .step").forEach((n, i) => {
+    n.classList.toggle("on", i === curIdx && t > 0);
+    n.classList.toggle("done", t > 0 && i < curIdx);
+  });
+
+  const w = liveWater(steps, t);
+  const fill = document.getElementById("colFill");
+  if (fill) fill.style.width = Math.min(100, (w / c.water)*100) + "%";
+  const live = document.getElementById("colLive");
+  if (live) live.innerHTML = "<b>" + gram(w) + "</b> / " + gram(c.water);
+
+  const now = document.getElementById("tNow");
+  if (now){
+    if (t === 0) now.innerHTML = "시작을 누르면 추출 순서을 따라갑니다.";
+    else {
+      const cur = steps[Math.max(0, curIdx)], next = steps[curIdx + 1];
+      const s = steps[curIdx];
+      const pouring = s && s.pat && t >= s.at && t < s.at + (s.dur || 0);
+      now.innerHTML = (pouring ? "붓는 중 · <b>" : "지금 · <b>") + cur.label + "</b>" +
+        (next ? "　다음까지 " + mmss(Math.max(0, next.at - t)) : "　마지막 단계");
+    }
+  }
+
+  /* 타이머가 돌 때만 화면이 단계를 따라갑니다. 멈춰 있으면 미리보기를 건드리지 않습니다 */
+  const isLive = timer.running || timer.elapsed > 0;
+  if (isLive && curIdx >= 0 && curIdx !== shownStep) setPourStep(curIdx, false);
+
+  if (isLive){
+    const cs = steps[shownStep];
+    let p = 0, on = false;
+    if (cs && cs.pat){
+      const d = cs.dur || 3;
+      p = Math.max(0, Math.min(1, (t - cs.at) / d));
+      on = t >= cs.at && t < cs.at + d;
+    }
+    renderPourFrame(p, on, waterPxAt(steps, t, r, isImm));
+  }
+
+  /* 소리 */
+  if (timer.running){
+    const cs = steps[shownStep];
+    if (curIdx >= 0 && curIdx !== fired.step){
+      fired.step = curIdx;
+      const s = steps[curIdx];
+      if (s.kind === "end") sEnd(); else if (s.pat) sPour(); else sAct();
+    }
+    const nx = steps[curIdx + 1];
+    if (nx){
+      const left = nx.at - t;
+      for (let k = 3; k >= 1; k--){
+        const key = curIdx + ":" + k;
+        if (left <= k && left > k - 1 && !fired.ticks[key]){ fired.ticks[key] = 1; sTick(); }
+      }
+    }
+    if (cs && cs.pat && cs.dur && t >= cs.at + cs.dur && !fired.stops[shownStep]){
+      fired.stops[shownStep] = 1; sStop();
+    }
+  }
+}
+function updateTimerButtons(){
+  const b = document.getElementById("tPlay");
+  if (b) b.textContent = timer.running ? "⏸ 일시정지" : (timer.elapsed > 0 ? "▶ 이어서" : "▶ 시작");
+  const s = document.getElementById("tSound");
+  if (s){
+    s.textContent = state.sound ? "🔊 소리 켬" : "🔇 소리 끔";
+    s.setAttribute("aria-pressed", state.sound ? "true" : "false");
+  }
+}
+
+function setPourStep(i, play){
+  const r = byId(RECIPES, state.selected), steps = stepsFor(r), s = steps[i];
+  if (!s) return;
+  shownStep = i;
+  const panel = document.getElementById("pourPanel");
+  if (!panel) return;
+  const m = METHODS[r.method], p = s.pat ? PATTERNS[s.pat] : null;
+  const isImm = r.method === "immersion";
+  const bk = DRIPPER_BODY[r.dripper] || "cone";
+  const stream = s.stream || (p && p.stream) || m.stream;
+  const height = s.height || (p && p.height) || "보통";
+  const fmtFlow = n => Number.isInteger(n) ? String(n) : Number(n).toFixed(1);
+  const flow = typeof s.flowRateGps === "number" ? fmtFlow(s.flowRateGps) + "g/s"
+    : Array.isArray(s.flowRateRangeGps) ? fmtFlow(s.flowRateRangeGps[0]) + "–" + fmtFlow(s.flowRateRangeGps[1]) + "g/s"
+    : (s.flowDescriptor || "");
+  const context = s.label +
+    (s.triggerText ? "<br><b>시작 조건</b> · " + s.triggerText : "") +
+    (s.approx ? "<br><b>표시 주의</b> · 원문의 조건/범위를 타이머용으로 근사한 단계" : "");
+  /* 단계 시작 시점의 수위 = 직전 붓기가 남긴 높이. 물은 이제부터 차오릅니다 */
+  const prevPx = s.prevHeight ? (isImm ? 24 : (WATER_H[s.prevHeight] || 10)) : 0;
+  const targetPx = p ? (isImm ? 24 : (WATER_H[height] || 10)) : prevPx;
+
+  panel.innerHTML =
+    '<div class="views">' +
+      '<figure class="view">' + topSVG(r.dripper, s.pat || null, { id:"pdPath", dotId:"pdDot" }) +
+        "<figcaption>위에서</figcaption></figure>" +
+      '<figure class="view">' + sideSVG(r.dripper, r.method, s,
+        { grpId:"svGrp", streamId:"svStream", splashId:"svSplash", waterId:"svWater",
+          waterPx:prevPx, gap:r.gap }) +
+        "<figcaption>옆에서</figcaption></figure>" +
+    "</div>" +
+    '<div class="pour-info">' +
+      '<span class="pour-step">' + mmss(s.at) + " · " +
+        (s.add > 0 ? "+" + gram(s.add) : (s.kind === "end" ? "종료" : "동작")) + "</span>" +
+      '<p class="pour-name">' + (p ? p.label : s.label) + "</p>" +
+      '<p class="pour-desc">' + (p ? p.desc : "이 단계에는 물을 붓지 않습니다 — " + s.label + ".") + "</p>" +
+      (p ? '<p class="pour-context">' + context + "</p>" : "") +
+      (p ? '<span class="pour-attrs">' +
+        '<span class="attr">물줄기 <b>' + stream + "</b></span>" +
+        (flow ? '<span class="attr">유량 <b>' + flow + "</b></span>" : "") +
+        '<span class="attr">슬러리 수위 <b>' + height + "</b></span>" +
+        '<span class="attr">붓는 높이 <b>' + (r.dropCm || m.dropCm) + "</b></span>" +
+        '<span class="attr">붓는 시간 <b>' + (s.durEstimated || s.approx ? "약 " : "") + (s.dur || 3) + "초</b></span>" +
+      "</span>" : "") +
+      (p ? '<button type="button" class="replay" id="pdReplay">↻ 다시 재생</button>' : "") +
+    "</div>";
+
+  view = { idx:i, bk, spoutY:sideGeom.spoutY, prevPx, targetPx, dur:s.dur || 3, hasPat:!!p };
+
+  const rp = document.getElementById("pdReplay");
+  if (rp) rp.addEventListener("click", () => { if (!timer.running) startPreview(); });
+
+  if (p && play && !timer.running) startPreview();
+  else renderPourFrame(0, false, prevPx);
+}
+
+/* ── 상세 ─────────────────────────────────────────────── */
+function renderDetail(){
+  const el = document.getElementById("detail"), r = RECIPES.find(x => x.id === state.selected);
+  if (!r || !visible().some(x => x.id === r.id)){
+    el.innerHTML = '<p class="empty" style="margin:20px">현재 필터에 맞는 레시피가 없습니다.</p>';
+    return;
+  }
+  const c = ctxFor(r), steps = stepsFor(r), gr = grindFor(r), m = METHODS[r.method];
+
+  const flagNote = gr.flag === "under"
+    ? '<div class="callout warn"><span class="ic">△</span><span>계산된 목표가 이 그라인더의 <b>가장 가는 눈금보다 아래</b>입니다. 최소 눈금으로 두고 물 온도·저어주기으로 조절하세요.</span></div>'
+    : gr.flag === "over"
+    ? '<div class="callout warn"><span class="ic">△</span><span>계산된 목표가 이 그라인더의 <b>가장 굵은 눈금을 넘어섭니다</b>. 최대 눈금으로 두고 붓기를 짧게 가져가세요.</span></div>' : "";
+
+  let refNote = "";
+  if (r.refDials && r.refDials[gr.g.id]){
+    const v = r.refDials[gr.g.id][state.roast];
+    refNote = '<div class="callout"><span class="ic">※</span><span>레시피 원문이 제시한 ' + gr.g.name +
+      " 기준값은 <b>" + v + " " + gr.g.unit + "</b>(" + roast().label +
+      ")입니다. 환산표 기반 계산값과 자료 출처가 달라 차이가 납니다 — 원문 값부터 시작해 맛으로 좁혀가세요.</span></div>";
+  }
+
+  /* 「1050μm(중강배전 기준) · 배전도 −35 = 1015μm」 형태의 한 줄 계산 근거 */
+  const trail = "레시피 " + Math.round(gr.base) + "μm(" + gr.fitLabel + " 기준)" +
+    (gr.dR ? " · 배전도 " + signed(gr.dR) : "") +
+    (gr.dP ? " · 가공 " + signed(gr.dP) : "") +
+    (gr.dR || gr.dP ? " = " + Math.round(gr.um) + "μm" : " · 그대로");
+
+  /* 선택한 배전도가 레시피 기준과 다를 때 무엇을 어떻게 바꿔놓았는지 — 한 줄로 */
+  const ts = tempShift(r);
+  const roastNote = (gr.fit !== state.roast)
+    ? roast().label + "으로 맞춤 — 분쇄 " + (gr.dR ? signed(gr.dR) + "μm " + (gr.dR > 0 ? "굵게" : "가늘게") : "그대로") +
+      " · 물 " + (ts ? (ts > 0 ? "+" : "") + ts + "℃" : "그대로") +
+      (gr.sens !== 1 ? " · 원문 기준으로 " + Math.round(gr.sens * 100) + "%만 적용" : "") +
+      " · 순서와 시간은 원문 그대로"
+    : "";
+
+  const drow = (k, v) => "<div><dt>" + k + "</dt><dd>" + v + "</dd></div>";
+
+  /* 제조사가 브루잉별 권장 클릭수를 제시하는 그라인더(페모북 A2)일 때 */
+  let bandNote = "";
+  if (gr.g.bands){
+    const list = gr.g.bands.map(b => b.label + " " + b.lo + "–" + b.hi).join(" · ");
+    bandNote = '<div class="callout"><span class="ic">◷</span><span><b>' + gr.g.name +
+      " 제조사 권장</b> — " + list + " 클릭. 이 레시피의 <b>" + gr.text + "클릭</b>은 " +
+      (gr.band === "권장 구간 사이" ? "구간 사이입니다." : "「" + gr.band + "」 구간입니다.") +
+      "</span></div>";
+  }
+
+  /* 원 레시피 용량에서 많이 벗어나면 스케줄이 안 맞습니다 */
+  const mult = r.dose ? state.dose / r.dose : 1;
+  const doseNote = (mult < 0.65 || mult > 1.6)
+    ? '<div class="callout warn"><span class="ic">△</span><span>이 레시피의 원 용량은 <b>' + r.dose +
+      "g</b>입니다. 지금은 <b>" + state.dose + "g(약 " + mult.toFixed(1) +
+      "배)</b>이라 물량은 비율대로 맞지만 <b>붓는 간격과 총 시간은 원 레시피 값 그대로</b>입니다. 배출이 크면 드리퍼도 큰 사이즈로 바꾸고 시간도 함께 늘려야 합니다.</span></div>"
+    : "";
+
+  const ticks = steps.filter(s => s.add > 0)
+    .map(s => '<i style="left:' + Math.min(100, (s.to/c.water)*100) + '%"></i>').join("");
+
+  const tl = steps.map((s, i) => {
+    const kind = s.kind === "bloom" ? "bloom" : s.kind === "pour" ? "pour" : "act";
+    const amt = s.add > 0 ? "<b>+" + gram(s.add) + '</b><br><span class="cum">누적 ' + gram(s.to) + "</span>"
+      : (s.kind === "end" ? "종료" : "동작");
+    const pl = s.pat && PATTERNS[s.pat] ? PATTERNS[s.pat].label : "";
+    const durText = s.dur ? (s.durEstimated || s.approx ? "약 " : "") + s.dur + "초" : "";
+    return '<button type="button" class="step ' + kind + '" data-i="' + i + '" aria-pressed="false">' +
+      '<span class="at">' + mmss(s.at) + "</span>" +
+      '<span class="lb"><span class="top"><span class="k"></span>' + s.label + "</span>" +
+        (pl ? '<span class="pat">' + pl + " 붓기" + (durText ? " · " + durText : "") + (s.approx ? "" : "") + "</span>" : "") +
+        (s.triggerText ? '<span class="trigger">조건 · ' + s.triggerText + "</span>" : "") +
+      "</span><span class=\"amt\">" + amt + "</span></button>";
+  }).join("");
+
+  let finish = "";
+  if (r.dilute){
+    finish = '<div class="sec"><p class="sec-label">가수 · 마무리</p>' +
+      '<div class="gauge" style="border-color:var(--water);background:var(--water-dim)">' +
+        '<span class="gauge-n" style="color:var(--water)">' + gram(c.dose*r.dilute) + "</span>" +
+        '<span class="gauge-meta"><span class="g1">원두량 ×' + r.dilute + " 가수</span>" +
+        '<span class="g2">추출액 ' + gram(c.water) + " + 가수 " + gram(c.dose*r.dilute) +
+        " = " + gram(c.water + c.dose*r.dilute) + "</span></span></div></div>";
+  } else if (c.ice){
+    finish = '<div class="sec"><p class="sec-label">얼음 · 마무리</p>' +
+      '<div class="gauge" style="border-color:var(--water);background:var(--water-dim)">' +
+        '<span class="gauge-n" style="color:var(--water)">' + gram(c.ice) + "</span>" +
+        '<span class="gauge-meta"><span class="g1">서버에 먼저 담는 얼음</span>' +
+        '<span class="g2">온수 ' + gram(c.water) + " + 얼음 " + gram(c.ice) +
+        " = 총 " + gram(c.water + c.ice) + "</span></span></div></div>";
+  }
+
+  const finalRatio = ((c.water + c.ice + (r.dilute ? c.dose*r.dilute : 0)) / c.dose).toFixed(1);
+
+  el.innerHTML =
+    '<div class="d-bar"><button type="button" class="d-back" id="dBack">← 목록</button>' +
+      '<span class="bar-name">' + r.name + "</span></div>" +
+    '<div class="d-head">' +
+      '<div class="row-top"><span class="row-tag">' + DRIPPER_LABEL[r.dripper] + "</span>" + waveBadge(r) + mbadge(r.method) + fitBadge(r) + "</div>" +
+      "<h3>" + r.name + "</h3>" +
+      '<div class="d-by"><b>' + r.by + "</b> · " + r.role + "</div>" +
+      '<p class="d-blurb">' + r.blurb + "</p>" +
+    "</div>" +
+
+    '<div class="tiles">' +
+      tile("원두 · 물", state.dose + "g / " + gram(c.water),
+           (c.ice ? "얼음 " + gram(c.ice) + " · " : "") +
+           (r.dilute ? "물 더하기 " + gram(c.dose*r.dilute) + " · " : "") + "최종 1 : " + finalRatio) +
+      tile("물 온도", tempFor(r),
+           r.tempFixed ? "배전도 무관 · 끓는 물"
+           : tempShift(r) ? roast().label + "에 맞춰 " + (tempShift(r) > 0 ? "+" : "") + tempShift(r) + "℃"
+           : "원 레시피 그대로") +
+      tile(timeKey(r), timeValue(r), timeSub(r)) +
+      '<button type="button" class="tile tile-btn" id="grindTile" aria-expanded="false" aria-controls="grindPanel">' +
+        '<span class="k">분쇄</span><span class="v">' + gr.text + '</span><span class="s">' +
+        gr.g.unit + " · " + Math.round(gr.um) + "μm</span></button>" +
+    "</div>" +
+    '<div class="tilepanel" id="grindPanel">' +
+      '<dl class="dialinfo">' +
+        drow("그라인더", gr.g.name + " · " + gr.g.hint) +
+        (gr.rot ? drow("다이얼 돌린 양", gr.rot) : "") +
+        drow("계산 근거", trail) +
+        (roastNote ? drow("배전도 맞춤", roastNote) : "") +
+      "</dl>" + flagNote + refNote + bandNote +
+    "</div>" + (doseNote ? '<div class="sec" style="padding-bottom:0;border-bottom:0">' + doseNote + "</div>" : "") +
+
+    '<div class="sec"><p class="sec-label"><span>추출 순서</span><span>단계를 누르면 붓는 모양이 바뀝니다</span></p>' +
+      '<div class="timer"><span class="clock" id="clock">0:00</span>' +
+        '<span class="tbtns">' +
+          '<button type="button" class="tbtn primary" id="tPlay">▶ 시작</button>' +
+          '<button type="button" class="tbtn" id="tReset">■ 리셋</button>' +
+          '<button type="button" class="tbtn" id="tSound" aria-pressed="true">🔊 소리 켬</button></span>' +
+        '<span class="t-now" id="tNow">시작을 누르면 순서대로 따라갑니다.</span></div>' +
+      '<div class="column"><div class="col-track"><div class="col-fill" id="colFill"></div></div>' +
+        '<div class="col-ticks">' + ticks + "</div>" +
+        '<div class="col-read"><span id="colLive"><b>0g</b> / ' + gram(c.water) + "</span><span>누적 물량</span></div>" +
+      "</div>" +
+      '<div class="pour" id="pourPanel"></div>' +
+      '<div class="tl" id="tl">' + tl + "</div>" +
+    "</div>" +
+    finish +
+    '<div class="sec"><p class="sec-label">브루잉 노트</p>' +
+      '<ul class="tips">' + r.tips.map(t => "<li>" + t + "</li>").join("") + "</ul>" +
+      sourceBlock(r) + "</div>";
+
+  document.getElementById("dBack").addEventListener("click", closeSheet);
+  document.getElementById("grindTile").addEventListener("click", e => {
+    const b = e.currentTarget, open = b.getAttribute("aria-expanded") !== "true";
+    b.setAttribute("aria-expanded", open ? "true" : "false");
+    document.getElementById("grindPanel").classList.toggle("on", open);
+    state.grindOpen = open; save();
+  });
+  if (state.grindOpen){
+    document.getElementById("grindTile").setAttribute("aria-expanded", "true");
+    document.getElementById("grindPanel").classList.add("on");
+  }
+  document.getElementById("tPlay").addEventListener("click", toggleTimer);
+  document.getElementById("tReset").addEventListener("click", () => {
+    stopTimer(); updateTimerButtons(); paintTimer();
+    const f = steps.findIndex(s => s.pat); setPourStep(f < 0 ? 0 : f, true);
+  });
+  document.getElementById("tSound").addEventListener("click", () => {
+    state.sound = !state.sound; save(); updateTimerButtons();
+    if (state.sound){ audioCtx(); sTick(); }
+  });
+  document.getElementById("tl").addEventListener("click", e => {
+    const b = e.target.closest(".step");
+    if (!b) return;
+    document.querySelectorAll("#tl .step").forEach(n => n.setAttribute("aria-pressed", n === b ? "true" : "false"));
+    setPourStep(parseInt(b.dataset.i, 10), !timer.running);
+  });
+
+  updateTimerButtons();
+  paintTimer();
+  const fp = steps.findIndex(s => s.pat);
+  if (!timer.running && timer.elapsed === 0) setPourStep(fp < 0 ? 0 : fp, true);
+
+  function tile(k, v, s){
+    return '<div class="tile"><span class="k">' + k + '</span><span class="v">' + v +
+      '</span><span class="s">' + s + "</span></div>";
+  }
+}
+
+/* ── 부록 ─────────────────────────────────────────────── */
+function renderAppendix(){
+  document.getElementById("roastGuide").innerHTML = ROASTS.map(r =>
+    "<tr><th><span style=\"display:inline-flex;align-items:center;gap:6px\">" +
+    '<i style="width:8px;height:8px;border-radius:50%;background:' + r.dot + '"></i>' +
+    r.label + "</span></th>" + r.cols.map(c => "<td>" + c + "</td>").join("") + "</tr>").join("");
+
+  const vs = [
+    { id:"handdrip", dripper:"kono", step:{ pat:"coin", stream:"가늘게", height:"낮게" },
+      pts:["물줄기 가늘게 · 붓는 높이 2–3cm", "작은 원을 여러 번 나눠", "저어주기 최소 · 진한 원액 후 가수", "코노 · 융 · 칼리타 계보"] },
+    { id:"pourover", dripper:"v60", step:{ pat:"wide", stream:"굵게", height:"보통" },
+      pts:["물줄기 굵게 · 붓는 높이 5–8cm", "넓은 원으로 적은 횟수", "높이와 저어주기으로 균일하게", "V60 · 케멕스 · 오리가미 계보"] }
+  ];
+  document.getElementById("vsGrid").innerHTML = vs.map(v => {
+    const m = METHODS[v.id];
+    return '<div class="vscard">' + sideSVG(v.dripper, v.id, v.step, {}) +
+      '<div><h4>' + m.label + " <span class=\"mbadge m-" + v.id + "\">" + m.sub + "</span></h4>" +
+      "<p>" + m.desc + "</p><ul>" + v.pts.map(p => "<li>" + p + "</li>").join("") + "</ul></div></div>";
+  }).join("");
+
+  document.getElementById("patGrid").innerHTML = Object.keys(PATTERNS).map(k => {
+    const p = PATTERNS[k];
+    return '<div class="patcard">' + topSVG("v60", k, { cls:"pd", stroke:3.4 }) +
+      '<div><p class="pn">' + p.label + '</p><p class="pd2">물줄기 ' + p.stream + " · 슬러리 수위 " + p.height + "</p></div></div>";
+  }).join("");
+}
+
+/* ── 입력 ─────────────────────────────────────────────── */
+function setDose(v){ state.dose = Math.max(10, Math.min(60, v)); save(); refreshAll(); }
+document.getElementById("doseDown").addEventListener("click", () => setDose(state.dose - 1));
+document.getElementById("doseUp").addEventListener("click", () => setDose(state.dose + 1));
+document.getElementById("calRef").addEventListener("input", e => {
+  const v = parseFloat(e.target.value);
+  if (!isNaN(v)){ state.custom.ref = v; save(); renderList(); renderDetail(); }
+});
+document.getElementById("calUm").addEventListener("input", e => {
+  const v = parseFloat(e.target.value);
+  if (!isNaN(v) && v >= 5){ state.custom.umPerClick = v; save(); renderList(); renderDetail(); }
+});
+
+/* ── 시작 ─────────────────────────────────────────────── */
+ensureSelection();
+renderControls();
+renderList();
+renderDetail();
+renderAppendix();
+</script>
