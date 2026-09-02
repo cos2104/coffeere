@@ -1,3 +1,5 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>브루 다이얼</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -47,6 +49,7 @@
 *{box-sizing:border-box}
 body{
   margin:0; background:var(--bg); color:var(--ink);
+  -webkit-text-size-adjust:100%; text-size-adjust:100%;
   font-family:var(--ff-sans); font-weight:400; font-size:15px; line-height:1.6;
   -webkit-font-smoothing:antialiased;
 }
@@ -66,7 +69,7 @@ table{border-collapse:collapse}
 .mast p{margin:0;max-width:44ch;color:var(--ink-2);font-size:14px;font-weight:300}
 
 /* ── 설정 바 (한 줄에 모아 접기) ─────────────────────────── */
-.bar{display:grid;grid-template-columns:repeat(auto-fit,minmax(112px,1fr));gap:1px;
+.bar{display:grid;grid-template-columns:repeat(auto-fit,minmax(104px,1fr));gap:1px;
   background:var(--line-soft);border:1px solid var(--line);border-radius:var(--r);
   box-shadow:var(--shadow);overflow:hidden}
 .ctl{background:var(--panel);padding:9px 11px;display:flex;flex-direction:column;gap:5px;min-width:0}
