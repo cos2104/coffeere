@@ -8,6 +8,7 @@
 <style>
 /* ── 토큰 : 다크 우선 ─────────────────────────────────────── */
 :root{
+  color-scheme:dark;
   --bg:#16110D; --bg-2:#1B1511; --panel:#1E1813; --panel-2:#261F19; --panel-3:#2E261F;
   --line:#372E26; --line-soft:#2A231D;
   --ink:#F1E8DD; --ink-2:#BFB0A0; --ink-3:#9C8C7C;
@@ -25,6 +26,7 @@
 }
 @media (prefers-color-scheme:light){
   :root:not([data-theme="dark"]){
+    color-scheme:light;
     --bg:#EFE9DE; --bg-2:#E9E2D5; --panel:#FBF7F0; --panel-2:#F3EDE3; --panel-3:#EDE5D8;
     --line:#D9CEBF; --line-soft:#E6DED2;
     --ink:#241C14; --ink-2:#5C4F42; --ink-3:#6B5D51;
@@ -36,6 +38,7 @@
   }
 }
 :root[data-theme="light"]{
+  color-scheme:light;
   --bg:#EFE9DE; --bg-2:#E9E2D5; --panel:#FBF7F0; --panel-2:#F3EDE3; --panel-3:#EDE5D8;
   --line:#D9CEBF; --line-soft:#E6DED2;
   --ink:#241C14; --ink-2:#5C4F42; --ink-3:#6B5D51;
@@ -68,32 +71,55 @@ table{border-collapse:collapse}
 .eyebrow{font-family:var(--ff-mono);font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--ember)}
 .mast p{margin:0;max-width:44ch;color:var(--ink-2);font-size:14px;font-weight:300}
 
-/* ── 설정 바 (한 줄에 모아 접기) ─────────────────────────── */
-.bar{display:grid;grid-template-columns:repeat(auto-fit,minmax(104px,1fr));gap:1px;
-  background:var(--line-soft);border:1px solid var(--line);border-radius:var(--r);
-  box-shadow:var(--shadow);overflow:hidden}
-.ctl{background:var(--panel);padding:9px 11px;display:flex;flex-direction:column;gap:5px;min-width:0}
-.ctl[hidden]{display:none}
-.ctl > label{font-family:var(--ff-mono);font-size:9.5px;letter-spacing:.15em;text-transform:uppercase;
-  color:var(--ink-3);display:flex;align-items:center;gap:5px}
+/* ── 선택 컨트롤 ─────────────────────────────────────────── */
 .selwrap{position:relative;display:block}
 .selwrap::after{content:"";position:absolute;right:12px;top:50%;width:6px;height:6px;
   border-right:1.7px solid var(--ember);border-bottom:1.7px solid var(--ember);
   transform:translateY(-70%) rotate(45deg);pointer-events:none;transition:border-color .15s,transform .15s}
 .selwrap:hover::after{border-color:var(--ember-2);transform:translateY(-45%) rotate(45deg)}
-.ctl select{
+.selwrap select{
   appearance:none;-webkit-appearance:none;width:100%;
   background:linear-gradient(180deg,var(--panel-2),var(--panel-3));color:var(--ink);
   border:1px solid var(--line);border-radius:8px;
   padding:8px 26px 8px 10px;font-size:13px;line-height:1.25;cursor:pointer;
   text-overflow:ellipsis;transition:border-color .15s,box-shadow .15s}
-.ctl select:hover{border-color:var(--ember-line)}
-.ctl select:focus-visible{border-color:var(--ember);box-shadow:0 0 0 3px var(--ember-dim);outline:none}
-.ctl option{background:var(--panel);color:var(--ink)}
-.rdot{width:9px;height:9px;border-radius:50%;flex:none;box-shadow:0 0 0 1px rgba(0,0,0,.25) inset}
-.adj{font-family:var(--ff-mono);font-size:15px;font-weight:600;font-variant-numeric:tabular-nums;
-  display:flex;align-items:center;color:var(--ember)}
-.adj small{font-family:var(--ff-sans);font-size:11px;color:var(--ink-3);font-weight:300;margin-left:6px}
+.selwrap select:hover{border-color:var(--ember-line)}
+.selwrap select:focus-visible{border-color:var(--ember);box-shadow:0 0 0 3px var(--ember-dim);outline:none}
+.selwrap option{background:var(--panel);color:var(--ink)}
+.selwrap optgroup{background:var(--panel);color:var(--ink-3);font-style:normal}
+
+/* 레시피 제목이 곧 선택 — 제목을 눌러 레시피를 고릅니다 */
+.titlewrap{display:block;margin:7px 0 2px}
+.titlewrap::after{right:5px;width:8px;height:8px}
+.titlewrap select{font-family:var(--ff-display);font-weight:700;
+  font-size:clamp(20px,4.4vw,27px);line-height:1.25;
+  background:transparent;border:0;border-radius:0;border-bottom:1px dashed var(--ember-line);
+  padding:2px 30px 7px 0;color:var(--ink)}
+.titlewrap select:hover{border-color:transparent;border-bottom-color:var(--ember)}
+.titlewrap select:focus-visible{box-shadow:none;border-bottom-color:var(--ember)}
+.titlewrap option{font-size:14px;font-weight:500}
+.titlewrap optgroup{font-size:11.5px}
+
+/* 픽바 — 그라인더·드리퍼·원두량·배전도·가공을 라벨 없이 */
+.pickbar{display:flex;flex-wrap:wrap;gap:7px;margin-top:13px}
+.pickbar .selwrap{display:inline-block}
+.pickbar select{width:auto;max-width:70vw;font-size:12.5px;padding:6px 25px 6px 10px;border-radius:999px}
+.pickbar select:disabled{opacity:.55;cursor:default}
+.selwrap:has(select:disabled)::after{opacity:.35;border-color:var(--ink-3)}
+.selwrap:has(select:disabled):hover::after{border-color:var(--ink-3);transform:translateY(-70%) rotate(45deg)}
+/* iOS는 16px 미만 폼 컨트롤 포커스 시 화면을 자동 확대하므로 터치 기기에선 16px로 */
+@media(pointer:coarse){
+  .selwrap select{font-size:16px}
+  .pickbar select{font-size:16px}
+}
+.d-head .calib{margin-top:12px}
+
+/* 내 레시피 검증 상태 */
+.vbadge{font-family:var(--ff-mono);font-size:9.5px;letter-spacing:.08em;border:1px solid;border-radius:999px;
+  padding:2px 8px;white-space:nowrap}
+.vbadge.v-ok{color:var(--good);border-color:var(--good-line);background:var(--good-dim)}
+.vbadge.v-part{color:var(--ember);border-color:var(--ember-line);background:var(--ember-dim)}
+.vbadge.v-todo{color:var(--ink-3);border-color:var(--line);background:var(--panel-2)}
 
 .calib{display:none;gap:10px;flex-wrap:wrap;padding:11px 13px;border:1px dashed var(--ember-line);
   background:var(--ember-dim);border-radius:var(--r-s)}
@@ -103,39 +129,10 @@ table{border-collapse:collapse}
   padding:6px 8px;font-family:var(--ff-mono);font-size:14px;font-variant-numeric:tabular-nums}
 .calib .note{flex-basis:100%;font-size:11.5px;color:var(--ink-3);font-weight:300;line-height:1.5;margin:0}
 
-.stepper{display:flex;align-items:center;border:1px solid var(--line);border-radius:7px;
-  background:var(--panel-2);width:100%}
-.stepper button{flex:none;width:32px;height:34px;font-family:var(--ff-mono);font-size:16px;color:var(--ink-2);line-height:1}
-.stepper button:hover{color:var(--ember)}
-.stepper .val{flex:1;font-family:var(--ff-mono);font-size:15px;font-weight:600;text-align:center;
-  font-variant-numeric:tabular-nums;min-width:0}
-.stepper .val span{font-size:11px;color:var(--ink-3);font-weight:400}
 
-/* ── 본문 2단 ───────────────────────────────────────────── */
-.cols{display:grid;gap:20px;grid-template-columns:1fr;align-items:start}
-@media(min-width:1080px){.cols{grid-template-columns:minmax(0,1fr) minmax(0,1.08fr)}}
-
-.list-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin:0 2px 10px}
-.list-head h2{font-family:var(--ff-display);font-size:19px;margin:0;font-weight:700}
-.count{font-family:var(--ff-mono);font-size:11.5px;color:var(--ink-3)}
-
-.rows{display:flex;flex-direction:column;gap:8px}
-.row{display:grid;grid-template-columns:1fr auto;gap:12px;align-items:center;width:100%;text-align:left;
-  background:var(--panel);border:1px solid var(--line);border-left:3px solid transparent;border-radius:var(--r-s);
-  padding:13px 15px;transition:border-color .15s,background .15s}
-.row:hover{border-left-color:var(--ember-line);background:var(--panel-2)}
-.row[aria-current="true"]{border-left-color:var(--ember);background:var(--panel-2);border-color:var(--ember-line)}
-.row-main{min-width:0;display:flex;flex-direction:column;gap:2px}
+/* ── 배지·공통 ──────────────────────────────────────────── */
 .row-top{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
 .row-tag{font-family:var(--ff-mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink-3)}
-.row-name{display:block;font-family:var(--ff-display);font-size:17px;font-weight:700;line-height:1.3;
-  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.row-by{display:block;font-size:12px;color:var(--ink-3);font-weight:300;
-  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.row-by b{font-weight:500;color:var(--ink-2)}
-.row-dial{text-align:right;font-family:var(--ff-mono);font-variant-numeric:tabular-nums;flex:none}
-.row-dial .n{font-size:18px;font-weight:600;color:var(--ember);letter-spacing:-.01em;white-space:nowrap}
-.row-dial .u{font-size:10px;color:var(--ink-3);letter-spacing:.06em;white-space:nowrap}
 .empty{padding:26px 16px;text-align:center;color:var(--ink-3);font-size:13.5px;font-weight:300;
   border:1px dashed var(--line);border-radius:var(--r-s)}
 
@@ -163,31 +160,13 @@ table{border-collapse:collapse}
 /* ── 상세 ───────────────────────────────────────────────── */
 .detail{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);
   overflow:hidden;position:relative}
-@media(min-width:1080px){.detail{position:sticky;top:20px;max-height:calc(100vh - 40px);overflow-y:auto}}
-.d-bar{display:none}
-.d-back{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--ember);font-weight:500;
-  border:1px solid var(--ember-line);background:var(--ember-dim);border-radius:999px;padding:6px 14px 6px 11px}
 .d-head{padding:20px 20px 16px;border-bottom:1px solid var(--line);
   background:linear-gradient(180deg,var(--ember-dim),transparent)}
-/* 모바일에서는 목록 위로 덮는 시트 — 레시피 이름이 두 번 보이지 않게.
-   고정되는 건 얇은 뒤로가기 바 하나뿐이고 본문은 전부 함께 스크롤됩니다 */
-@media(max-width:1079px){
-  .detail{position:fixed;inset:0;z-index:60;border:0;border-radius:0;background:var(--bg);
-    overflow-y:auto;-webkit-overflow-scrolling:touch;
-    transform:translateX(100%);visibility:hidden;transition:transform .22s ease,visibility .22s}
-  body.sheet .detail{transform:none;visibility:visible}
-  body.sheet{overflow:hidden}
-  .d-bar{display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:3;
-    padding:8px 14px;background:var(--bg);border-bottom:1px solid var(--line)}
-  .d-bar .bar-name{font-family:var(--ff-display);font-size:14px;font-weight:700;color:var(--ink-2);
-    overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
-  .d-head{padding:14px 15px 13px}
-  .d-head h3{font-size:22px}
+@media(max-width:640px){
   .d-blurb{font-size:13px}
 }
 .d-head .row-top{margin-bottom:2px}
 .d-head .row-tag{color:var(--ember)}
-.d-head h3{font-family:var(--ff-display);font-size:clamp(23px,3vw,29px);font-weight:700;margin:4px 0 4px;line-height:1.2;text-wrap:balance}
 .d-by{font-size:13px;color:var(--ink-2);font-weight:300}
 .d-by b{font-weight:500;color:var(--ink)}
 .d-blurb{margin:10px 0 0;font-size:13.5px;color:var(--ink-2);font-weight:300;max-width:56ch}
@@ -270,8 +249,10 @@ table{border-collapse:collapse}
 .sv-body{fill:none;stroke:var(--line);stroke-width:1.7;stroke-linejoin:round;stroke-linecap:round}
 .sv-bed{fill:var(--panel-3);stroke:var(--line-soft);stroke-width:1}
 .sv-water{fill:var(--water);fill-opacity:.2;stroke:var(--water);stroke-opacity:.55;stroke-width:1}
-.sv-spout{fill:none;stroke:var(--ink-3);stroke-width:3.2;stroke-linecap:round}
-.sv-kettle{fill:var(--panel-3);stroke:var(--ink-3);stroke-width:1.2}
+.sv-spout{fill:none;stroke:var(--ink-3);stroke-width:3.4;stroke-linecap:round}
+.sv-kettle{fill:var(--panel-3);stroke:var(--ink-3);stroke-width:1.2;stroke-linejoin:round}
+.sv-knob{fill:var(--ink-3)}
+.sv-handle{fill:none;stroke:var(--ink-3);stroke-width:1.5;stroke-linecap:round}
 .sv-stream{stroke:var(--ember);stroke-linecap:round}
 .sv-splash{fill:none;stroke:var(--ember);stroke-width:1.2;opacity:.5}
 .sv-dim{stroke:var(--ink-3);stroke-width:.8;stroke-dasharray:2 3;opacity:.55}
@@ -290,6 +271,9 @@ table{border-collapse:collapse}
   border-radius:999px;padding:4px 12px;background:var(--ember-dim)}
 
 /* 타임라인 */
+/* 넓은 화면에서는 드립 모습(왼쪽) · 추출 순서(오른쪽) 2단 */
+.brewcols{display:grid;gap:12px;grid-template-columns:1fr;align-items:start}
+@media(min-width:900px){.brewcols{grid-template-columns:minmax(0,1.05fr) minmax(0,1fr)}}
 .tl{display:flex;flex-direction:column;gap:2px}
 .step{display:grid;grid-template-columns:50px 1fr auto;gap:11px;align-items:center;width:100%;text-align:left;
   padding:9px 10px;border-radius:var(--r-s);border:1px solid transparent;transition:background .15s,border-color .15s}
@@ -387,12 +371,14 @@ details.appendix>summary:hover{color:var(--ink)}
 .vscard p{margin:0;font-size:12.5px;color:var(--ink-2);font-weight:300;line-height:1.55}
 .vscard ul{margin:8px 0 0;padding-left:15px;font-size:12px;color:var(--ink-3);font-weight:300;line-height:1.6}
 
-.patgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(158px,1fr));gap:14px}
-.patcard{border:1px solid var(--line);border-radius:var(--r-s);padding:12px;display:flex;gap:12px;align-items:center;
+.pat-hint{font-size:12px;color:var(--ink-3);font-weight:300;margin:0 0 10px}
+.patgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(236px,1fr));gap:14px}
+.patcard{border:1px solid var(--line);border-radius:var(--r-s);padding:12px;display:flex;gap:12px;align-items:flex-start;text-align:left;width:100%;cursor:pointer;
   background:var(--panel-2)}
 .patcard .pd{width:64px;height:64px;flex:none;border:0;background:none}
 .patcard .pn{font-size:13.5px;font-weight:500;margin:0 0 2px}
 .patcard .pd2{font-size:11.5px;color:var(--ink-3);font-weight:300;line-height:1.45;margin:0}
+.patcard .pd3{font-size:12px;color:var(--ink-2);font-weight:300;line-height:1.5;margin:6px 0 0}
 
 .foot{font-size:12px;color:var(--ink-3);font-weight:300;line-height:1.65;max-width:78ch;margin:0 2px}
 .foot b{color:var(--ink-2);font-weight:500}
@@ -445,47 +431,13 @@ details.fold[open] > summary.sec-label{margin:0 0 12px}
     <p>그라인더와 드리퍼를 고르면 유명 바리스타 레시피가 <b>내 그라인더 클릭수</b>로 환산됩니다. 단계마다 <b>위·옆에서 본 붓기 모양</b>과 핸드드립·푸어오버 구분까지.</p>
   </header>
 
-  <section aria-label="브루 설정" style="display:flex;flex-direction:column;gap:10px">
-    <div class="bar">
-      <div class="ctl"><label for="selGrinder">그라인더</label><span class="selwrap"><select id="selGrinder"></select></span></div>
-      <div class="ctl"><label for="selDripper">드리퍼</label><span class="selwrap"><select id="selDripper"></select></span></div>
-      <div class="ctl" id="waveSizeCtl" hidden><label for="selWaveSize">웨이브 크기</label><span class="selwrap"><select id="selWaveSize"></select></span></div>
-      <div class="ctl"><label for="selMethod">추출 방식</label><span class="selwrap"><select id="selMethod"></select></span></div>
-      <div class="ctl"><label for="selRoast">배전도 <i class="rdot" id="roastDot"></i></label><span class="selwrap"><select id="selRoast"></select></span></div>
-      <div class="ctl"><label for="selProc">가공</label><span class="selwrap"><select id="selProc"></select></span></div>
-      <div class="ctl">
-        <label>원두량</label>
-        <div class="stepper">
-          <button type="button" id="doseDown" aria-label="원두량 1g 줄이기">−</button>
-          <div class="val" id="doseVal">20<span>g</span></div>
-          <button type="button" id="doseUp" aria-label="원두량 1g 늘리기">＋</button>
-        </div>
-      </div>
-      <div class="ctl"><label>분쇄 보정</label><span class="adj" id="adjOut">±0μm</span></div>
-    </div>
-    <div class="calib" id="calib">
-      <label>기준 눈금 <input type="number" id="calRef" step="0.5" min="0" max="200"></label>
-      <label>클릭당 μm <input type="number" id="calUm" step="1" min="5" max="200"></label>
-      <p class="note">평소 <b>중배전 워시드 드립</b>이 잘 나오는 눈금을 기준값에 넣으세요. 그 값이 900μm이 되고, 클릭당 μm으로 나머지를 계산합니다.</p>
-    </div>
-  </section>
-
-  <div class="cols">
-    <section aria-label="레시피 목록">
-      <div class="list-head">
-        <h2>레시피</h2>
-        <span class="count" id="listCount"></span>
-      </div>
-      <div class="rows" id="rows"></div>
-    </section>
-
-    <section class="detail" id="detail" aria-live="polite"></section>
-  </div>
+  <section class="detail" id="detail" aria-live="polite"></section>
 
   <details class="appendix">
     <summary>핸드드립 vs 푸어오버 · 물 붓는 모양 사전</summary>
     <div class="appendix-body">
       <div class="vs" id="vsGrid"></div>
+      <p class="pat-hint">카드를 누르면 붓는 궤적이 재생됩니다.</p>
       <div class="patgrid" id="patGrid"></div>
       <div>
         <div class="tblwrap">
@@ -531,7 +483,8 @@ details.fold[open] > summary.sec-label{margin:0 0 12px}
           600μm(3.7)→1200μm(10.0)이 63클릭, 즉 <b>클릭당 약 9.5μm</b>입니다. 제조사가 말하는 클릭당 20μm은
           버(burr) 이동 거리라 실제 입도 변화와 1:1이 아니며, 실측 기반인 표 쪽을 따릅니다.
           다만 <b>850–900μm 행(6.0→7.0)</b>만 클릭당 5μm으로 튑니다. 다른 행들과 맞추면 6.0→6.5 정도가 되어야 합니다.
-          <b>페모북 A2</b>는 이 표와 홈바리스타클럽의 "최근생산 기준" 실측 표를 절충해 씁니다 —
+          <b>페모북 A2</b>는 610–830μm 구간에서 내 레시피 파일(10/8)의 K-Ultra·A2 통일 환산값 13점을 그대로 따르고,
+          그 밖에서는 이 표와 홈바리스타클럽의 "최근생산 기준" 실측 표를 절충합니다 —
           600~1000μm에서는 두 표가 ±50μm 안에서 일치하고, 1100μm 이상에서 갈려 중간값을 택했습니다.
           제조사 권장 클릭수는 실기기와 어긋나 쓰지 않습니다. 각 열은 구간별로 선형보간하므로,
           위의 튀는 행은 그 구간에서만 약간의 오차로 남습니다.
@@ -559,7 +512,7 @@ details.fold[open] > summary.sec-label{margin:0 0 12px}
     <b>환산 방식</b> — 각 레시피의 목표 입도(μm)에 배전도·가공방식 보정을 더한 뒤, 환산표를 구간별 선형보간해 그라인더 눈금으로 되돌립니다.
     <b>밀랩 M01</b>(공식 사양과 표 일치) · <b>코만단테 MK4</b> · <b>K‑Ultra</b>는 표의 값을 그대로 쓰며, 외부 사용 가이드들과 정합을 확인했습니다
     (코만단테: V60 20–25클릭대 일치 · K‑Ultra: 프렌치프레스 9–10 일치).
-    <b>페모북 A2</b>는 이 표와 홈바리스타클럽 실측 표의 절충입니다.
+    <b>페모북 A2</b>는 610–830μm에서 내 레시피 파일(10/8)의 통일 환산값을 그대로 쓰고, 그 밖은 두 실측 표의 절충입니다.
     <b>타임모어 C3</b>(공식 83μm/클릭 · 매뉴얼 권장 푸어오버 13–16클릭)와 <b>바라짜 엔코어</b>(공식 매뉴얼 권장 V60 15 · 프렌치프레스 28)는 공식 자료 기준 근사,
     <b>EK43s</b>는 커뮤니티 실측 기반 근사로 개체차가 큽니다. 어느 쪽이든 「내 그라인더」에서 직접 보정할 수 있습니다.<br>
     <b>레시피 출처</b> — 전주연 <a href="https://coffee4m.com/%EC%B9%BC%EB%A6%AC%ED%83%80-%EC%9B%A8%EC%9D%B4%EB%B8%8C-%EB%93%9C%EB%A6%AC%ED%8D%BC-%EB%A0%88%EC%8B%9C%ED%94%BC/">coffee4m</a> ·
@@ -585,9 +538,10 @@ const GRINDERS = [
   { id:"kultra", name:"1Zpresso K‑Ultra", unit:"숫자.클릭", dec:0, base:10,
     hint:"다이얼 숫자 그대로 · 숫자 한 칸 10클릭",
     curve:[[600,37],[700,45],[800,55],[850,60],[900,70],[1000,82],[1050,84],[1200,100]] },
-  { id:"a2", name:"페모북 A2", unit:"클릭", dec:0, hint:"실측 표 2종 절충 · 한 바퀴 40클릭",
+  { id:"a2", name:"페모북 A2", unit:"클릭", dec:0, hint:"610–830μm은 내 통일표 · 밖은 실측 표 2종 절충 · 한 바퀴 40클릭",
     dial:40,
-    curve:[[500,0],[600,8],[700,16],[800,22],[875,30],[950,40],[1000,45],[1100,55],[1200,63],[1300,72]] },
+    /* 610–830μm: 내 레시피 파일(2026-10-08)의 K-Ultra·A2 통일 환산 13점을 그대로 통과. 범위 밖은 디시·홈바리스타클럽 절충 유지 */
+    curve:[[500,0],[610,8],[640,9],[660,11],[675,12],[700,14],[710,16],[720,17],[730,18],[740,19],[750,20],[770,21],[810,24],[830,25],[875,30],[950,40],[1000,45],[1100,55],[1200,63],[1300,72]] },
   { id:"ek43s", name:"EK43s", unit:"다이얼", dec:1, hint:"0–16 다이얼 · 커뮤니티 실측 근사 · 개체차 큼",
     curve:[[600,4],[700,6],[800,7.5],[900,10],[1000,12],[1100,14.5],[1200,16]] },
   { id:"c3", name:"타임모어 C3", unit:"클릭", dec:0, dial:12, hint:"공식 매뉴얼 기준 근사 · 1바퀴 12클릭",
@@ -624,17 +578,19 @@ const PROCESSES = [
 ];
 
 const DRIPPERS = [
-  { id:"all", label:"전체" }, { id:"v60", label:"V60" }, { id:"wave", label:"칼리타 웨이브" },
+  { id:"all", label:"전체 드리퍼" }, { id:"v60", label:"V60" },
+  { id:"wave155", label:"칼리타 웨이브 155" }, { id:"wave185", label:"칼리타 웨이브 185" },
   { id:"origami", label:"오리가미" }, { id:"kono", label:"코노" }, { id:"nel", label:"융드립" },
-  { id:"switch", label:"하리오 스위치" },
-  { id:"clever", label:"클레버" }, { id:"chemex", label:"케멕스" },
-  { id:"frenchpress", label:"프렌치프레스" }, { id:"aeropress", label:"에어로프레스" }
+  { id:"switch", label:"하리오 스위치" }, { id:"clever", label:"클레버" }, { id:"chemex", label:"케멕스" },
+  { id:"frenchpress", label:"프렌치프레스" }, { id:"aeropress", label:"에어로프레스" },
+  { id:"steel", label:"스텐 이중망 (빈플러스)" }
 ];
+/* 'wave'는 155·185 공용 레시피 — 어느 쪽을 골라도 보입니다 */
+const dripperMatch = (r, want) =>
+  want === "all" || r.dripper === want ||
+  (r.dripper === "wave" && (want === "wave155" || want === "wave185"));
 const DRIPPER_LABEL = Object.fromEntries(DRIPPERS.map(d => [d.id, d.label]));
-const WAVE_SIZES = [
-  { id:"all", label:"전체" }, { id:"155", label:"155" }, { id:"185", label:"185" },
-  { id:"both", label:"155·185 공용만" }, { id:"unspecified", label:"미지정" }
-];
+DRIPPER_LABEL.wave = "칼리타 웨이브";  /* 155·185 공용 레시피 */
 const WAVE_SIZE_LABEL = { "155":"Wave 155", "185":"Wave 185", both:"155·185 공용", unspecified:"크기 미지정" };
 const ROAST_BASIS_LABEL = {
   explicit:"원문 명시", roasterStyle:"로스터 성향", inferred:"조건 기반 제안",
@@ -660,10 +616,6 @@ const METHODS = {
     short:"밸브를 닫고 침지 → 열어서 투과",
     desc:"밸브를 닫고 침지로 우린 뒤 열어서 투과로 내립니다. 두 방식의 중간." }
 };
-const METHOD_LIST = [
-  { id:"all", label:"전체" }, { id:"handdrip", label:"핸드드립" }, { id:"pourover", label:"푸어오버" },
-  { id:"immersion", label:"침지식" }, { id:"hybrid", label:"하이브리드" }
-];
 
 /* ── 물 붓는 모양 ──────────────────────────────────────── */
 const PATTERNS = {
@@ -698,6 +650,25 @@ const PATTERNS = {
   flood:    { label:"한 번에",     stream:"굵게",   height:"높게", rate:10,
               desc:"굵은 물줄기로 중앙에 한 번에 붓습니다. 침지식은 저어주기가 곧 균일함이라 세게 부어도 좋습니다." }
 };
+/* 추출 화면에서는 한 줄 요약만 보여주고, 전체 설명은 부록 '물 붓는 모양'에 둡니다 */
+const PATTERN_SHORT = {
+  bloom:"중심→바깥 동심원으로 가루 전체를 적십니다. 필터 벽은 건드리지 않기.",
+  drop:"중심에 물방울을 한 방울씩 — 가장 느리고 진한 드립.",
+  coin:"동전 크기의 아주 작은 동심원 — 낮은 수위 유지용.",
+  smallCir:"반지름 절반까지만 나선 — 가장자리를 남겨 농도 확보.",
+  spiral:"중심에서 바깥 70%까지 천천히 나선 — 기본 붓기.",
+  wide:"바깥 85%까지 크게 돌며 전체에 고르게 — 벽은 직접 때리지 않기.",
+  back:"바깥으로 나갔다가 다시 중심으로 — 한 번에 베드 전체를 지납니다.",
+  ring:"중심은 비우고 중간 반경에만 원.",
+  center:"중앙 한 점에 물줄기를 고정 — 수위 유지용.",
+  inward:"바깥에서 시작해 중앙으로 들어오는 나선.",
+  spot:"어둡고 마른 지점만 짧게 겨냥해 붓습니다.",
+  edgeRinse:"필터 경계를 한 바퀴만 훑어 걸린 가루 내리기.",
+  zigzag:"좌우로 빠르게 왕복 — 마른 덩어리를 없애는 전면 붓기.",
+  edgeCenter:"가장자리 한 바퀴 → 끊지 않고 중앙 고정으로 전환.",
+  flood:"굵은 물줄기로 중앙에 한 번에 — 침지식은 세게 부어도 좋습니다."
+};
+
 /* 물줄기 세기별 유량 (g/s) — 붓기 시간 계산용 */
 const RATE = { "한 방울씩":1.5, "가늘게":4, "보통":6, "굵게":9 };
 
@@ -1431,14 +1402,98 @@ const RECIPES = [
 ];
 
 /* ── 상태 ─────────────────────────────────────────────── */
+
+/* ── 내 레시피 — 개인 검증 데이터 (coffee_recipes_1.json, 2026-10-08) ── */
+const MY_BEANS = [{"id":"tov-san-lorenzo","short":"산 로렌조","name":"과테말라 엘 소코로 산 로렌조 워시드","roaster":"토브공작소 (목포)","roast":"중배전","proc":"풀리 워시드","notes":["감귤류","구운 아몬드","갈색 설탕","다크 초콜릿"],"owned":true,"recipes":[{"k":"kalita-hot-20","d":"칼리타 웨이브 185","s":"hot","g":20,"w":320,"i":0,"t":"92℃","ku":4.7,"a2":17,"um":720,"st":[[0,50,"뜸"],[40,160,""],[80,320,""]],"fin":[180,210],"v":"추천(미검증)","tip":"쓴맛·탄 느낌이면 90℃, 밍밍하면 4.2로 곱게"},{"k":"kalita-iced-20","d":"칼리타 웨이브 185","s":"ice","g":20,"w":190,"i":130,"t":"92℃","ku":4.5,"a2":14,"um":700,"st":[[0,40,"뜸"],[40,120,""],[65,160,""],[85,190,""]],"fin":[140,170],"v":"검증됨","tip":"사용자 확인: 아주 만족. 물이 베드에 얇게 남았을 때 드리퍼 내리기"},{"k":"v60-hot-20","d":"하리오 V60","s":"hot","g":20,"w":320,"i":0,"t":"92℃","ku":4.7,"a2":17,"um":720,"st":[[0,50,"뜸 + 스월"],[40,190,""],[70,320,"붓고 가볍게 돌리기"]],"fin":[165,195],"v":"추천(미검증)","tip":"Onyx 레시피 기준 V60과 칼리타 분쇄는 거의 같음(V60 중앙값 644µm, 칼리타 621µm)"},{"k":"v60-iced-20","d":"하리오 V60","s":"ice","g":20,"w":190,"i":130,"t":"92℃","ku":4.5,"a2":14,"um":700,"st":[[0,40,"뜸 + 스월"],[40,120,""],[65,190,""]],"fin":[135,160],"v":"추천(미검증)","tip":"물이 베드에 얇게 남았을 때 드리퍼 내리기. Onyx 레시피 기준 V60과 칼리타 분쇄는 거의 같음(V60 중앙값 644µm, 칼리타 621µm)"},{"k":"switch-hot-20","d":"하리오 스위치","s":"hot","g":20,"w":320,"i":0,"t":"92℃","ku":4.5,"a2":14,"um":700,"st":[[0,200,"밸브 닫고 15초 안에 붓고 3번 젓기"],[180,200,"드리퍼 살짝 돌리고 밸브 열기"],[190,320,"밸브 연 채로 나머지 120g 원을 그리며 천천히"]],"fin":[250,280],"v":"추천(미검증)","tip":"침출 3:00. 침출식은 농도 기울기가 줄어 드립보다 추출이 느림 → 칼리타보다 0.2 곱게, 침출 길게. 스위치 02(240ml) 기준 침출은 200g까지, 나머지는 밸브 열고 부음. 연하면 침출 30초 더."},{"k":"switch-iced-20","d":"하리오 스위치","s":"ice","g":20,"w":190,"i":130,"t":"92℃","ku":4.3,"a2":12,"um":675,"st":[[0,190,"밸브 닫고 15초 안에 붓고 3번 젓기"],[165,190,"드리퍼 살짝 돌리고 밸브 열기 (얼음 위로)"]],"fin":[215,235],"v":"추천(미검증)","tip":"침출 2:45. 침출식은 농도 기울기가 줄어 드립보다 추출이 느림 → 칼리타보다 0.2 곱게, 침출 길게. 연하면 침출 30초 더."},{"k":"beanplus-hot-20","d":"빈플러스 이중망 스텐","s":"hot","g":20,"w":320,"i":0,"t":"92℃","ku":4.7,"a2":17,"um":720,"st":[[0,50,"뜸"],[40,100,""],[55,160,""],[70,210,""],[85,270,""],[100,320,""]],"fin":[150,180],"v":"추천(미검증)","tip":"금속 필터는 미분·오일이 통과해 바디가 묵직함. 칼리타와 같은 분쇄로 시작, 텁텁하면 0.2 굵게. 다 내린 뒤 1분 두기."},{"k":"beanplus-iced-20","d":"빈플러스 이중망 스텐","s":"ice","g":20,"w":190,"i":130,"t":"92℃","ku":4.5,"a2":14,"um":700,"st":[[0,40,"뜸"],[40,80,""],[55,120,""],[70,150,""],[85,190,""]],"fin":[135,165],"v":"추천(미검증)","tip":"금속 필터는 미분·오일이 통과해 바디가 묵직함. 칼리타와 같은 분쇄로 시작, 텁텁하면 0.2 굵게. 다 내린 뒤 1분 두기."}]},{"id":"tov-aricha-amy","short":"아리차 에이미","name":"에티오피아 예가체프 아리차 에이미 내추럴","roaster":"토브공작소 (목포)","roast":"약배전","proc":"내추럴","notes":["베리","복숭아","체리","갈색설탕","포도"],"owned":true,"recipes":[{"k":"kalita-hot-20","d":"칼리타 웨이브 185","s":"hot","g":20,"w":300,"i":0,"t":"94℃","ku":4.2,"a2":11,"um":660,"st":[[0,50,"뜸 + 3~4번 젓기"],[45,160,""],[85,300,""]],"fin":[165,195],"v":"부분검증","tip":"총 3:05에 맛있음 확인. 떫거나 뭉개지면 4.4 + 95℃, 시큼하고 얇으면 온도만 95~96℃, 가스 빠져 빨라지면 4.1"},{"k":"kalita-iced-20","d":"칼리타 웨이브 185","s":"ice","g":20,"w":190,"i":130,"t":"94℃","ku":4.0,"a2":9,"um":640,"st":[[0,40,"뜸 + 3~4번 젓기"],[45,120,""],[70,160,""],[90,190,""]],"fin":[140,170],"v":"추천(미검증)","tip":"고지대 약배전이라 분쇄가 힘든 건 정상. 칼리타 4.2로 맛 확인했던 잔이 아이스였다면 4.2 그대로 쓰기"},{"k":"v60-hot-20","d":"하리오 V60","s":"hot","g":20,"w":300,"i":0,"t":"94℃","ku":4.2,"a2":11,"um":660,"st":[[0,50,"뜸 + 3~4번 젓기"],[45,180,""],[75,300,"붓고 가볍게 돌리기"]],"fin":[165,195],"v":"추천(미검증)","tip":"3:30 넘고 떫으면 4.4. Onyx 레시피 기준 V60과 칼리타 분쇄는 거의 같음(V60 중앙값 644µm, 칼리타 621µm)"},{"k":"v60-iced-20","d":"하리오 V60","s":"ice","g":20,"w":190,"i":130,"t":"94℃","ku":4.0,"a2":9,"um":640,"st":[[0,40,"뜸 + 3~4번 젓기"],[45,120,""],[70,190,""]],"fin":[135,160],"v":"추천(미검증)","tip":"물이 베드에 얇게 남았을 때 드리퍼 내리기. Onyx 레시피 기준 V60과 칼리타 분쇄는 거의 같음(V60 중앙값 644µm, 칼리타 621µm)"},{"k":"switch-hot-20","d":"하리오 스위치","s":"hot","g":20,"w":300,"i":0,"t":"94℃","ku":4.0,"a2":9,"um":640,"st":[[0,200,"밸브 닫고 15초 안에 붓고 3번 젓기"],[210,200,"드리퍼 살짝 돌리고 밸브 열기"],[220,300,"밸브 연 채로 나머지 100g 원을 그리며 천천히"]],"fin":[280,310],"v":"추천(미검증)","tip":"침출 3:30. 침출식은 농도 기울기가 줄어 드립보다 추출이 느림 → 칼리타보다 0.2 곱게, 침출 길게. 스위치 02(240ml) 기준 침출은 200g까지, 나머지는 밸브 열고 부음. 연하면 침출 30초 더."},{"k":"switch-iced-20","d":"하리오 스위치","s":"ice","g":20,"w":190,"i":130,"t":"94℃","ku":3.8,"a2":8,"um":610,"st":[[0,190,"밸브 닫고 15초 안에 붓고 3번 젓기"],[195,190,"드리퍼 살짝 돌리고 밸브 열기 (얼음 위로)"]],"fin":[245,265],"v":"추천(미검증)","tip":"침출 3:15. 침출식은 농도 기울기가 줄어 드립보다 추출이 느림 → 칼리타보다 0.2 곱게, 침출 길게. 연하면 침출 30초 더."},{"k":"beanplus-hot-20","d":"빈플러스 이중망 스텐","s":"hot","g":20,"w":300,"i":0,"t":"94℃","ku":4.2,"a2":11,"um":660,"st":[[0,50,"뜸 + 3~4번 젓기"],[45,100,""],[60,150,""],[75,200,""],[90,250,""],[105,300,""]],"fin":[155,185],"v":"추천(미검증)","tip":"금속 필터는 미분·오일이 통과해 바디가 묵직함. 칼리타와 같은 분쇄로 시작, 텁텁하면 0.2 굵게. 다 내린 뒤 1분 두기. 산미·꽃향은 종이필터보다 흐려질 수 있음"},{"k":"beanplus-iced-20","d":"빈플러스 이중망 스텐","s":"ice","g":20,"w":190,"i":130,"t":"94℃","ku":4.0,"a2":9,"um":640,"st":[[0,40,"뜸 + 3~4번 젓기"],[45,80,""],[60,120,""],[75,150,""],[90,190,""]],"fin":[140,170],"v":"추천(미검증)","tip":"금속 필터는 미분·오일이 통과해 바디가 묵직함. 칼리타와 같은 분쇄로 시작, 텁텁하면 0.2 굵게. 다 내린 뒤 1분 두기. 산미·꽃향은 종이필터보다 흐려질 수 있음"}]},{"id":"tov-forest-blend","short":"숲 블렌드","name":"토브 숲 블렌드","roaster":"토브공작소 (목포)","roast":"중강배전","proc":"내추럴","notes":["파인애플","리치","믹스베리","초콜릿","요거트"],"owned":true,"recipes":[{"k":"kalita-hot-20","d":"칼리타 웨이브 185","s":"hot","g":20,"w":280,"i":0,"t":"88–89℃","ku":5.0,"a2":20,"um":750,"st":[[0,50,"뜸"],[45,160,""],[85,280,""]],"fin":[165,195],"v":"추천(미검증)","tip":"연하면 물 260g, 뭉개지면 5.3. A2에서만 뭉개지면 미분(그라인더) 영향"},{"k":"kalita-iced-20","d":"칼리타 웨이브 185","s":"ice","g":20,"w":190,"i":130,"t":"88–89℃","ku":4.8,"a2":18,"um":730,"st":[[0,40,"뜸"],[45,120,""],[70,160,""],[90,190,""]],"fin":[140,170],"v":"추천(미검증)","tip":"연하면 얼음 110g"},{"k":"v60-hot-20","d":"하리오 V60","s":"hot","g":20,"w":280,"i":0,"t":"88–89℃","ku":5.0,"a2":20,"um":750,"st":[[0,50,"뜸 + 스월"],[45,170,""],[75,280,"붓고 가볍게 돌리기"]],"fin":[160,190],"v":"추천(미검증)","tip":"내추럴 미분 많음 → 뭉개지면 5.0. Onyx 레시피 기준 V60과 칼리타 분쇄는 거의 같음(V60 중앙값 644µm, 칼리타 621µm)"},{"k":"v60-iced-20","d":"하리오 V60","s":"ice","g":20,"w":190,"i":130,"t":"88–89℃","ku":4.8,"a2":18,"um":730,"st":[[0,40,"뜸 + 스월"],[45,120,""],[70,190,""]],"fin":[135,160],"v":"추천(미검증)","tip":"물이 베드에 얇게 남았을 때 드리퍼 내리기. Onyx 레시피 기준 V60과 칼리타 분쇄는 거의 같음(V60 중앙값 644µm, 칼리타 621µm)"},{"k":"switch-hot-20","d":"하리오 스위치","s":"hot","g":20,"w":280,"i":0,"t":"88–89℃","ku":4.8,"a2":18,"um":730,"st":[[0,200,"밸브 닫고 15초 안에 붓고 3번 젓기"],[165,200,"드리퍼 살짝 돌리고 밸브 열기"],[175,280,"밸브 연 채로 나머지 80g 원을 그리며 천천히"]],"fin":[235,265],"v":"추천(미검증)","tip":"침출 2:45. 침출식은 농도 기울기가 줄어 드립보다 추출이 느림 → 칼리타보다 0.2 곱게, 침출 길게. 스위치 02(240ml) 기준 침출은 200g까지, 나머지는 밸브 열고 부음. 연하면 침출 30초 더."},{"k":"switch-iced-20","d":"하리오 스위치","s":"ice","g":20,"w":190,"i":130,"t":"88–89℃","ku":4.6,"a2":16,"um":710,"st":[[0,190,"밸브 닫고 15초 안에 붓고 3번 젓기"],[150,190,"드리퍼 살짝 돌리고 밸브 열기 (얼음 위로)"]],"fin":[200,220],"v":"추천(미검증)","tip":"침출 2:30. 침출식은 농도 기울기가 줄어 드립보다 추출이 느림 → 칼리타보다 0.2 곱게, 침출 길게. 연하면 침출 30초 더."},{"k":"beanplus-hot-20","d":"빈플러스 이중망 스텐","s":"hot","g":20,"w":280,"i":0,"t":"88–89℃","ku":5.0,"a2":20,"um":750,"st":[[0,50,"뜸"],[45,100,""],[60,140,""],[75,190,""],[90,230,""],[105,280,""]],"fin":[155,185],"v":"추천(미검증)","tip":"금속 필터는 미분·오일이 통과해 바디가 묵직함. 칼리타와 같은 분쇄로 시작, 텁텁하면 0.2 굵게. 다 내린 뒤 1분 두기. 내추럴 미분이 많아 마지막 한 모금은 남기기"},{"k":"beanplus-iced-20","d":"빈플러스 이중망 스텐","s":"ice","g":20,"w":190,"i":130,"t":"88–89℃","ku":4.8,"a2":18,"um":730,"st":[[0,40,"뜸"],[45,80,""],[60,120,""],[75,150,""],[90,190,""]],"fin":[140,170],"v":"추천(미검증)","tip":"금속 필터는 미분·오일이 통과해 바디가 묵직함. 칼리타와 같은 분쇄로 시작, 텁텁하면 0.2 굵게. 다 내린 뒤 1분 두기. 내추럴 미분이 많아 마지막 한 모금은 남기기"}]},{"id":"korang-decaf","short":"코랑 디카페인","name":"코랑커피 디카페인 블렌드","roaster":"코랑커피 (제조: 비네스트로스팅하우스, 광주)","roast":"강배전","proc":"슈가케인 EA 디카페인","notes":["스모키","흑설탕","다크초콜릿"],"owned":true,"recipes":[{"k":"kalita-hot-20","d":"칼리타 웨이브 185","s":"hot","g":20,"w":280,"i":0,"t":"83–85℃","ku":5.8,"a2":25,"um":830,"st":[[0,50,"뜸"],[30,160,""],[70,280,""]],"fin":[150,180],"v":"부분검증","tip":"K-Ultra로 맛있음 확인. 쓰면 82℃, 밍밍하면 5.5. 뒷맛의 미세한 쿰쿰함은 디카페인 특성일 수 있음"},{"k":"kalita-iced-20","d":"칼리타 웨이브 185","s":"ice","g":20,"w":190,"i":130,"t":"83–85℃","ku":5.6,"a2":24,"um":810,"st":[[0,40,"뜸"],[30,120,""],[55,160,""],[75,190,""]],"fin":[130,160],"v":"추천(미검증)","tip":"강배전 디카페인은 아이스에서 단맛이 잘 살아남. 칼리타 5.8로 맛 확인했던 잔이 아이스였다면 5.8 그대로 쓰기"},{"k":"v60-hot-20","d":"하리오 V60","s":"hot","g":20,"w":280,"i":0,"t":"83–85℃","ku":5.8,"a2":25,"um":830,"st":[[0,50,"뜸 + 스월"],[30,170,""],[60,280,""]],"fin":[140,170],"v":"추천(미검증)","tip":"디카페인은 추출이 빠름 → 쓰면 6.0. Onyx 레시피 기준 V60과 칼리타 분쇄는 거의 같음(V60 중앙값 644µm, 칼리타 621µm)"},{"k":"v60-iced-20","d":"하리오 V60","s":"ice","g":20,"w":190,"i":130,"t":"83–85℃","ku":5.6,"a2":24,"um":810,"st":[[0,40,"뜸 + 스월"],[30,120,""],[55,190,""]],"fin":[125,150],"v":"추천(미검증)","tip":"물이 베드에 얇게 남았을 때 드리퍼 내리기. Onyx 레시피 기준 V60과 칼리타 분쇄는 거의 같음(V60 중앙값 644µm, 칼리타 621µm)"},{"k":"switch-hot-20","d":"하리오 스위치","s":"hot","g":20,"w":260,"i":0,"t":"90℃","ku":5.2,"a2":21,"um":770,"st":[[0,200,"밸브 닫고 15초 안에 붓고 3번 젓기"],[90,200,"3번 더 젓기"],[150,200,"드리퍼 살짝 돌리고 밸브 열기"],[160,260,"밸브 연 채로 나머지 60g 원을 그리며 천천히"]],"fin":[220,250],"v":"추천(미검증)","tip":"침출 2:30. 침출식은 농도 기울기가 줄어 드립보다 추출이 느림 → 칼리타(5.8/84℃)보다 곱게·뜨겁게·길게. 스위치 02(240ml) 기준 침출은 200g까지, 나머지는 밸브 열고 부음. 1차(5.6/84℃/1:30/280g)는 밍밍했음. 그래도 연하면 침출 3:00, 쓴맛이 튀면 88℃"},{"k":"switch-iced-20","d":"하리오 스위치","s":"ice","g":20,"w":190,"i":130,"t":"90℃","ku":5.2,"a2":21,"um":770,"st":[[0,190,"밸브 닫고 15초 안에 붓고 3번 젓기"],[75,190,"3번 더 젓기"],[135,190,"드리퍼 살짝 돌리고 밸브 열기 (얼음 위로)"]],"fin":[185,205],"v":"추천(미검증)","tip":"침출 2:15. 침출식은 농도 기울기가 줄어 드립보다 추출이 느림 → 칼리타(5.8/84℃)보다 곱게·뜨겁게·길게. 1차(5.6/84℃/1:30/280g)는 밍밍했음. 그래도 연하면 침출 2:45, 쓴맛이 튀면 88℃"},{"k":"beanplus-hot-20","d":"빈플러스 이중망 스텐","s":"hot","g":20,"w":280,"i":0,"t":"83–85℃","ku":5.8,"a2":25,"um":830,"st":[[0,50,"뜸"],[30,100,""],[45,140,""],[60,190,""],[75,230,""],[90,280,""]],"fin":[140,170],"v":"추천(미검증)","tip":"금속 필터는 미분·오일이 통과해 바디가 묵직함. 칼리타와 같은 분쇄로 시작, 텁텁하면 0.2 굵게. 다 내린 뒤 1분 두기. 강배전이라 스모키함이 더 묵직하게 나옴"},{"k":"beanplus-iced-20","d":"빈플러스 이중망 스텐","s":"ice","g":20,"w":190,"i":130,"t":"83–85℃","ku":5.6,"a2":24,"um":810,"st":[[0,40,"뜸"],[30,80,""],[45,120,""],[60,150,""],[75,190,""]],"fin":[125,155],"v":"추천(미검증)","tip":"금속 필터는 미분·오일이 통과해 바디가 묵직함. 칼리타와 같은 분쇄로 시작, 텁텁하면 0.2 굵게. 다 내린 뒤 1분 두기. 강배전이라 스모키함이 더 묵직하게 나옴"}]},{"id":"arounz-zenith","short":"제니스","name":"어라운지 제니스 블렌드","roaster":"어라운지 (제조: 씨케이코퍼레이션즈, 천안)","roast":"미디엄 (에스프레소용)","proc":"","notes":["다크초콜릿","아몬드","몰트"],"owned":true,"recipes":[{"k":"kalita-hot-20","d":"칼리타 웨이브 185","s":"hot","g":20,"w":300,"i":0,"t":"91℃","ku":4.7,"a2":17,"um":720,"st":[[0,50,"뜸"],[40,160,""],[80,300,""]],"fin":[165,195],"v":"추천(미검증)","tip":""},{"k":"kalita-iced-20","d":"칼리타 웨이브 185","s":"ice","g":20,"w":190,"i":130,"t":"91℃","ku":4.5,"a2":14,"um":700,"st":[[0,40,"뜸"],[40,120,""],[65,160,""],[85,190,""]],"fin":[140,170],"v":"추천(미검증)","tip":"물이 베드에 얇게 남았을 때 드리퍼 내리기"},{"k":"kalita-hot-30","d":"칼리타 웨이브 185","s":"hot","g":30,"w":450,"i":0,"t":"91℃","ku":4.9,"a2":19,"um":740,"st":[[0,75,"뜸"],[45,200,""],[85,330,""],[125,450,""]],"fin":[210,240],"v":"추천(미검증)","tip":""},{"k":"kalita-iced-30","d":"칼리타 웨이브 185","s":"ice","g":30,"w":285,"i":195,"t":"91℃","ku":4.7,"a2":17,"um":720,"st":[[0,60,"뜸"],[45,180,""],[75,240,""],[100,285,""]],"fin":[170,195],"v":"추천(미검증)","tip":"물이 베드에 얇게 남았을 때 드리퍼 내리기"},{"k":"v60-hot-20","d":"하리오 V60","s":"hot","g":20,"w":300,"i":0,"t":"91℃","ku":4.7,"a2":17,"um":720,"st":[[0,50,"뜸 + 스월"],[40,180,""],[70,300,"붓고 가볍게 돌리기"]],"fin":[165,195],"v":"추천(미검증)","tip":"Onyx 레시피 기준 V60과 칼리타 분쇄는 거의 같음(V60 중앙값 644µm, 칼리타 621µm)"},{"k":"v60-iced-20","d":"하리오 V60","s":"ice","g":20,"w":190,"i":130,"t":"91℃","ku":4.5,"a2":14,"um":700,"st":[[0,40,"뜸 + 스월"],[40,120,""],[65,190,""]],"fin":[135,160],"v":"추천(미검증)","tip":"물이 베드에 얇게 남았을 때 드리퍼 내리기. Onyx 레시피 기준 V60과 칼리타 분쇄는 거의 같음(V60 중앙값 644µm, 칼리타 621µm)"},{"k":"switch-hot-20","d":"하리오 스위치","s":"hot","g":20,"w":300,"i":0,"t":"91℃","ku":4.5,"a2":14,"um":700,"st":[[0,200,"밸브 닫고 15초 안에 붓고 3번 젓기"],[180,200,"드리퍼 살짝 돌리고 밸브 열기"],[190,300,"밸브 연 채로 나머지 100g 원을 그리며 천천히"]],"fin":[250,280],"v":"추천(미검증)","tip":"침출 3:00. 침출식은 농도 기울기가 줄어 드립보다 추출이 느림 → 칼리타보다 0.2 곱게, 침출 길게. 스위치 02(240ml) 기준 침출은 200g까지, 나머지는 밸브 열고 부음. 연하면 침출 30초 더."},{"k":"switch-iced-20","d":"하리오 스위치","s":"ice","g":20,"w":190,"i":130,"t":"91℃","ku":4.3,"a2":12,"um":675,"st":[[0,190,"밸브 닫고 15초 안에 붓고 3번 젓기"],[165,190,"드리퍼 살짝 돌리고 밸브 열기 (얼음 위로)"]],"fin":[215,235],"v":"추천(미검증)","tip":"침출 2:45. 침출식은 농도 기울기가 줄어 드립보다 추출이 느림 → 칼리타보다 0.2 곱게, 침출 길게. 연하면 침출 30초 더."},{"k":"switch-hot-30","d":"하리오 스위치","s":"hot","g":30,"w":450,"i":0,"t":"91℃","ku":4.7,"a2":17,"um":720,"st":[[0,180,"밸브 닫고 15초 안에 붓고 3번 젓기"],[180,180,"드리퍼 살짝 돌리고 밸브 열기"],[190,450,"밸브 연 채로 나머지 270g 원을 그리며 천천히"]],"fin":[250,280],"v":"추천(미검증)","tip":"침출 3:00. 침출식은 농도 기울기가 줄어 드립보다 추출이 느림 → 칼리타보다 0.2 곱게, 침출 길게. 스위치 02(240ml) 기준 침출은 180g까지, 나머지는 밸브 열고 부음. 연하면 침출 30초 더."},{"k":"switch-iced-30","d":"하리오 스위치","s":"ice","g":30,"w":285,"i":195,"t":"91℃","ku":4.5,"a2":14,"um":700,"st":[[0,180,"밸브 닫고 15초 안에 붓고 3번 젓기"],[165,180,"드리퍼 살짝 돌리고 밸브 열기"],[175,285,"밸브 연 채로 나머지 105g 원을 그리며 천천히"]],"fin":[235,265],"v":"추천(미검증)","tip":"침출 2:45. 침출식은 농도 기울기가 줄어 드립보다 추출이 느림 → 칼리타보다 0.2 곱게, 침출 길게. 스위치 02(240ml) 기준 침출은 180g까지, 나머지는 밸브 열고 부음. 연하면 침출 30초 더."},{"k":"beanplus-hot-20","d":"빈플러스 이중망 스텐","s":"hot","g":20,"w":300,"i":0,"t":"91℃","ku":4.7,"a2":17,"um":720,"st":[[0,50,"뜸"],[40,100,""],[55,150,""],[70,200,""],[85,250,""],[100,300,""]],"fin":[150,180],"v":"추천(미검증)","tip":"금속 필터는 미분·오일 통과 → 텁텁하면 0.2 굵게. 다 내린 뒤 1분 두면 미분이 가라앉음"},{"k":"beanplus-iced-20","d":"빈플러스 이중망 스텐","s":"ice","g":20,"w":190,"i":130,"t":"91℃","ku":4.5,"a2":14,"um":700,"st":[[0,40,"뜸"],[40,80,""],[55,120,""],[70,160,""],[85,190,""]],"fin":[140,160],"v":"추천(미검증)","tip":""},{"k":"beanplus-hot-30","d":"빈플러스 이중망 스텐","s":"hot","g":30,"w":450,"i":0,"t":"91℃","ku":4.9,"a2":19,"um":740,"st":[[0,75,"뜸"],[45,150,""],[65,225,""],[85,300,""],[105,375,""],[125,450,""]],"fin":[180,210],"v":"추천(미검증)","tip":"마지막 한 모금은 미분이 있으니 남기기"},{"k":"beanplus-iced-30","d":"빈플러스 이중망 스텐","s":"ice","g":30,"w":285,"i":195,"t":"91℃","ku":4.7,"a2":17,"um":720,"st":[[0,60,"뜸"],[45,120,""],[65,180,""],[85,240,""],[105,285,""]],"fin":[150,170],"v":"추천(미검증)","tip":""}]},{"id":"tov-sugarcane-decaf","short":"슈가케인 디카페인","name":"콜롬비아 슈가케인 EA 디카페인","roaster":"토브공작소 (목포)","roast":"중배전","proc":"Water-EA 디카페인","notes":["자몽","스파이스","코코아","갈색설탕"],"owned":false,"recipes":[{"k":"kalita-hot-20","d":"칼리타 웨이브 185","s":"hot","g":20,"w":300,"i":0,"t":"88–90℃","ku":5.0,"a2":20,"um":750,"st":[[0,50,"뜸"],[35,160,""],[75,300,""]],"fin":[150,180],"v":"추천(미검증)","tip":"구매 전 참고용. 디카페인은 추출이 빨라 중배전이어도 굵게·낮게"},{"k":"kalita-iced-20","d":"칼리타 웨이브 185","s":"ice","g":20,"w":190,"i":130,"t":"88–90℃","ku":4.8,"a2":18,"um":730,"st":[[0,40,"뜸"],[35,120,""],[60,160,""],[80,190,""]],"fin":[135,160],"v":"추천(미검증)","tip":""},{"k":"v60-hot-20","d":"하리오 V60","s":"hot","g":20,"w":300,"i":0,"t":"88–90℃","ku":5.0,"a2":20,"um":750,"st":[[0,50,"뜸 + 스월"],[35,180,""],[65,300,""]],"fin":[150,170],"v":"추천(미검증)","tip":"Onyx 레시피 기준 V60과 칼리타 분쇄는 거의 같음(V60 중앙값 644µm, 칼리타 621µm)"},{"k":"v60-iced-20","d":"하리오 V60","s":"ice","g":20,"w":190,"i":130,"t":"88–90℃","ku":4.8,"a2":18,"um":730,"st":[[0,40,"뜸 + 스월"],[35,120,""],[60,190,""]],"fin":[125,150],"v":"추천(미검증)","tip":"물이 베드에 얇게 남았을 때 드리퍼 내리기. Onyx 레시피 기준 V60과 칼리타 분쇄는 거의 같음(V60 중앙값 644µm, 칼리타 621µm)"},{"k":"switch-hot-20","d":"하리오 스위치","s":"hot","g":20,"w":300,"i":0,"t":"88–90℃","ku":4.8,"a2":18,"um":730,"st":[[0,200,"밸브 닫고 15초 안에 붓고 3번 젓기"],[165,200,"드리퍼 살짝 돌리고 밸브 열기"],[175,300,"밸브 연 채로 나머지 100g 원을 그리며 천천히"]],"fin":[235,265],"v":"추천(미검증)","tip":"침출 2:45. 침출식은 농도 기울기가 줄어 드립보다 추출이 느림 → 칼리타보다 0.2 곱게, 침출 길게. 스위치 02(240ml) 기준 침출은 200g까지, 나머지는 밸브 열고 부음. 연하면 침출 30초 더."},{"k":"switch-iced-20","d":"하리오 스위치","s":"ice","g":20,"w":190,"i":130,"t":"88–90℃","ku":4.6,"a2":16,"um":710,"st":[[0,190,"밸브 닫고 15초 안에 붓고 3번 젓기"],[150,190,"드리퍼 살짝 돌리고 밸브 열기 (얼음 위로)"]],"fin":[200,220],"v":"추천(미검증)","tip":"침출 2:30. 침출식은 농도 기울기가 줄어 드립보다 추출이 느림 → 칼리타보다 0.2 곱게, 침출 길게. 연하면 침출 30초 더."},{"k":"beanplus-hot-20","d":"빈플러스 이중망 스텐","s":"hot","g":20,"w":300,"i":0,"t":"88–90℃","ku":5.0,"a2":20,"um":750,"st":[[0,50,"뜸"],[35,100,""],[50,150,""],[65,200,""],[80,250,""],[95,300,""]],"fin":[145,175],"v":"추천(미검증)","tip":"금속 필터는 미분·오일이 통과해 바디가 묵직함. 칼리타와 같은 분쇄로 시작, 텁텁하면 0.2 굵게. 다 내린 뒤 1분 두기."},{"k":"beanplus-iced-20","d":"빈플러스 이중망 스텐","s":"ice","g":20,"w":190,"i":130,"t":"88–90℃","ku":4.8,"a2":18,"um":730,"st":[[0,40,"뜸"],[35,80,""],[50,120,""],[65,150,""],[80,190,""]],"fin":[130,160],"v":"추천(미검증)","tip":"금속 필터는 미분·오일이 통과해 바디가 묵직함. 칼리타와 같은 분쇄로 시작, 텁텁하면 0.2 굵게. 다 내린 뒤 1분 두기."}]}];
+
+const MY_ROAST = {"약배전":"light","중배전":"medium","중강배전":"mdark","강배전":"dark","미디엄 (에스프레소용)":"medium"};
+const MY_PROC = {"내추럴":"natural","풀리 워시드":"washed","슈가케인 EA 디카페인":"decaf","Water-EA 디카페인":"decaf"};
+const MY_DRIP = {"칼리타 웨이브 185":"wave185","칼리타 웨이브 155":"wave155","하리오 V60":"v60","하리오 스위치":"switch","빈플러스 이중망 스텐":"steel"};
+const MY_DRIP_SHORT = {wave185:"칼리타 185",wave155:"칼리타 155",v60:"V60",switch:"스위치",steel:"스텐 이중망"};
+const MY_RULE_TIP = {
+  v60:"V60은 칼리타와 같은 분쇄로 시작합니다 (Onyx 가이드 기준 두 드리퍼의 분쇄 차이가 거의 없음). 뜸 후 스월.",
+  steel:"금속 필터는 칼리타와 같은 분쇄·온도로 시작 — 텁텁하면 0.2 굵게. 15초 간격으로 나눠 붓고, 다 내린 뒤 1분 두면 미분이 가라앉습니다.",
+  switch:"스위치는 칼리타보다 0.2 곱게, 침출 2:30~3:30 (약배전 길게 · 강배전 짧게). 02(240ml)는 20g 기준 200g만 침출하고 나머지는 밸브 열고 붓습니다."
+};
+function myStepsBuilder(rec, dr){
+  return c => {
+    const f = g => c.water * (g / rec.w);
+    const out = [];
+    if (dr === "switch"){
+      /* 침출(밸브 닫고 붓기) → 밸브 열기 → 남은 물 붓기 — 단계 수에 상관없이 물이 늘지 않는 단계를 밸브 열기로 봅니다 */
+      let prev = 0, drained = false;
+      rec.st.forEach((st, i) => {
+        if (i === 0){
+          out.push({ at:st[0], kind:"pour", to:f(st[1]), dur:15, pat:"flood",
+            label:(st[2] || "밸브 닫고 붓고 젓기") });
+          prev = st[1];
+        } else if (st[1] <= prev){
+          /* 침출 중 젓기와 밸브 열기를 구분 — 라벨에 '밸브 열'이 있는 단계만 배수 시작 */
+          const valve = (st[2] || "").indexOf("밸브 열") >= 0;
+          out.push({ at:st[0], kind:"act", drain:valve && !drained,
+            label:(st[2] || "드리퍼 살짝 돌리고 밸브 열기") });
+          if (valve) drained = true;
+        } else {
+          out.push({ at:st[0], kind:"pour", to:f(st[1]), pat:"spiral",
+            label:(st[2] || "나머지 붓기") });
+          prev = st[1];
+        }
+      });
+    } else {
+      rec.st.forEach((st, i) => {
+        out.push({ at:st[0], kind:i === 0 ? "bloom" : "pour", to:f(st[1]),
+          label:(st[2] || (i === 0 ? "뜸" : (i+1) + "차 붓기")),
+          pat:i === 0 ? "bloom" : (dr === "steel" ? "smallCir" : "spiral") });
+      });
+    }
+    out.push({ at:rec.fin[1], kind:"end",
+      label:"다 내려오면 완료 (" + mmss(rec.fin[0]) + "~" + mmss(rec.fin[1]) + ")" });
+    return out;
+  };
+}
+function buildPersonal(){
+  MY_BEANS.forEach(b => {
+    b.recipes.forEach(rec => {
+      const dr = MY_DRIP[rec.d] || "v60";
+      const tips = [];
+      if (rec.tip) tips.push(rec.tip);
+      if (MY_RULE_TIP[dr]) tips.push(MY_RULE_TIP[dr]);
+      if (rec.s === "ice") tips.push("아이스는 뜨겁게보다 0.2 곱게 간 값입니다. 얼음은 전체 물의 약 40% — 서버에 얼음을 먼저 담고, 물이 베드에 얇게 남았을 때 드리퍼를 내립니다.");
+      RECIPES.push({
+        id:"my-" + b.id + "-" + rec.k,
+        personal:true, vstatus:rec.v,
+        name:b.short + " · " + (MY_DRIP_SHORT[dr] || dr) + " " + (rec.s === "ice" ? "아이스" : "핫") + (rec.g !== 20 ? " " + rec.g + "g" : ""),
+        by:b.roaster, role:b.name + " — " + b.roast + " · " + (b.proc || "가공 미상") + (b.owned ? "" : " · 미보유"),
+        dripper:dr, method:dr === "switch" ? "hybrid" : "pourover",
+        fit:MY_ROAST[b.roast] || "medium", fitProcess:MY_PROC[b.proc] || "washed", procUnknown:!b.proc,
+        dose:rec.g, ratio:rec.w / rec.g, iceMul:rec.i ? rec.i / rec.g : undefined,
+        temp:rec.t, um:rec.um, tol:25, total:rec.fin[1],
+        blurb:(b.notes || []).join(" · "),
+        steps:myStepsBuilder(rec, dr),
+        tips:tips,
+        source:"내 기록 (" + rec.v + ") · 기준 K-Ultra " + rec.ku.toFixed(1) + " · A2 " + rec.a2 + "클릭 · " + rec.um + "μm"
+      });
+    });
+  });
+}
+buildPersonal();
+
+/* 칼리타 웨이브를 155 / 185 드리퍼로 분리 — waveSize 메타 기반, 공용·미지정은 'wave' 유지(양쪽에 노출) */
+RECIPES.forEach(r => {
+  if (r.dripper === "wave"){
+    if (r.waveSize === "155") r.dripper = "wave155";
+    else if (r.waveSize === "185") r.dripper = "wave185";
+  }
+});
+
 const LS = "brew-dial-v3";
 const state = {
-  grinder:"c40", dripper:"all", waveSize:"all", method:"all", roast:"medium", process:"washed", dose:20,
+  grinder:"c40", dripper:"all", roast:"medium", process:"washed", dose:20,
   selected:"kasuya46", sound:true, custom:{ ref:24, umPerClick:30 }
 };
 try { const raw = localStorage.getItem(LS); if (raw) Object.assign(state, JSON.parse(raw)); } catch (e) {}
 if (!state.custom || typeof state.custom.ref !== "number") state.custom = { ref:24, umPerClick:30 };
-if (!WAVE_SIZES.some(x => x.id === state.waveSize)) state.waveSize = "all";
+if (!DRIPPERS.some(d => d.id === state.dripper)) state.dripper = "all";  /* 옛 저장값(wave 등) 이행 */
 function save(){ try { localStorage.setItem(LS, JSON.stringify(state)); } catch (e) {} }
 
 const byId = (arr, id) => arr.find(x => x.id === id) || arr[0];
@@ -1602,13 +1657,16 @@ function ribs(dripper){
       const a = i/20 * TAU;
       out += line(CX + 20*Math.cos(a), CY + 20*Math.sin(a), CX + 52*Math.cos(a), CY + 52*Math.sin(a));
     }
-  } else if (dripper === "wave"){
+  } else if (dripper === "wave" || dripper === "wave155" || dripper === "wave185"){
     for (let i = 0; i < 20; i++){
       const a = i/20 * TAU;
       out += '<path class="pd-rib" d="' + spiralD(46, 52, a, a + 0.16, 6) + '"/>';
       out += '<path class="pd-rib" d="' + spiralD(52, 46, a + 0.16, a + 0.31, 6) + '"/>';
     }
     out += '<circle class="pd-rib" cx="60" cy="60" r="24" stroke-dasharray="3 4"/>';
+  } else if (dripper === "steel"){
+    /* 이중망 스텐 — 촘촘한 그물 결 */
+    for (let i = 0; i < 4; i++) out += '<circle class="pd-rib" cx="60" cy="60" r="' + (18 + i*11) + '" stroke-dasharray="1.5 2.5"/>';
   } else if (dripper === "nel"){
     /* 융(플란넬)은 리브가 없는 천 — 결만 옅게 */
     for (let i = 0; i < 3; i++) out += '<circle class="pd-rib" cx="60" cy="60" r="' + (30 + i*8) + '" stroke-dasharray="1 3"/>';
@@ -1651,7 +1709,7 @@ const BODY = {
   cyl:  { rimY:32, botY:104, topL:28, topR:92, botL:28, botR:92, bedTop:72 }
 };
 const DRIPPER_BODY = { v60:"cone", origami:"cone", kono:"cone", nel:"cone", switch:"cone", clever:"cone",
-  wave:"flat", chemex:"flask", frenchpress:"cyl", aeropress:"cyl" };
+  wave:"flat", wave155:"flat", wave185:"flat", steel:"cone", chemex:"flask", frenchpress:"cyl", aeropress:"cyl" };
 const STREAM_W = { "한 방울씩":1.2, "가늘게":1.8, "보통":2.8, "굵게":4.2 };
 const WATER_H  = { "낮게":4, "보통":10, "높게":17 };
 
@@ -1714,8 +1772,10 @@ function sideSVG(dripper, method, step, o){
     pour =
       '<g class="sv-pourgrp" ' + (o.grpId ? 'id="' + o.grpId + '" ' : "") +
         'transform="translate(60,' + spoutY.toFixed(1) + ')">' +
-        '<rect class="sv-kettle" x="-33" y="-22" width="18" height="13" rx="3"/>' +
-        '<path class="sv-spout" d="M-15,-14 C-8,-14 -2.5,-8 0,-1"/>' +
+        '<path class="sv-kettle" d="M-72,-36 L-39,-36 L-33.5,-11 Q-32.5,-7 -37.5,-7 L-71,-7 Q-76,-7 -75,-11 Z"/>' +
+        '<circle class="sv-knob" cx="-55" cy="-38.8" r="2.4"/>' +
+        '<path class="sv-handle" d="M-67,-36 C-63.5,-47 -46.5,-47 -44,-36"/>' +
+        '<path class="sv-spout" d="M-39,-28 C-24,-35 -13,-26 -7.5,-14 C-4.5,-7 -2,-3.5 0,-1"/>' +
       "</g>" +
       '<line class="sv-stream" ' + (o.streamId ? 'id="' + o.streamId + '" ' : "") +
         'x1="60" y1="' + spoutY.toFixed(1) + '" x2="60" y2="' + surfaceY.toFixed(1) +
@@ -1734,28 +1794,13 @@ function sideSVG(dripper, method, step, o){
 }
 
 /* ── 컨트롤 ───────────────────────────────────────────── */
-function refreshAll(){ renderControls(); renderList(); renderDetail(); }
+function refreshAll(){ renderDetail(); }
 
-function waveSizeMatches(r, wanted){
-  if (wanted === "all") return true;
-  const actual = r.waveSize || "unspecified";
-  if (wanted === "155") return actual === "155" || actual === "both";
-  if (wanted === "185") return actual === "185" || actual === "both";
-  return actual === wanted;
-}
-function countFor(dripperId, methodId, waveSizeId){
-  const wanted = dripperId === "wave" ? (waveSizeId || "all") : "all";
-  return RECIPES.filter(r =>
-    (dripperId === "all" || r.dripper === dripperId) &&
-    (methodId === "all" || r.method === methodId) &&
-    waveSizeMatches(r, wanted)).length;
+function countFor(dripperId){
+  return RECIPES.filter(r => dripperMatch(r, dripperId)).length;
 }
 function visible(){
-  const wanted = state.dripper === "wave" ? state.waveSize : "all";
-  return RECIPES.filter(r =>
-    (state.dripper === "all" || r.dripper === state.dripper) &&
-    (state.method === "all" || r.method === state.method) &&
-    waveSizeMatches(r, wanted));
+  return RECIPES.filter(r => dripperMatch(r, state.dripper));
 }
 
 function fillSelect(id, items, current, onChange){
@@ -1767,56 +1812,86 @@ function fillSelect(id, items, current, onChange){
   el.value = current;
   el.onchange = () => onChange(el.value);
 }
-function renderControls(){
+function renderPickers(){
+  /* 제목 = 레시피 선택 (내 레시피는 원두별 그룹, 유명 레시피는 드리퍼 매칭만) */
+  const el = document.getElementById("selRecipe");
+  if (el){
+    const vis = visible();
+    let html = "";
+    MY_BEANS.forEach(b => {
+      const mine = vis.filter(r => r.personal && r.id.startsWith("my-" + b.id + "-"));
+      if (!mine.length) return;
+      html += '<optgroup label="내 원두 · ' + b.short + '">' +
+        mine.map(r => '<option value="' + r.id + '">' + r.name +
+          (r.vstatus === "검증됨" ? " ✓" : r.vstatus === "부분검증" ? " ◐" : "") + "</option>").join("") +
+        "</optgroup>";
+    });
+    const famous = vis.filter(r => !r.personal);
+    if (famous.length){
+      html += '<optgroup label="유명 레시피">' +
+        famous.map(r => '<option value="' + r.id + '">' + r.name + " — " + r.by + "</option>").join("") +
+        "</optgroup>";
+    }
+    el.innerHTML = html;
+    el.value = state.selected;
+    el.onchange = () => {
+      state.selected = el.value;
+      const nr = RECIPES.find(x => x.id === el.value);
+      if (nr){
+        if (nr.dose) state.dose = nr.dose;  /* 레시피가 설계된 원두량으로 맞추고, 필요하면 아래에서 바꿉니다 */
+        /* 레시피의 드리퍼로 선택을 맞춥니다 — 155·185 공용(wave)은 현재 선택을 유지 */
+        if (DRIPPERS.some(d => d.id === nr.dripper)) state.dripper = nr.dripper;
+      }
+      save(); stopTimer(); renderDetail();
+    };
+  }
+
   fillSelect("selGrinder",
     GRINDERS.map(g => ({ id:g.id, label:g.name })).concat([{ id:"custom", label:"내 그라인더 (직접 보정)" }]),
     state.grinder, v => { state.grinder = v; save(); refreshAll(); });
 
-  const cal = document.getElementById("calib");
-  cal.classList.toggle("on", state.grinder === "custom");
-  document.getElementById("calRef").value = state.custom.ref;
-  document.getElementById("calUm").value = state.custom.umPerClick;
-
-  fillSelect("selDripper", DRIPPERS.map(d => ({ id:d.id, label:d.label, n:countFor(d.id, state.method, d.id === "wave" ? state.waveSize : "all") })),
+  fillSelect("selDripper", DRIPPERS.map(d => ({ id:d.id, label:d.label, n:countFor(d.id) })),
     state.dripper, v => { state.dripper = v; ensureSelection(); save(); stopTimer(); refreshAll(); });
 
-  const waveCtl = document.getElementById("waveSizeCtl");
-  waveCtl.hidden = state.dripper !== "wave";
-  fillSelect("selWaveSize", WAVE_SIZES.map(s => ({ id:s.id, label:s.label, n:countFor("wave", state.method, s.id) })),
-    state.waveSize, v => { state.waveSize = v; ensureSelection(); save(); stopTimer(); refreshAll(); });
+  const doseEl = document.getElementById("selDose");
+  if (doseEl){
+    let dh = "";
+    for (let g = 10; g <= 60; g++) dh += '<option value="' + g + '"' + (g === state.dose ? " selected" : "") + ">" + g + "g</option>";
+    doseEl.innerHTML = dh;
+    doseEl.onchange = () => { state.dose = parseInt(doseEl.value, 10); save(); refreshAll(); };
+  }
 
-  fillSelect("selMethod", METHOD_LIST.map(m => ({ id:m.id, label:m.label, n:countFor(state.dripper, m.id, state.dripper === "wave" ? state.waveSize : "all") })),
-    state.method, v => { state.method = v; ensureSelection(); save(); stopTimer(); refreshAll(); });
-
+  /* 내 레시피는 원두가 고정이라 배전도·가공을 바꿀 수 없습니다 (잠금·복원은 renderDetail에서) */
+  const sel = byId(RECIPES, state.selected);
   fillSelect("selRoast", ROASTS.map(r => ({ id:r.id, label:r.label })),
     state.roast, v => { state.roast = v; save(); refreshAll(); });
-  document.getElementById("roastDot").style.background = roast().dot;
-
   fillSelect("selProc", PROCESSES.map(p => ({ id:p.id, label:p.label })),
     state.process, v => { state.process = v; save(); refreshAll(); });
+  const rSel = document.getElementById("selRoast"), pSel = document.getElementById("selProc");
+  if (rSel) rSel.disabled = !!sel.personal;
+  if (pSel) pSel.disabled = !!sel.personal;
+  if (pSel && sel.personal && sel.procUnknown) pSel.innerHTML = "<option selected>가공 미상</option>";
 
-  document.getElementById("doseVal").innerHTML = state.dose + "<span>g</span>";
-
-  /* 보정량은 레시피마다 다릅니다 — 지금 선택한 레시피 기준으로 보여줍니다 */
-  const sel = byId(RECIPES, state.selected), D = deltas(sel);
-  const adj = D.dR + D.dP;
-  document.getElementById("adjOut").innerHTML = signed(adj) + "μm" +
-    "<small>" + (adj ? sel.name + " 기준" : D.fitLabel + " 설계 · 그대로") + "</small>";
+  const cal = document.getElementById("calib");
+  if (cal){
+    cal.classList.toggle("on", state.grinder === "custom");
+    const cr = document.getElementById("calRef"), cu = document.getElementById("calUm");
+    cr.value = state.custom.ref; cu.value = state.custom.umPerClick;
+    cr.oninput = e => { const v = parseFloat(e.target.value); if (!isNaN(v)){ state.custom.ref = v; save(); renderDetail(); } };
+    cu.oninput = e => { const v = parseFloat(e.target.value); if (!isNaN(v) && v >= 5){ state.custom.umPerClick = v; save(); renderDetail(); } };
+  }
 }
 
-/* 모바일: 상세를 시트로 열고 닫기 */
-const isNarrow = () => window.innerWidth < 1080;
-function openSheet(){ if (isNarrow()) document.body.classList.add("sheet"); }
-function closeSheet(){ document.body.classList.remove("sheet"); }
+/* ESC — 추출 화면 닫기 (타이머는 유지) */
 window.addEventListener("keydown", e => {
-  if (e.key !== "Escape") return;
-  if (document.body.classList.contains("brewing")) setBrewing(false);  // 추출 화면 먼저 닫기 (타이머는 유지)
-  else closeSheet();
+  if (e.key === "Escape" && document.body.classList.contains("brewing")) setBrewing(false);  // 추출 화면 닫기 (타이머 유지)
 });
-window.addEventListener("resize", () => { if (!isNarrow()) closeSheet(); });
 function ensureSelection(){
   const vis = visible();
-  if (vis.length && !vis.some(r => r.id === state.selected)) state.selected = vis[0].id;
+  if (vis.length && !vis.some(r => r.id === state.selected)){
+    state.selected = vis[0].id;
+    if (vis[0].dose) state.dose = vis[0].dose;  /* 제목 셀렉트 경로와 동일하게 설계 원두량으로 */
+  }
   if (!vis.length) state.selected = "";
 }
 function mbadge(method){
@@ -1828,6 +1903,12 @@ function waveBadge(r){
   const key = r.waveSize || "unspecified";
   const basis = r.waveSizeBasis ? " · " + r.waveSizeBasis : "";
   return '<span class="meta-badge wave" title="사이즈 근거' + basis + '">' + (WAVE_SIZE_LABEL[key] || WAVE_SIZE_LABEL.unspecified) + "</span>";
+}
+function vBadge(r){
+  if (!r.personal) return "";
+  const map = { "검증됨":["v-ok","검증됨"], "부분검증":["v-part","부분검증"], "추천(미검증)":["v-todo","추천 · 미검증"] };
+  const m = map[r.vstatus] || ["v-todo", r.vstatus || "내 기록"];
+  return '<span class="vbadge ' + m[0] + '">' + m[1] + "</span>";
 }
 function fitBadge(r){
   const f = ROASTS[roastIdx(r.fit || "medium")];
@@ -1862,42 +1943,6 @@ function timeSub(r){
 }
 
 /* ── 리스트 ───────────────────────────────────────────── */
-function renderList(){
-  const wrap = document.getElementById("rows"), vis = visible();
-  wrap.textContent = "";
-  document.getElementById("listCount").textContent = vis.length + "개 · " + grinder().name + " 기준";
-  if (!vis.length){
-    wrap.innerHTML = '<p class="empty">해당하는 레시피가 없습니다. 드리퍼나 추출 방식을 「전체」로 바꿔보세요.</p>';
-    return;
-  }
-  vis.forEach(r => {
-    const gr = grindFor(r), c = ctxFor(r);
-    const b = document.createElement("button");
-    b.type = "button"; b.className = "row";
-    b.setAttribute("aria-current", state.selected === r.id ? "true" : "false");
-    b.innerHTML =
-      '<span class="row-main">' +
-        '<span class="row-top"><span class="row-tag">' + DRIPPER_LABEL[r.dripper] + "</span>" + waveBadge(r) + mbadge(r.method) + fitBadge(r) +
-        "</span>" +
-        '<span class="row-name">' + r.name + "</span>" +
-        '<span class="row-by"><b>' + r.by + "</b> · 1 : " + fmtRatio(r.ratio) + " → " + gram(c.water) +
-          (c.ice ? " + 얼음 " + gram(c.ice) : "") + (r.dilute ? " + 가수 " + gram(state.dose*r.dilute) : "") +
-        "</span>" +
-      "</span>" +
-      '<span class="row-dial"><span class="n">' + gr.text + '</span><br><span class="u">' +
-        gr.g.unit + " · " + Math.round(gr.um) + "μm</span></span>";
-    b.addEventListener("click", () => {
-      if (state.selected === r.id){
-        /* 같은 레시피 재탭 — 진행 중인 타이머를 지우지 않고 화면만 복귀 */
-        openSheet();
-        if (timer.running || timer.elapsed > 0) setBrewing(true);
-        return;
-      }
-      state.selected = r.id; save(); stopTimer(); renderList(); renderDetail(); openSheet();
-    });
-    wrap.appendChild(b);
-  });
-}
 
 /* ── 소리 ─────────────────────────────────────────────── */
 const snd = { ctx:null };
@@ -2150,9 +2195,6 @@ function setBrewing(on){
   if (on){
     const d = document.getElementById("detail");
     if (d) d.scrollTop = 0;
-  } else if (was && isNarrow()){
-    /* 좁은 화면에서 추출 화면을 닫으면 상세가 사라지지 않게 시트로 복귀 */
-    document.body.classList.add("sheet");
   }
   updateTimerButtons();
 }
@@ -2203,7 +2245,7 @@ function setPourStep(i, play){
       '<span class="pour-step">' + mmss(s.at) + " · " +
         (s.add > 0 ? "+" + gram(s.add) : (s.kind === "end" ? "종료" : "동작")) + "</span>" +
       '<p class="pour-name">' + (p ? p.label : s.label) + "</p>" +
-      '<p class="pour-desc">' + (p ? p.desc : "이 단계에는 물을 붓지 않습니다 — " + s.label + ".") + "</p>" +
+      '<p class="pour-desc">' + (p ? (PATTERN_SHORT[s.pat] || p.desc) : "이 단계에는 물을 붓지 않습니다 — " + s.label + ".") + "</p>" +
       (p ? '<p class="pour-context">' + context + "</p>" : "") +
       (p ? '<span class="pour-attrs">' +
         '<span class="attr">물줄기 <b>' + stream + "</b></span>" +
@@ -2227,9 +2269,22 @@ function setPourStep(i, play){
 /* ── 상세 ─────────────────────────────────────────────── */
 function renderDetail(){
   const el = document.getElementById("detail"), r = RECIPES.find(x => x.id === state.selected);
+  /* 내 레시피는 원두 고정 — 배전도·가공을 잠그되, 떠날 때 원래 선택을 복원합니다 */
+  if (r && r.personal){
+    if (!state.keepRoast){ state.keepRoast = state.roast; state.keepProc = state.process; }
+    state.roast = r.fit; state.process = r.fitProcess || "washed";
+  } else if (state.keepRoast){
+    state.roast = state.keepRoast; state.process = state.keepProc || "washed";
+    delete state.keepRoast; delete state.keepProc;
+  }
   if (!r || !visible().some(x => x.id === r.id)){
-    el.innerHTML = '<p class="empty" style="margin:20px">현재 필터에 맞는 레시피가 없습니다.</p>';
-    return;
+    if (!visible().length) state.dripper = "all";
+    ensureSelection(); save();
+    if (!RECIPES.find(x => x.id === state.selected)){
+      el.innerHTML = '<p class="empty" style="margin:20px">표시할 레시피가 없습니다.</p>';
+      return;
+    }
+    return renderDetail();
   }
   const c = ctxFor(r), steps = stepsFor(r), gr = grindFor(r), m = METHODS[r.method];
 
@@ -2318,13 +2373,23 @@ function renderDetail(){
   const finalRatio = ((c.water + c.ice + (r.dilute ? c.dose*r.dilute : 0)) / c.dose).toFixed(1);
 
   el.innerHTML =
-    '<div class="d-bar"><button type="button" class="d-back" id="dBack">← 목록</button>' +
-      '<span class="bar-name">' + r.name + "</span></div>" +
     '<div class="d-head">' +
-      '<div class="row-top"><span class="row-tag">' + DRIPPER_LABEL[r.dripper] + "</span>" + waveBadge(r) + mbadge(r.method) + fitBadge(r) + "</div>" +
-      "<h3>" + r.name + "</h3>" +
+      '<div class="row-top"><span class="row-tag">' + DRIPPER_LABEL[r.dripper] + "</span>" + waveBadge(r) + mbadge(r.method) + fitBadge(r) + vBadge(r) + "</div>" +
+      '<span class="selwrap titlewrap"><select id="selRecipe" aria-label="레시피 선택"></select></span>' +
       '<div class="d-by"><b>' + r.by + "</b> · " + r.role + "</div>" +
       '<p class="d-blurb">' + r.blurb + "</p>" +
+      '<div class="pickbar">' +
+        '<span class="selwrap"><select id="selGrinder" aria-label="그라인더"></select></span>' +
+        '<span class="selwrap"><select id="selDripper" aria-label="드리퍼"></select></span>' +
+        '<span class="selwrap"><select id="selDose" aria-label="원두량"></select></span>' +
+        '<span class="selwrap"><select id="selRoast" aria-label="배전도"></select></span>' +
+        '<span class="selwrap"><select id="selProc" aria-label="가공방식"></select></span>' +
+      "</div>" +
+      '<div class="calib" id="calib">' +
+        '<label>기준 눈금 <input type="number" id="calRef" step="0.5" min="0" max="200"></label>' +
+        '<label>클릭당 μm <input type="number" id="calUm" step="1" min="5" max="200"></label>' +
+        '<p class="note">평소 <b>중배전 워시드 드립</b>이 잘 나오는 눈금을 기준값에 넣으세요. 그 값이 900μm이 되고, 클릭당 μm으로 나머지를 계산합니다.</p>' +
+      "</div>" +
     "</div>" +
 
     '<div class="tiles">' +
@@ -2362,15 +2427,17 @@ function renderDetail(){
         '<div class="col-ticks">' + ticks + "</div>" +
         '<div class="col-read"><span id="colLive"><b>0g</b> / ' + gram(c.water) + "</span><span>누적 물량</span></div>" +
       "</div>" +
-      '<div class="pour" id="pourPanel"></div>' +
-      '<div class="tl" id="tl">' + tl + "</div>" +
+      '<div class="brewcols">' +
+        '<div class="pour" id="pourPanel"></div>' +
+        '<div class="tl" id="tl">' + tl + "</div>" +
+      "</div>" +
     "</div>" +
     finish +
     '<details class="sec fold" id="noteFold"' + (state.noteOpen ? " open" : "") + '><summary class="sec-label">브루잉 노트 · 팁 ' + r.tips.length + "개</summary>" +
       '<ul class="tips">' + r.tips.map(t => "<li>" + t + "</li>").join("") + "</ul>" +
       sourceBlock(r) + "</details>";
 
-  document.getElementById("dBack").addEventListener("click", closeSheet);
+  renderPickers();
   document.getElementById("noteFold").addEventListener("toggle", e => {
     state.noteOpen = e.target.open; save();   // 원두량·배전도를 바꿔도 펼침 상태 유지
   });
@@ -2436,28 +2503,36 @@ function renderAppendix(){
 
   document.getElementById("patGrid").innerHTML = Object.keys(PATTERNS).map(k => {
     const p = PATTERNS[k];
-    return '<div class="patcard">' + topSVG("v60", k, { cls:"pd", stroke:3.4 }) +
-      '<div><p class="pn">' + p.label + '</p><p class="pd2">물줄기 ' + p.stream + " · 슬러리 수위 " + p.height + "</p></div></div>";
+    return '<button type="button" class="patcard" title="누르면 붓는 궤적을 재생합니다">' + topSVG("v60", k, { cls:"pd", stroke:3.4 }) +
+      '<div><p class="pn">' + p.label + '</p><p class="pd2">물줄기 ' + p.stream + " · 슬러리 수위 " + p.height + '</p><p class="pd3">' + p.desc + "</p></div></button>";
   }).join("");
+  /* 카드를 누르면 그 패턴의 붓는 궤적을 처음부터 그려서 보여줍니다 */
+  document.querySelectorAll("#patGrid .patcard").forEach(card => {
+    card.addEventListener("click", () => {
+      const path = card.querySelector(".pd-path"), dot = card.querySelector(".pd-dot");
+      if (!path) return;
+      const L = path.getTotalLength(), DUR = 2200, t0 = performance.now();
+      path.style.strokeDasharray = L + " " + L;
+      if (card._anim) cancelAnimationFrame(card._anim);
+      const tick = now => {
+        const f = Math.min(1, (now - t0) / DUR);
+        path.style.strokeDashoffset = String(L * (1 - f));
+        if (dot){
+          const pt = path.getPointAtLength(L * f);
+          dot.setAttribute("cx", pt.x); dot.setAttribute("cy", pt.y);
+          dot.style.opacity = f < 1 ? "1" : "0";
+        }
+        if (f < 1) card._anim = requestAnimationFrame(tick);
+      };
+      card._anim = requestAnimationFrame(tick);
+    });
+  });
 }
 
-/* ── 입력 ─────────────────────────────────────────────── */
-function setDose(v){ state.dose = Math.max(10, Math.min(60, v)); save(); refreshAll(); }
-document.getElementById("doseDown").addEventListener("click", () => setDose(state.dose - 1));
-document.getElementById("doseUp").addEventListener("click", () => setDose(state.dose + 1));
-document.getElementById("calRef").addEventListener("input", e => {
-  const v = parseFloat(e.target.value);
-  if (!isNaN(v)){ state.custom.ref = v; save(); renderList(); renderDetail(); }
-});
-document.getElementById("calUm").addEventListener("input", e => {
-  const v = parseFloat(e.target.value);
-  if (!isNaN(v) && v >= 5){ state.custom.umPerClick = v; save(); renderList(); renderDetail(); }
-});
+/* ── 입력은 전부 픽커(renderPickers) 안에서 연결됩니다 ── */
 
 /* ── 시작 ─────────────────────────────────────────────── */
 ensureSelection();
-renderControls();
-renderList();
 renderDetail();
 renderAppendix();
 </script>
