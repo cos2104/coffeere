@@ -223,7 +223,10 @@ table{border-collapse:collapse}
 
 /* 누적 물량 바 */
 .column{margin:14px 0 4px}
-.col-track{position:relative;height:10px;border-radius:999px;background:var(--panel-3);border:1px solid var(--line);overflow:hidden}
+.col-track{position:relative;height:10px;border-radius:999px;background:var(--panel-3);border:1px solid var(--line);overflow:hidden;
+  cursor:pointer;touch-action:none}
+.col-track:hover{border-color:var(--ember-line)}
+@media(pointer:coarse){.col-track{height:16px}}
 .col-fill{position:absolute;inset:0 auto 0 0;width:0;background:linear-gradient(90deg,var(--ember),var(--ember-2));
   transition:width .12s linear}
 .col-ticks{position:relative;height:9px;margin-top:4px}
@@ -2016,6 +2019,18 @@ function toggleTimer(){
 }
 const elapsedNow = () => timer.running ? timer.elapsed + (performance.now() - timer.start)/1000 : timer.elapsed;
 
+/* 원하는 시각으로 이동 — 돌던 중이면 그 시각부터 계속, 멈춰 있으면 그 시각에 멈춰 둡니다 */
+function seekTo(t){
+  const r = byId(RECIPES, state.selected), steps = stepsFor(r);
+  const total = Math.max(r.total || 0, steps.length ? steps[steps.length - 1].at : 0);
+  t = Math.max(0, Math.min(total, t));
+  timer.elapsed = t;
+  if (timer.running) timer.start = performance.now();
+  else preview.playing = false;
+  shownStep = -1; resetSounds();
+  paintTimer();
+}
+
 function liveWater(steps, t){
   let w = 0;
   for (const s of steps){
@@ -2414,7 +2429,7 @@ function renderDetail(){
       "</dl>" + flagNote + refNote + bandNote +
     "</div>" + (doseNote ? '<div class="sec" style="padding-bottom:0;border-bottom:0">' + doseNote + "</div>" : "") +
 
-    '<div class="sec" id="brewSec"><p class="sec-label"><span>추출 순서</span><span>단계를 누르면 붓는 모양이 바뀝니다</span></p>' +
+    '<div class="sec" id="brewSec"><p class="sec-label"><span>추출 순서</span><span>단계나 물량 바를 누르면 그 시점으로 이동합니다</span></p>' +
       '<div class="timer"><span class="clock" id="clock">0:00</span>' +
         '<span class="tbtns">' +
           '<button type="button" class="tbtn primary" id="tPlay">▶ 시작</button>' +
@@ -2466,8 +2481,40 @@ function renderDetail(){
     const b = e.target.closest(".step");
     if (!b) return;
     document.querySelectorAll("#tl .step").forEach(n => n.setAttribute("aria-pressed", n === b ? "true" : "false"));
-    setPourStep(parseInt(b.dataset.i, 10), !timer.running);
+    /* 단계를 누르면 타이머가 그 시점으로 이동합니다 (멈춰 있으면 그 시각에서 대기) */
+    seekTo(steps[parseInt(b.dataset.i, 10)].at);
   });
+
+  /* 시간 슬라이드: 클릭·터치·드래그로 이동 — 채움이 누적 물량이므로 물량을 시간으로 역산해
+     누른 자리와 채움 끝이 정확히 일치하게 합니다 (물을 붓지 않는 구간은 그 직전 시각으로) */
+  const track = document.querySelector(".col-track");
+  if (track){
+    const seekFromEvent = ev => {
+      const rect = track.getBoundingClientRect();
+      const f = Math.max(0, Math.min(1, (ev.clientX - rect.left) / rect.width));
+      const target = f * c.water;
+      let lo = 0, hi = Math.max(r.total || 0, steps[steps.length - 1].at, 1);
+      for (let k = 0; k < 40; k++){
+        const mid = (lo + hi) / 2;
+        if (liveWater(steps, mid) < target) lo = mid; else hi = mid;
+      }
+      seekTo(f >= 1 ? hi : (f <= 0 ? 0 : hi));
+    };
+    track.addEventListener("pointerdown", ev => {
+      ev.preventDefault();
+      try { track.setPointerCapture(ev.pointerId); } catch (e2) {}
+      seekFromEvent(ev);
+      const mv = e2 => seekFromEvent(e2);
+      const up = () => {
+        track.removeEventListener("pointermove", mv);
+        track.removeEventListener("pointerup", up);
+        track.removeEventListener("pointercancel", up);
+      };
+      track.addEventListener("pointermove", mv);
+      track.addEventListener("pointerup", up);
+      track.addEventListener("pointercancel", up);
+    });
+  }
 
   updateTimerButtons();
   shownStep = -1;                       // 재렌더로 비워진 붓기 패널을 paintTimer가 다시 채우게
