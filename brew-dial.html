@@ -1984,6 +1984,7 @@ let preview = { playing:false, t0:0, dur:3 };
 let view = { idx:-1, bk:"cone", spoutY:20, prevPx:0, targetPx:0, dur:3, hasPat:false };
 let fired = { step:-1, ticks:{}, stops:{} };
 let raf = 0, shownStep = -1;
+let scrub = { on:false };   /* 슬라이더 드래그 중 — 사운드 억제용 */
 
 function ensureLoop(){ if (!raf) raf = requestAnimationFrame(tickAll); }
 function tickAll(){
@@ -2127,8 +2128,9 @@ function paintTimer(){
   });
 
   const w = liveWater(steps, t);
+  const tTotal = Math.max(r.total || 0, steps.length ? steps[steps.length - 1].at : 0, 1);
   const fill = document.getElementById("colFill");
-  if (fill) fill.style.width = Math.min(100, (w / c.water)*100) + "%";
+  if (fill) fill.style.width = Math.min(100, (t / tTotal)*100) + "%";
   const live = document.getElementById("colLive");
   if (live) live.innerHTML = "<b>" + gram(w) + "</b> / " + gram(c.water);
 
@@ -2165,8 +2167,8 @@ function paintTimer(){
     renderPourFrame(p, on, waterPxAt(steps, t, r, isImm));
   }
 
-  /* 소리 */
-  if (timer.running){
+  /* 소리 — 슬라이더를 끄는 동안은 울리지 않습니다 */
+  if (timer.running && !scrub.on){
     const cs = steps[shownStep];
     if (curIdx >= 0 && curIdx !== fired.step){
       fired.step = curIdx;
@@ -2351,8 +2353,9 @@ function renderDetail(){
       "배)</b>이라 물량은 비율대로 맞지만 <b>붓는 간격과 총 시간은 원 레시피 값 그대로</b>입니다. 배출이 크면 드리퍼도 큰 사이즈로 바꾸고 시간도 함께 늘려야 합니다.</span></div>"
     : "";
 
-  const ticks = steps.filter(s => s.add > 0)
-    .map(s => '<i style="left:' + Math.min(100, (s.to/c.water)*100) + '%"></i>').join("");
+  const tTotal = Math.max(r.total || 0, steps.length ? steps[steps.length - 1].at : 0, 1);
+  const ticks = steps.filter(s => s.at > 0)
+    .map(s => '<i style="left:' + Math.min(100, (s.at/tTotal)*100) + '%"></i>').join("");
 
   const tl = steps.map((s, i) => {
     const kind = s.kind === "bloom" ? "bloom" : s.kind === "pour" ? "pour" : "act";
@@ -2440,7 +2443,7 @@ function renderDetail(){
         '<span class="t-now" id="tNow">시작을 누르면 순서대로 따라갑니다.</span></div>' +
       '<div class="column"><div class="col-track"><div class="col-fill" id="colFill"></div></div>' +
         '<div class="col-ticks">' + ticks + "</div>" +
-        '<div class="col-read"><span id="colLive"><b>0g</b> / ' + gram(c.water) + "</span><span>누적 물량</span></div>" +
+        '<div class="col-read"><span id="colLive"><b>0g</b> / ' + gram(c.water) + "</span><span>누적 물량 · 바를 끌면 이동</span></div>" +
       "</div>" +
       '<div class="brewcols">' +
         '<div class="pour" id="pourPanel"></div>' +
@@ -2485,27 +2488,33 @@ function renderDetail(){
     seekTo(steps[parseInt(b.dataset.i, 10)].at);
   });
 
-  /* 시간 슬라이드: 클릭·터치·드래그로 이동 — 채움이 누적 물량이므로 물량을 시간으로 역산해
-     누른 자리와 채움 끝이 정확히 일치하게 합니다 (물을 붓지 않는 구간은 그 직전 시각으로) */
+  /* 시간 슬라이드: 바 전체 = 전체 추출 시간. 누른 비율 × 총 시간으로 곧장 이동하고,
+     드래그는 프레임당 한 번만 반영해 버벅임을 없앱니다 */
   const track = document.querySelector(".col-track");
   if (track){
-    const seekFromEvent = ev => {
+    const tTot = Math.max(r.total || 0, steps.length ? steps[steps.length - 1].at : 0, 1);
+    let pendF = null, pendRaf = 0;
+    const applyPend = () => {
+      pendRaf = 0;
+      if (pendF == null) return;
+      const f = pendF; pendF = null;
+      seekTo(f * tTot);
+    };
+    const queueSeek = ev => {
       const rect = track.getBoundingClientRect();
-      const f = Math.max(0, Math.min(1, (ev.clientX - rect.left) / rect.width));
-      const target = f * c.water;
-      let lo = 0, hi = Math.max(r.total || 0, steps[steps.length - 1].at, 1);
-      for (let k = 0; k < 40; k++){
-        const mid = (lo + hi) / 2;
-        if (liveWater(steps, mid) < target) lo = mid; else hi = mid;
-      }
-      seekTo(f >= 1 ? hi : (f <= 0 ? 0 : hi));
+      pendF = Math.max(0, Math.min(1, (ev.clientX - rect.left) / rect.width));
+      if (!pendRaf) pendRaf = requestAnimationFrame(applyPend);
     };
     track.addEventListener("pointerdown", ev => {
       ev.preventDefault();
       try { track.setPointerCapture(ev.pointerId); } catch (e2) {}
-      seekFromEvent(ev);
-      const mv = e2 => seekFromEvent(e2);
+      scrub.on = true;
+      queueSeek(ev);
+      const mv = e2 => queueSeek(e2);
       const up = () => {
+        scrub.on = false;
+        if (pendRaf){ cancelAnimationFrame(pendRaf); pendRaf = 0; }
+        applyPend();                       // 놓는 순간의 위치를 확정 (숨은 탭에서도 동작)
         track.removeEventListener("pointermove", mv);
         track.removeEventListener("pointerup", up);
         track.removeEventListener("pointercancel", up);
