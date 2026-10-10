@@ -414,7 +414,7 @@ body.brewing .t-step b{font-size:clamp(22px,4.5vw,30px)}
 body.brewing .t-step i{font-size:15px}
 body.brewing .t-next{font-size:15px;color:var(--ink)}
 body.brewing .t-next b{color:var(--ember)}
-body.brewing .pour{background:transparent;border-color:var(--line-soft)}
+body.brewing .pour{background:transparent;border-color:var(--line-soft);transition:transform .5s cubic-bezier(.3,.9,.3,1);will-change:transform}
 body.brewing .pd,body.brewing .sv{width:clamp(118px,23vw,168px);height:clamp(118px,23vw,168px)}
 body.brewing .pour-name{font-size:23px}
 body.brewing .pour-desc{font-size:13.5px}
@@ -1945,8 +1945,7 @@ function resetSounds(){ fired = { step:-1, ticks:{}, stops:{} }; }
 function stopTimer(){
   timer.running = false; timer.elapsed = 0; shownStep = -1; resetSounds();
   preview.playing = false;
-  dropWake(); clearInterval(timer.iv); timer.iv = 0;
-  if (typeof setBrewing === "function") setBrewing(false);
+  dropWake(); clearInterval(timer.iv); timer.iv = 0;   /* 추출 화면은 닫기 버튼·ESC로만 나갑니다 */
 }
 function toggleTimer(){
   if (timer.running){
@@ -2101,7 +2100,13 @@ function paintTimer(){
       stepEl.firstElementChild.textContent = top;
       stepEl.lastElementChild.textContent = bot;
       stepEl.lastElementChild.style.display = bot ? "" : "none";
-      nextEl.innerHTML = next ? "다음까지 <b>" + mmss(Math.max(0, next.at - t)) + "</b>" : "마지막 단계";
+      if (document.body.classList.contains("brewing") && next){
+        /* 추출 화면: 다음까지 남은 시간을 크게, 진행 시간을 작게 */
+        clock.textContent = mmss(Math.max(0, next.at - t));
+        nextEl.innerHTML = "진행 <b>" + mmss(t) + "</b>";
+      } else {
+        nextEl.innerHTML = next ? "다음까지 <b>" + mmss(Math.max(0, next.at - t)) + "</b>" : "마지막 단계 · 진행 <b>" + mmss(t) + "</b>";
+      }
     }
   }
 
@@ -2109,6 +2114,7 @@ function paintTimer(){
   const isLive = timer.running || timer.elapsed > 0;
   if (isLive && curIdx >= 0 && curIdx !== shownStep){
     setPourStep(curIdx, false);
+    alignPourCard(curIdx);
     if (document.body.classList.contains("brewing") && !REDUCE){
       const cur = document.querySelector('#tl .step[data-i="' + curIdx + '"]');
       if (cur) cur.scrollIntoView({ block:"nearest", behavior:"smooth" });
@@ -2165,12 +2171,67 @@ document.addEventListener("visibilitychange", () => {
 });
 
 /* 추출 화면(집중 모드) — 타이머가 돌 때 추출 순서만 크게 보여줍니다 */
+/* 추출 화면(넓은 2단)에서 오른쪽 드립 카드가 현재 단계 줄 높이를 따라 내려갑니다 */
+function alignPourCard(idx){
+  if (!document.body.classList.contains("brewing") || window.innerWidth < 900) return;
+  const pour = document.querySelector("#brewSec .pour"), tlEl = document.getElementById("tl");
+  const row = document.querySelector('#tl .step[data-i="' + idx + '"]');
+  if (!pour || !row || !tlEl) return;
+  const curT = parseFloat((pour.style.transform.match(/-?[\d.]+/) || [0])[0]) || 0;
+  const naturalTop = pour.getBoundingClientRect().top - curT;
+  let ty = row.getBoundingClientRect().top - naturalTop;
+  const maxTy = tlEl.getBoundingClientRect().bottom - pour.offsetHeight - naturalTop;
+  ty = Math.max(0, Math.min(ty, Math.max(0, maxTy)));
+  pour.style.transform = "translateY(" + ty.toFixed(0) + "px)";
+}
+
+/* 추출 화면 전환 — 추출 순서 위·아래 내용이 접히며 사라지고, 나올 때 다시 펼쳐집니다 */
+function brewCollapsibles(){
+  const out = [], detail = document.getElementById("detail");
+  if (detail) Array.prototype.forEach.call(detail.children, el => { if (el.id !== "brewSec") out.push(el); });
+  const wrap = detail ? detail.parentElement : null;
+  if (wrap) Array.prototype.forEach.call(wrap.children, el => { if (el !== detail) out.push(el); });
+  return out;
+}
+let brewAnim = 0;
 function setBrewing(on){
-  const was = document.body.classList.contains("brewing");
-  document.body.classList.toggle("brewing", !!on);
+  on = !!on;
+  const body = document.body;
+  if (body.classList.contains("brewing") === on){ updateTimerButtons(); return; }
+  clearTimeout(brewAnim);
+  const els = brewCollapsibles();
+  if (REDUCE || !els.length){
+    body.classList.toggle("brewing", on);
+    const d0 = document.getElementById("detail"); if (on && d0) d0.scrollTop = 0;
+    updateTimerButtons(); return;
+  }
   if (on){
-    const d = document.getElementById("detail");
-    if (d) d.scrollTop = 0;
+    els.forEach(el => {
+      el.style.height = el.offsetHeight + "px"; el.style.overflow = "hidden";
+      void el.offsetHeight;
+      el.style.transition = "height .35s ease, opacity .25s ease, margin .35s ease, padding .35s ease";
+      el.style.height = "0px"; el.style.opacity = "0";
+      el.style.marginTop = "0"; el.style.marginBottom = "0";
+      el.style.paddingTop = "0"; el.style.paddingBottom = "0";
+    });
+    brewAnim = setTimeout(() => {
+      body.classList.add("brewing");
+      els.forEach(el => { el.style.cssText = ""; });
+      const d1 = document.getElementById("detail"); if (d1) d1.scrollTop = 0;
+      alignPourCard(shownStep);
+      updateTimerButtons();
+    }, 360);
+  } else {
+    body.classList.remove("brewing");
+    const pour = document.querySelector("#brewSec .pour"); if (pour) pour.style.transform = "";
+    els.forEach(el => {
+      const h = el.offsetHeight;
+      el.style.height = "0px"; el.style.overflow = "hidden"; el.style.opacity = "0";
+      void el.offsetHeight;
+      el.style.transition = "height .35s ease, opacity .3s ease";
+      el.style.height = h + "px"; el.style.opacity = "1";
+    });
+    brewAnim = setTimeout(() => { els.forEach(el => { el.style.cssText = ""; }); }, 400);
   }
   updateTimerButtons();
 }
@@ -2427,7 +2488,7 @@ function renderDetail(){
   }
   document.getElementById("tPlay").addEventListener("click", toggleTimer);
   document.getElementById("tReset").addEventListener("click", () => {
-    stopTimer(); setBrewing(false); updateTimerButtons(); paintTimer();
+    stopTimer(); updateTimerButtons(); paintTimer();
     const f = steps.findIndex(s => s.pat); setPourStep(f < 0 ? 0 : f, true);
   });
   document.getElementById("tSound").addEventListener("click", () => {
@@ -2438,8 +2499,12 @@ function renderDetail(){
     const b = e.target.closest(".step");
     if (!b) return;
     document.querySelectorAll("#tl .step").forEach(n => n.setAttribute("aria-pressed", n === b ? "true" : "false"));
-    /* 단계를 누르면 타이머가 그 시점으로 이동합니다 (멈춰 있으면 그 시각에서 대기) */
-    seekTo(steps[parseInt(b.dataset.i, 10)].at);
+    /* 줄 안에서 누른 가로 위치만큼 그 구간의 시각으로 — 왼쪽 끝 = 단계 시작 */
+    const i2 = parseInt(b.dataset.i, 10), st = steps[i2];
+    const nextAt = steps[i2 + 1] ? steps[i2 + 1].at : Math.max(r.total || 0, steps[steps.length - 1].at);
+    const rect = b.getBoundingClientRect();
+    const f = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+    seekTo(st.at + f * Math.max(0, nextAt - st.at));
   });
 
   /* 시간 슬라이드: 바 전체 = 전체 추출 시간. 누른 비율 × 총 시간으로 곧장 이동하고,
