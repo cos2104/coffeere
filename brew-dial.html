@@ -218,7 +218,7 @@ table{border-collapse:collapse}
 /* 타이머 */
 .timer{display:flex;align-items:center;gap:14px;flex-wrap:wrap;
   background:var(--panel-2);border:1px solid var(--line);border-radius:var(--r-s);padding:13px 15px}
-.clock{font-family:var(--ff-mono);font-size:34px;font-weight:600;font-variant-numeric:tabular-nums;letter-spacing:-.01em;line-height:1}
+.clock{font-family:var(--ff-mono);font-size:clamp(38px,6vw,58px);font-weight:600;font-variant-numeric:tabular-nums;letter-spacing:-.01em;line-height:1}
 .clock.run{color:var(--ember)}
 .tbtns{display:flex;gap:7px;margin-left:auto}
 .tbtn{border:1px solid var(--line);border-radius:999px;padding:7px 15px;font-size:12.5px;font-weight:500;
@@ -226,9 +226,10 @@ table{border-collapse:collapse}
 .tbtn:hover{border-color:var(--ember-line);color:var(--ember)}
 .tbtn.primary{background:var(--ember-dim);border-color:var(--ember-line);color:var(--ember)}
 .t-step{display:flex;flex-direction:column;align-items:flex-end;line-height:1.12;min-width:36px}
-.t-step b{font-family:var(--ff-mono);font-size:19px;font-weight:600;color:var(--ember)}
-.t-step i{font-style:normal;font-size:12px;color:var(--ink-2);font-weight:300}
-.t-next{font-family:var(--ff-mono);font-size:12.5px;color:var(--ink-2);font-variant-numeric:tabular-nums}
+.t-step[hidden]{display:none}
+.t-step b{font-family:var(--ff-mono);font-size:clamp(19px,2.6vw,25px);font-weight:600;color:var(--ember)}
+.t-step i{font-style:normal;font-size:13.5px;color:var(--ink-2);font-weight:300}
+.t-next{font-family:var(--ff-mono);font-size:14px;color:var(--ink-2);font-variant-numeric:tabular-nums}
 .t-next b{color:var(--ink);font-weight:600}
 
 /* 누적 물량 바 */
@@ -243,15 +244,15 @@ table{border-collapse:collapse}
 .col-ticks i{position:absolute;top:0;width:1px;height:5px;background:var(--line);transform:translateX(-.5px)}
 .col-read{display:flex;justify-content:space-between;font-family:var(--ff-mono);font-size:11.5px;color:var(--ink-3);
   font-variant-numeric:tabular-nums;margin-top:2px}
-.col-read b{color:var(--ink);font-weight:600;font-size:13px}
+.col-read b{color:var(--ink);font-weight:600;font-size:14px}
 
 /* ── 물 붓는 모양 : 두 뷰 ──────────────────────────────── */
-.pour{display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap;
+.pour{display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap;transition:transform .5s cubic-bezier(.3,.9,.3,1);will-change:transform;
   background:var(--panel-2);border:1px solid var(--line);border-radius:var(--r-s);padding:14px 15px}
 .views{display:flex;gap:10px;flex:none}
 .view{display:flex;flex-direction:column;gap:5px;align-items:center;margin:0}
 .view figcaption{font-family:var(--ff-mono);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-3)}
-.pd,.sv{width:116px;height:116px;display:block;background:var(--panel);border:1px solid var(--line-soft);border-radius:8px}
+.pd,.sv{width:clamp(116px,15vw,160px);height:clamp(116px,15vw,160px);display:block;background:var(--panel);border:1px solid var(--line-soft);border-radius:8px}
 .pd-rim{fill:none;stroke:var(--line);stroke-width:1.6}
 .pd-bed{fill:var(--panel-3);stroke:var(--line-soft);stroke-width:1}
 .pd-rib{fill:none;stroke:var(--line-soft);stroke-width:1;stroke-linecap:round}
@@ -272,7 +273,7 @@ table{border-collapse:collapse}
 .sv-hide{opacity:0}
 .pour-info{display:flex;flex-direction:column;gap:8px;min-width:0;flex:1 1 200px}
 .pour-step{font-family:var(--ff-mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--ember)}
-.pour-name{font-family:var(--ff-display);font-size:20px;font-weight:700;line-height:1.25;margin:0}
+.pour-name{font-family:var(--ff-display);font-size:22px;font-weight:700;line-height:1.25;margin:0}
 .pour-desc{margin:0;font-size:13px;color:var(--ink-2);font-weight:300;line-height:1.55}
 .pour-context{margin:0;padding:7px 9px;border-left:2px solid var(--ember);background:var(--ember-dim);
   color:var(--ink-2);font-size:12px;line-height:1.5;border-radius:0 6px 6px 0}
@@ -286,7 +287,15 @@ table{border-collapse:collapse}
 /* 타임라인 */
 /* 넓은 화면에서는 드립 모습(왼쪽) · 추출 순서(오른쪽) 2단 */
 .brewcols{display:grid;gap:12px;grid-template-columns:1fr;align-items:start}
-@media(min-width:900px){.brewcols{grid-template-columns:minmax(0,1.05fr) minmax(0,1fr)}}
+/* 넓은 화면: 왼쪽 = 시계·버튼·물량 바·추출 순서, 오른쪽 = 드립 모양 위 + 설명 아래 — 메인·추출 화면 동일 */
+@media(min-width:900px){
+  #brewSec{display:grid;grid-template-columns:1fr 1fr;gap:10px 28px;align-items:start}
+  #brewSec > .sec-label{grid-column:1/-1}
+  #brewSec .brewcols{display:contents}
+  #brewSec .pour{grid-column:2;grid-row:2 / span 3;flex-direction:column;align-items:stretch}
+  #brewSec .pour .views{justify-content:center}
+  #brewSec .tl{grid-column:1}
+}
 .tl{display:flex;flex-direction:column;gap:2px}
 .step{position:relative;overflow:hidden;display:grid;grid-template-columns:50px 1fr auto;gap:11px;align-items:center;width:100%;text-align:left;
   padding:9px 10px;border-radius:var(--r-s);border:1px solid transparent;transition:background .15s,border-color .15s}
@@ -348,7 +357,6 @@ table{border-collapse:collapse}
   .step{grid-template-columns:44px 1fr auto;gap:8px;padding:8px 7px}
   .step .lb{font-size:13px}
   .timer{padding:11px 12px;gap:10px}
-  .clock{font-size:29px}
   .appendix-body{padding:0 15px 18px}
   details.appendix > summary{padding:14px 15px}
 }
@@ -406,31 +414,11 @@ body.brewing{overflow:hidden}
 body.brewing .detail{position:fixed;inset:0;z-index:90;border:0;border-radius:0;max-height:none;
   overflow-y:auto;background:var(--bg);transform:none;visibility:visible;box-shadow:none}
 body.brewing .detail > *:not(#brewSec){display:none}
-body.brewing #brewSec{display:block;max-width:820px;margin:0 auto;padding:24px 20px 64px;border:0}
+body.brewing #brewSec{max-width:1240px;margin:0 auto;padding:24px 24px 64px;border:0}
 body.brewing #brewSec .sec-label span:last-child{display:none}
 body.brewing .timer{background:transparent;border:0;padding:10px 0 4px}
-body.brewing .clock{font-size:clamp(46px,11vw,72px)}
-body.brewing .t-step b{font-size:clamp(22px,4.5vw,30px)}
-body.brewing .t-step i{font-size:15px}
-body.brewing .t-next{font-size:15px;color:var(--ink)}
-body.brewing .t-next b{color:var(--ember)}
-body.brewing .pour{background:transparent;border-color:var(--line-soft);transition:transform .5s cubic-bezier(.3,.9,.3,1);will-change:transform}
-body.brewing .pd,body.brewing .sv{width:clamp(118px,23vw,168px);height:clamp(118px,23vw,168px)}
-body.brewing .pour-name{font-size:23px}
-body.brewing .pour-desc{font-size:13.5px}
+body.brewing .pour{background:transparent}
 body.brewing .replay{display:none}
-body.brewing .step{padding:10px 10px}
-body.brewing .step.done{opacity:.2}
-body.brewing .col-read b{font-size:15px}
-/* 넓은 화면의 추출 화면: 왼쪽 = 시계·버튼·물량 바·추출 순서, 오른쪽 = 드립 모양 위 + 설명 아래 */
-@media(min-width:900px){
-  body.brewing #brewSec{display:grid;grid-template-columns:1fr 1fr;gap:10px 28px;max-width:1240px;align-items:start}
-  body.brewing #brewSec > .sec-label{grid-column:1/-1}
-  body.brewing #brewSec .brewcols{display:contents}
-  body.brewing #brewSec .pour{grid-column:2;grid-row:2 / span 3;flex-direction:column;align-items:stretch}
-  body.brewing #brewSec .pour .views{justify-content:center}
-  body.brewing #brewSec .tl{grid-column:1}
-}
 
 /* 접히는 브루잉 노트 */
 details.fold > summary{cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;gap:10px}
@@ -1946,6 +1934,8 @@ function stopTimer(){
   timer.running = false; timer.elapsed = 0; shownStep = -1; resetSounds();
   preview.playing = false;
   dropWake(); clearInterval(timer.iv); timer.iv = 0;   /* 추출 화면은 닫기 버튼·ESC로만 나갑니다 */
+  const pour0 = document.querySelector("#brewSec .pour");
+  if (pour0) pour0.style.transform = "";
 }
 function toggleTimer(){
   if (timer.running){
@@ -2173,7 +2163,7 @@ document.addEventListener("visibilitychange", () => {
 /* 추출 화면(집중 모드) — 타이머가 돌 때 추출 순서만 크게 보여줍니다 */
 /* 추출 화면(넓은 2단)에서 오른쪽 드립 카드가 현재 단계 줄 높이를 따라 내려갑니다 */
 function alignPourCard(idx){
-  if (!document.body.classList.contains("brewing") || window.innerWidth < 900) return;
+  if (window.innerWidth < 900) return;
   const pour = document.querySelector("#brewSec .pour"), tlEl = document.getElementById("tl");
   const row = document.querySelector('#tl .step[data-i="' + idx + '"]');
   if (!pour || !row || !tlEl) return;
@@ -2458,7 +2448,7 @@ function renderDetail(){
           '<button type="button" class="tbtn" id="bmExit">✕ 닫기</button></span></div>' +
       '<div class="column"><div class="col-track"><div class="col-fill" id="colFill"></div></div>' +
         '<div class="col-ticks">' + ticks + "</div>" +
-        '<div class="col-read"><span id="colLive"><b>0g</b> / ' + gram(c.water) + "</span><span>누적 물량 · 바를 끌면 이동</span></div>" +
+        '<div class="col-read"><span id="colLive"><b>0g</b> / ' + gram(c.water) + "</span><span>누적 물량</span></div>" +
       "</div>" +
       '<div class="brewcols">' +
         '<div class="pour" id="pourPanel"></div>' +
