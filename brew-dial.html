@@ -63,14 +63,6 @@ table{border-collapse:collapse}
 
 .wrap{max-width:1340px;margin:0 auto;padding:28px 20px 72px;display:flex;flex-direction:column;gap:22px}
 
-/* ── 마스트헤드 ──────────────────────────────────────────── */
-.mast{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:14px 24px;
-  padding-bottom:18px;border-bottom:1px solid var(--line)}
-.mast h1{font-family:var(--ff-display);font-weight:700;font-size:clamp(30px,4.6vw,46px);
-  margin:2px 0 0;letter-spacing:.01em;line-height:1.1;text-wrap:balance}
-.eyebrow{font-family:var(--ff-mono);font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--ember)}
-.mast p{margin:0;max-width:44ch;color:var(--ink-2);font-size:14px;font-weight:300}
-
 /* ── 선택 컨트롤 ─────────────────────────────────────────── */
 .selwrap{position:relative;display:block}
 .selwrap::after{content:"";position:absolute;right:12px;top:50%;width:6px;height:6px;
@@ -180,6 +172,7 @@ table{border-collapse:collapse}
   .d-blurb{font-size:13px}
 }
 .d-head .row-top{margin-bottom:2px}
+.brand{font-family:var(--ff-display);font-weight:700;font-size:13px;color:var(--ember);letter-spacing:.04em;margin-right:6px}
 .d-head .row-tag{color:var(--ember)}
 .d-by{font-size:13px;color:var(--ink-2);font-weight:300}
 .d-by b{font-weight:500;color:var(--ink)}
@@ -232,8 +225,11 @@ table{border-collapse:collapse}
   background:var(--panel);transition:border-color .15s,color .15s}
 .tbtn:hover{border-color:var(--ember-line);color:var(--ember)}
 .tbtn.primary{background:var(--ember-dim);border-color:var(--ember-line);color:var(--ember)}
-.t-now{font-size:12.5px;color:var(--ink-2);font-weight:300;flex-basis:100%;font-family:var(--ff-mono)}
-.t-now b{color:var(--ink);font-weight:500}
+.t-step{display:flex;flex-direction:column;align-items:flex-end;line-height:1.12;min-width:36px}
+.t-step b{font-family:var(--ff-mono);font-size:19px;font-weight:600;color:var(--ember)}
+.t-step i{font-style:normal;font-size:12px;color:var(--ink-2);font-weight:300}
+.t-next{font-family:var(--ff-mono);font-size:12.5px;color:var(--ink-2);font-variant-numeric:tabular-nums}
+.t-next b{color:var(--ink);font-weight:600}
 
 /* 누적 물량 바 */
 .column{margin:14px 0 4px}
@@ -292,7 +288,7 @@ table{border-collapse:collapse}
 .brewcols{display:grid;gap:12px;grid-template-columns:1fr;align-items:start}
 @media(min-width:900px){.brewcols{grid-template-columns:minmax(0,1.05fr) minmax(0,1fr)}}
 .tl{display:flex;flex-direction:column;gap:2px}
-.step{display:grid;grid-template-columns:50px 1fr auto;gap:11px;align-items:center;width:100%;text-align:left;
+.step{position:relative;overflow:hidden;display:grid;grid-template-columns:50px 1fr auto;gap:11px;align-items:center;width:100%;text-align:left;
   padding:9px 10px;border-radius:var(--r-s);border:1px solid transparent;transition:background .15s,border-color .15s}
 .step:hover{background:var(--panel-2)}
 .step .at{font-family:var(--ff-mono);font-size:13px;color:var(--ink-3);font-variant-numeric:tabular-nums}
@@ -307,7 +303,8 @@ table{border-collapse:collapse}
 .step .amt{font-family:var(--ff-mono);font-size:13px;font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}
 .step .amt b{font-weight:600}
 .step .amt .cum{color:var(--ink-3);font-size:11.5px}
-.step.on{background:var(--ember-dim);border-color:var(--ember-line)}
+.step::before{content:"";position:absolute;inset:0;width:var(--p,0%);background:var(--ember-dim);pointer-events:none}
+.step.on{border-color:var(--ember-line)}
 .step.done{opacity:.5}
 .step[aria-pressed="true"]{border-color:var(--ember-line)}
 .step.act .amt{color:var(--ink-3);font-size:11.5px}
@@ -342,8 +339,6 @@ table{border-collapse:collapse}
 /* 모바일 여백·크기 조정 */
 @media(max-width:640px){
   .wrap{padding:18px 14px 56px;gap:16px}
-  .mast{padding-bottom:14px}
-  .mast p{font-size:13px}
   .sec{padding:15px 15px}
   .d-head{padding:16px 15px 14px}
   .tile{padding:11px 12px}
@@ -415,8 +410,10 @@ body.brewing #brewSec{display:block;max-width:820px;margin:0 auto;padding:24px 2
 body.brewing #brewSec .sec-label span:last-child{display:none}
 body.brewing .timer{background:transparent;border:0;padding:10px 0 4px}
 body.brewing .clock{font-size:clamp(46px,11vw,72px)}
-body.brewing .t-now{font-size:16px;color:var(--ink)}
-body.brewing .t-now b{color:var(--ember)}
+body.brewing .t-step b{font-size:clamp(22px,4.5vw,30px)}
+body.brewing .t-step i{font-size:15px}
+body.brewing .t-next{font-size:15px;color:var(--ink)}
+body.brewing .t-next b{color:var(--ember)}
 body.brewing .pour{background:transparent;border-color:var(--line-soft)}
 body.brewing .pd,body.brewing .sv{width:clamp(118px,23vw,168px);height:clamp(118px,23vw,168px)}
 body.brewing .pour-name{font-size:23px}
@@ -425,6 +422,15 @@ body.brewing .replay{display:none}
 body.brewing .step{padding:10px 10px}
 body.brewing .step.done{opacity:.2}
 body.brewing .col-read b{font-size:15px}
+/* 넓은 화면의 추출 화면: 왼쪽 = 시계·버튼·물량 바·추출 순서, 오른쪽 = 드립 모양 위 + 설명 아래 */
+@media(min-width:900px){
+  body.brewing #brewSec{display:grid;grid-template-columns:1fr 1fr;gap:10px 28px;max-width:1240px;align-items:start}
+  body.brewing #brewSec > .sec-label{grid-column:1/-1}
+  body.brewing #brewSec .brewcols{display:contents}
+  body.brewing #brewSec .pour{grid-column:2;grid-row:2 / span 3;flex-direction:column;align-items:stretch}
+  body.brewing #brewSec .pour .views{justify-content:center}
+  body.brewing #brewSec .tl{grid-column:1}
+}
 
 /* 접히는 브루잉 노트 */
 details.fold > summary{cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;gap:10px}
@@ -440,14 +446,6 @@ details.fold[open] > summary.sec-label{margin:0 0 12px}
 </style>
 
 <div class="wrap">
-
-  <header class="mast">
-    <div>
-      <div class="eyebrow">Grind · Dripper · Pour</div>
-      <h1>브루 다이얼</h1>
-    </div>
-    <p>그라인더와 드리퍼를 고르면 유명 바리스타 레시피가 <b>내 그라인더 클릭수</b>로 환산됩니다. 단계마다 <b>위·옆에서 본 붓기 모양</b>과 핸드드립·푸어오버 구분까지.</p>
-  </header>
 
   <section class="detail" id="detail" aria-live="polite"></section>
 
@@ -2072,27 +2070,38 @@ function paintTimer(){
 
   let curIdx = -1;
   steps.forEach((s, i) => { if (t >= s.at) curIdx = i; });
+  const tTotal = Math.max(r.total || 0, steps.length ? steps[steps.length - 1].at : 0, 1);
   document.querySelectorAll("#tl .step").forEach((n, i) => {
     n.classList.toggle("on", i === curIdx && t > 0);
     n.classList.toggle("done", t > 0 && i < curIdx);
+    /* 위에서 아래로 — 각 줄이 자기 구간만큼 왼쪽부터 차오릅니다 */
+    const st = steps[i], nextAt = steps[i + 1] ? steps[i + 1].at : tTotal;
+    const p2 = t <= st.at ? 0 : t >= nextAt ? 1 : (t - st.at) / Math.max(1, nextAt - st.at);
+    n.style.setProperty("--p", (p2 * 100).toFixed(1) + "%");
   });
 
   const w = liveWater(steps, t);
-  const tTotal = Math.max(r.total || 0, steps.length ? steps[steps.length - 1].at : 0, 1);
   const fill = document.getElementById("colFill");
   if (fill) fill.style.width = Math.min(100, (t / tTotal)*100) + "%";
   const live = document.getElementById("colLive");
   if (live) live.innerHTML = "<b>" + gram(w) + "</b> / " + gram(c.water);
 
-  const now = document.getElementById("tNow");
-  if (now){
-    if (t === 0) now.innerHTML = "시작을 누르면 추출 순서를 따라갑니다.";
-    else {
+  /* 시계 왼쪽에 차수(위)·동작(아래), 오른쪽에 다음까지 남은 시간 */
+  const stepEl = document.getElementById("tStep"), nextEl = document.getElementById("tNext");
+  if (stepEl && nextEl){
+    if (t === 0){
+      stepEl.hidden = true;
+      nextEl.textContent = "시작을 누르면 추출 순서를 따라갑니다.";
+    } else {
       const cur = steps[Math.max(0, curIdx)], next = steps[curIdx + 1];
-      const s = steps[curIdx];
-      const pouring = s && s.pat && t >= s.at && t < s.at + (s.dur || 0);
-      now.innerHTML = (pouring ? "붓는 중 · <b>" : "지금 · <b>") + cur.label + "</b>" +
-        (next ? "　다음까지 " + mmss(Math.max(0, next.at - t)) : "　마지막 단계");
+      const nm = String(cur.label).match(/^(\d+)차/);
+      const top = nm ? nm[1] + "차" : cur.kind === "bloom" ? "뜸" : cur.kind === "end" ? "완료" : cur.kind === "act" ? "동작" : "붓기";
+      const bot = nm ? (cur.kind === "bloom" ? "뜸" : "붓기") : "";
+      stepEl.hidden = false;
+      stepEl.firstElementChild.textContent = top;
+      stepEl.lastElementChild.textContent = bot;
+      stepEl.lastElementChild.style.display = bot ? "" : "none";
+      nextEl.innerHTML = next ? "다음까지 <b>" + mmss(Math.max(0, next.at - t)) + "</b>" : "마지막 단계";
     }
   }
 
@@ -2347,7 +2356,7 @@ function renderDetail(){
 
   el.innerHTML =
     '<div class="d-head">' +
-      '<div class="row-top">' + waveBadge(r) + mbadge(r.method) + fitBadge(r) + vBadge(r) + "</div>" +
+      '<div class="row-top"><span class="brand">브루 다이얼</span>' + waveBadge(r) + mbadge(r.method) + fitBadge(r) + vBadge(r) + "</div>" +
       '<div class="titlerow">' +
         '<span class="selwrap titlewrap"><select id="selDripper" aria-label="드리퍼 선택"></select></span>' +
         '<span class="selwrap titlewrap"><select id="selRecipe" aria-label="레시피 선택"></select></span>' +
@@ -2376,14 +2385,16 @@ function renderDetail(){
     "</div>" +
 
     '<div class="sec" id="brewSec"><p class="sec-label"><span>추출 순서</span><span>단계나 물량 바를 누르면 그 시점으로 이동합니다</span></p>' +
-      '<div class="timer"><span class="clock" id="clock">0:00</span>' +
+      '<div class="timer">' +
+        '<span class="t-step" id="tStep" hidden><b></b><i></i></span>' +
+        '<span class="clock" id="clock">0:00</span>' +
+        '<span class="t-next" id="tNext">시작을 누르면 순서대로 따라갑니다.</span>' +
         '<span class="tbtns">' +
           '<button type="button" class="tbtn primary" id="tPlay">▶ 시작</button>' +
           '<button type="button" class="tbtn" id="tReset">■ 리셋</button>' +
           '<button type="button" class="tbtn" id="tSound" aria-pressed="true">🔊 소리 켬</button>' +
           '<button type="button" class="tbtn" id="bmEnter">⛶ 추출 화면</button>' +
-          '<button type="button" class="tbtn" id="bmExit">✕ 닫기</button></span>' +
-        '<span class="t-now" id="tNow">시작을 누르면 순서대로 따라갑니다.</span></div>' +
+          '<button type="button" class="tbtn" id="bmExit">✕ 닫기</button></span></div>' +
       '<div class="column"><div class="col-track"><div class="col-fill" id="colFill"></div></div>' +
         '<div class="col-ticks">' + ticks + "</div>" +
         '<div class="col-read"><span id="colLive"><b>0g</b> / ' + gram(c.water) + "</span><span>누적 물량 · 바를 끌면 이동</span></div>" +
