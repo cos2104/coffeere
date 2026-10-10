@@ -595,13 +595,15 @@ const PROCESSES = [
   { id:"decaf",     label:"디카페인",      d:88, note:"3–4클릭 굵게" }
 ];
 
+/* 내가 쓰는 드리퍼(V60 · 스위치 · 스텐 · 칼리타)를 위로, 나머지는 아래로 */
 const DRIPPERS = [
-  { id:"all", label:"전체 드리퍼" }, { id:"v60", label:"V60" },
+  { id:"all", label:"전체 드리퍼" },
+  { id:"v60", label:"V60" }, { id:"switch", label:"하리오 스위치" },
+  { id:"steel", label:"스텐 이중망 (빈플러스)" },
   { id:"wave155", label:"칼리타 웨이브 155" }, { id:"wave185", label:"칼리타 웨이브 185" },
   { id:"origami", label:"오리가미" }, { id:"kono", label:"코노" }, { id:"nel", label:"융드립" },
-  { id:"switch", label:"하리오 스위치" }, { id:"clever", label:"클레버" }, { id:"chemex", label:"케멕스" },
-  { id:"frenchpress", label:"프렌치프레스" }, { id:"aeropress", label:"에어로프레스" },
-  { id:"steel", label:"스텐 이중망 (빈플러스)" }
+  { id:"clever", label:"클레버" }, { id:"chemex", label:"케멕스" },
+  { id:"frenchpress", label:"프렌치프레스" }, { id:"aeropress", label:"에어로프레스" }
 ];
 /* 'wave'는 155·185 공용 레시피 — 어느 쪽을 골라도 보입니다 */
 const dripperMatch = (r, want) =>
