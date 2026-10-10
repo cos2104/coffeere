@@ -410,15 +410,7 @@ details.appendix>summary:hover{color:var(--ink)}
 #bmExit{display:none}
 body.brewing #bmEnter{display:none}
 body.brewing #bmExit{display:inline-block}
-body.brewing{overflow:hidden}
-body.brewing .detail{position:fixed;inset:0;z-index:90;border:0;border-radius:0;max-height:none;
-  overflow-y:auto;background:var(--bg);transform:none;visibility:visible;box-shadow:none}
-body.brewing .detail > *:not(#brewSec){display:none}
-body.brewing #brewSec{max-width:1240px;margin:0 auto;padding:24px 24px 64px;border:0}
 body.brewing #brewSec .sec-label span:last-child{display:none}
-body.brewing .timer{background:transparent;border:0;padding:10px 0 4px}
-body.brewing .pour{background:transparent}
-body.brewing .replay{display:none}
 
 /* 접히는 브루잉 노트 */
 details.fold > summary{cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;gap:10px}
@@ -2184,44 +2176,39 @@ function brewCollapsibles(){
   return out;
 }
 let brewAnim = 0;
+/* 접힌 상태를 즉시 적용 — 추출 중 재렌더로 새 요소가 생겨도 접힘을 유지합니다 */
+function collapseNow(el){
+  el.style.height = "0px"; el.style.overflow = "hidden"; el.style.opacity = "0";
+  el.style.marginTop = "0"; el.style.marginBottom = "0";
+  el.style.paddingTop = "0"; el.style.paddingBottom = "0";
+}
 function setBrewing(on){
   on = !!on;
   const body = document.body;
   if (body.classList.contains("brewing") === on){ updateTimerButtons(); return; }
   clearTimeout(brewAnim);
   const els = brewCollapsibles();
-  if (REDUCE || !els.length){
-    body.classList.toggle("brewing", on);
-    const d0 = document.getElementById("detail"); if (on && d0) d0.scrollTop = 0;
-    updateTimerButtons(); return;
-  }
+  body.classList.toggle("brewing", on);   /* 오버레이가 아니라 같은 화면 — 클래스는 버튼·표기 전환용 */
   if (on){
     els.forEach(el => {
       el.style.height = el.offsetHeight + "px"; el.style.overflow = "hidden";
       void el.offsetHeight;
-      el.style.transition = "height .35s ease, opacity .25s ease, margin .35s ease, padding .35s ease";
+      if (!REDUCE) el.style.transition = "height .35s ease, opacity .25s ease, margin .35s ease, padding .35s ease";
       el.style.height = "0px"; el.style.opacity = "0";
       el.style.marginTop = "0"; el.style.marginBottom = "0";
       el.style.paddingTop = "0"; el.style.paddingBottom = "0";
     });
-    brewAnim = setTimeout(() => {
-      body.classList.add("brewing");
-      els.forEach(el => { el.style.cssText = ""; });
-      const d1 = document.getElementById("detail"); if (d1) d1.scrollTop = 0;
-      alignPourCard(shownStep);
-      updateTimerButtons();
-    }, 360);
+    window.scrollTo({ top: 0, behavior: REDUCE ? "auto" : "smooth" });
+    brewAnim = setTimeout(() => alignPourCard(shownStep), REDUCE ? 0 : 380);
   } else {
-    body.classList.remove("brewing");
     const pour = document.querySelector("#brewSec .pour"); if (pour) pour.style.transform = "";
     els.forEach(el => {
-      const h = el.offsetHeight;
-      el.style.height = "0px"; el.style.overflow = "hidden"; el.style.opacity = "0";
-      void el.offsetHeight;
-      el.style.transition = "height .35s ease, opacity .3s ease";
-      el.style.height = h + "px"; el.style.opacity = "1";
+      el.style.transition = REDUCE ? "" : "height .35s ease, opacity .3s ease, margin .35s ease, padding .35s ease";
+      el.style.height = el.scrollHeight + "px"; el.style.opacity = "1";
+      el.style.marginTop = ""; el.style.marginBottom = "";
+      el.style.paddingTop = ""; el.style.paddingBottom = "";
     });
-    brewAnim = setTimeout(() => { els.forEach(el => { el.style.cssText = ""; }); }, 400);
+    brewAnim = setTimeout(() => { els.forEach(el => { el.style.cssText = ""; }); }, REDUCE ? 0 : 400);
   }
   updateTimerButtons();
 }
@@ -2461,6 +2448,7 @@ function renderDetail(){
       sourceBlock(r) + "</details>";
 
   renderPickers();
+  if (document.body.classList.contains("brewing")) brewCollapsibles().forEach(collapseNow);
   document.getElementById("noteFold").addEventListener("toggle", e => {
     state.noteOpen = e.target.open; save();   // 원두량·배전도를 바꿔도 펼침 상태 유지
   });
