@@ -88,13 +88,12 @@ table{border-collapse:collapse}
 .selwrap option{background:var(--panel);color:var(--ink)}
 .selwrap optgroup{background:var(--panel);color:var(--ink-3);font-style:normal}
 
-/* 드리퍼 선택 — 제목 위 작은 눈썹줄 */
-.driptitle{display:inline-block;margin:8px 0 0}
-.driptitle::after{right:4px;top:55%}
-.driptitle select{font-family:var(--ff-mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;
-  color:var(--ember);background:transparent;border:0;border-radius:0;padding:2px 24px 2px 0;width:auto;cursor:pointer}
-.driptitle select:hover{border:0;color:var(--ember-2)}
-.driptitle select:focus-visible{box-shadow:none;outline:1px dashed var(--ember-line);outline-offset:3px}
+/* 제목 줄 = 드리퍼 선택(반) + 레시피 선택(반) */
+.titlerow{display:flex;gap:14px;margin:7px 0 2px}
+.titlerow .selwrap{flex:1 1 50%;min-width:0}
+.titlerow .titlewrap{margin:0}
+.titlerow .titlewrap select{font-size:clamp(16px,2.6vw,21px)}
+@media(max-width:560px){.titlerow{flex-direction:column;gap:4px}}
 
 /* 레시피 제목이 곧 선택 — 제목을 눌러 레시피를 고릅니다 */
 .titlewrap{display:block;margin:7px 0 2px}
@@ -113,6 +112,13 @@ table{border-collapse:collapse}
 .pickbar .selwrap{display:inline-block}
 .pickbar select{width:auto;max-width:70vw;font-size:12.5px;padding:6px 25px 6px 10px;border-radius:999px}
 .pickbar select:disabled{opacity:.55;cursor:default}
+.grindchip{display:inline-flex;align-items:center;gap:5px;font-size:12.5px;color:var(--ember);
+  border:1px solid var(--ember-line);background:var(--ember-dim);border-radius:999px;padding:6px 12px;white-space:nowrap}
+.grindchip b{font-family:var(--ff-mono);font-weight:600}
+.grindchip small{font-size:10.5px;color:var(--ink-3);font-weight:300}
+.grindchip:hover{border-color:var(--ember)}
+.grindchip[aria-expanded="true"]{background:var(--ember);color:var(--bg)}
+.grindchip[aria-expanded="true"] small{color:var(--bg);opacity:.75}
 .selwrap:has(select:disabled)::after{opacity:.35;border-color:var(--ink-3)}
 .selwrap:has(select:disabled):hover::after{border-color:var(--ink-3);transform:translateY(-70%) rotate(45deg)}
 /* iOS는 16px 미만 폼 컨트롤 포커스 시 화면을 자동 확대하므로 터치 기기에선 16px로 */
@@ -296,6 +302,7 @@ table{border-collapse:collapse}
 .step.pour .lb .k,.step.bloom .lb .k{background:var(--ember)}
 .step.bloom .lb .k{box-shadow:0 0 0 3px var(--ember-dim)}
 .step .pat{font-family:var(--ff-mono);font-size:10.5px;color:var(--ink-3);padding-left:14px;letter-spacing:.04em}
+.pat-in{font-family:var(--ff-mono);font-size:10.5px;color:var(--ink-3);letter-spacing:.03em;font-weight:400}
 .step .trigger{font-family:var(--ff-sans);font-size:10.5px;color:var(--water);padding-left:14px;line-height:1.4}
 .step .amt{font-family:var(--ff-mono);font-size:13px;font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}
 .step .amt b{font-weight:600}
@@ -1418,6 +1425,7 @@ function buildPersonal(){
         id:"my-" + b.id + "-" + rec.k,
         personal:true, vstatus:rec.v,
         name:b.short + " · " + (MY_DRIP_SHORT[dr] || dr) + " " + (rec.s === "ice" ? "아이스" : "핫") + (rec.g !== 20 ? " " + rec.g + "g" : ""),
+        optLabel:b.short + " " + (rec.s === "ice" ? "아이스" : "핫") + (rec.g !== 20 ? " " + rec.g + "g" : ""),
         by:b.roaster, role:b.name + " — " + b.roast + " · " + (b.proc || "가공 미상") + (b.owned ? "" : " · 미보유"),
         dripper:dr, method:(rec.bm || "").indexOf("침출") === 0 ? "immersion" : (rec.bm || "").indexOf("하이브리드") === 0 ? "hybrid" : "pourover",
         fit:MY_ROAST[b.roast] || "medium", fitProcess:MY_PROC[b.proc] || "washed", procUnknown:!b.proc,
@@ -1761,7 +1769,7 @@ function fillSelect(id, items, current, onChange){
   if (!el) return;
   el.innerHTML = items.map(i =>
     '<option value="' + i.id + '"' + (i.id === current ? " selected" : "") + (i.n === 0 ? " disabled" : "") + ">" +
-    i.label + (i.n != null ? " (" + i.n + ")" : "") + "</option>").join("");
+    i.label + "</option>").join("");
   el.value = current;
   el.onchange = () => onChange(el.value);
 }
@@ -1775,14 +1783,17 @@ function renderPickers(){
       const mine = vis.filter(r => r.personal && r.id.startsWith("my-" + b.id + "-"));
       if (!mine.length) return;
       html += '<optgroup label="내 원두 · ' + b.short + '">' +
-        mine.map(r => '<option value="' + r.id + '">' + r.name +
+        mine.map(r => '<option value="' + r.id + '">' + (r.optLabel || r.name) +
           (r.vstatus === "검증됨" ? " ✓" : r.vstatus === "부분검증" ? " ◐" : "") + "</option>").join("") +
         "</optgroup>";
     });
     const famous = vis.filter(r => !r.personal);
     if (famous.length){
+      /* 만든 사람만 — 같은 사람의 레시피가 둘 이상 보일 때만 레시피명을 덧붙입니다 */
+      const nBy = {};
+      famous.forEach(r => { nBy[r.by] = (nBy[r.by] || 0) + 1; });
       html += '<optgroup label="유명 레시피">' +
-        famous.map(r => '<option value="' + r.id + '">' + r.name + " — " + r.by + "</option>").join("") +
+        famous.map(r => '<option value="' + r.id + '">' + (nBy[r.by] > 1 ? r.by + " · " + r.name : r.by) + "</option>").join("") +
         "</optgroup>";
     }
     el.innerHTML = html;
@@ -2179,9 +2190,9 @@ function setPourStep(i, play){
   const flow = typeof s.flowRateGps === "number" ? fmtFlow(s.flowRateGps) + "g/s"
     : Array.isArray(s.flowRateRangeGps) ? fmtFlow(s.flowRateRangeGps[0]) + "–" + fmtFlow(s.flowRateRangeGps[1]) + "g/s"
     : (s.flowDescriptor || "");
-  const context = s.label +
-    (s.triggerText ? "<br><b>시작 조건</b> · " + s.triggerText : "") +
-    (s.approx ? "<br><b>표시 주의</b> · 원문의 조건/범위를 타이머용으로 근사한 단계" : "");
+  /* 라벨·시각·물량은 추출 순서 줄에 이미 있으므로 조건·주의만 남깁니다 */
+  const context = (s.triggerText ? "<b>시작 조건</b> · " + s.triggerText : "") +
+    (s.approx ? (s.triggerText ? "<br>" : "") + "<b>표시 주의</b> · 원문의 조건/범위를 타이머용으로 근사한 단계" : "");
   /* 단계 시작 시점의 수위 = 직전 붓기가 남긴 높이. 물은 이제부터 차오릅니다 */
   const prevPx = s.prevHeight ? (isImm ? 24 : (WATER_H[s.prevHeight] || 10)) : 0;
   const targetPx = p ? (isImm ? 24 : (WATER_H[height] || 10)) : prevPx;
@@ -2196,17 +2207,14 @@ function setPourStep(i, play){
         "<figcaption>옆에서</figcaption></figure>" +
     "</div>" +
     '<div class="pour-info">' +
-      '<span class="pour-step">' + mmss(s.at) + " · " +
-        (s.add > 0 ? "+" + gram(s.add) : (s.kind === "end" ? "종료" : "동작")) + "</span>" +
       '<p class="pour-name">' + (p ? p.label : s.label) + "</p>" +
       '<p class="pour-desc">' + (p ? (PATTERN_SHORT[s.pat] || p.desc) : "이 단계에는 물을 붓지 않습니다 — " + s.label + ".") + "</p>" +
-      (p ? '<p class="pour-context">' + context + "</p>" : "") +
+      (p && context ? '<p class="pour-context">' + context + "</p>" : "") +
       (p ? '<span class="pour-attrs">' +
         '<span class="attr">물줄기 <b>' + stream + "</b></span>" +
         (flow ? '<span class="attr">유량 <b>' + flow + "</b></span>" : "") +
         '<span class="attr">슬러리 수위 <b>' + height + "</b></span>" +
         '<span class="attr">붓는 높이 <b>' + (r.dropCm || m.dropCm) + "</b></span>" +
-        '<span class="attr">붓는 시간 <b>' + (s.durEstimated || s.approx ? "약 " : "") + (s.dur || 3) + "초</b></span>" +
       "</span>" : "") +
       (p ? '<button type="button" class="replay" id="pdReplay">↻ 다시 재생</button>' : "") +
     "</div>";
@@ -2292,11 +2300,19 @@ function renderDetail(){
     const amt = s.add > 0 ? "<b>+" + gram(s.add) + '</b><br><span class="cum">누적 ' + gram(s.to) + "</span>"
       : (s.kind === "end" ? "종료" : "동작");
     const pl = s.pat && PATTERNS[s.pat] ? PATTERNS[s.pat].label : "";
-    const durText = s.dur ? (s.durEstimated || s.approx ? "약 " : "") + s.dur + "초" : "";
+    /* 라벨·패턴·시간을 한 줄로 합칩니다 — "2차 나선 붓기 · 13초" */
+    let line = String(s.label);
+    if (pl){
+      if (/^\d+차 붓기$/.test(line)) line = line.replace(" 붓기", "") + " " + pl + " 붓기";
+      else if (line === "뜸") line = pl;
+      else if (line.indexOf("뜸") === 0 && pl.indexOf("뜸") === 0) line = pl + line.slice(1);
+      else if (line.indexOf(pl) < 0) line += ' <span class="pat-in">· ' + pl + "</span>";
+    }
+    if (s.pat && s.dur && line.indexOf("초") < 0)
+      line += ' <span class="pat-in">· ' + (s.durEstimated || s.approx ? "약 " : "") + s.dur + "초</span>";
     return '<button type="button" class="step ' + kind + '" data-i="' + i + '" aria-pressed="false">' +
       '<span class="at">' + mmss(s.at) + "</span>" +
-      '<span class="lb"><span class="top"><span class="k"></span>' + s.label + "</span>" +
-        (pl ? '<span class="pat">' + pl + " 붓기" + (durText ? " · " + durText : "") + (s.approx ? "" : "") + "</span>" : "") +
+      '<span class="lb"><span class="top"><span class="k"></span>' + line + "</span>" +
         (s.triggerText ? '<span class="trigger">조건 · ' + s.triggerText + "</span>" : "") +
       "</span><span class=\"amt\">" + amt + "</span></button>";
   }).join("");
@@ -2318,17 +2334,27 @@ function renderDetail(){
         " = 총 " + gram(c.water + c.ice) + "</span></span></div></div>";
   }
 
-  const finalRatio = ((c.water + c.ice + (r.dilute ? c.dose*r.dilute : 0)) / c.dose).toFixed(1);
+  /* 온도는 정보 줄에 — 보정이 있으면 괄호로 덧붙입니다 */
+  const ts0 = tempShift(r);
+  const tempInfo = "물 <b>" + tempFor(r) + "</b>" +
+    (r.tempFixed ? "" : (ts0 && !r.personal ? " (" + roast().label + " 보정 " + (ts0 > 0 ? "+" : "") + ts0 + "℃)" : ""));
+  /* 만든 사람은 제목 셀렉트에 이미 있으므로 정보 줄에는 레시피명·이력·온도만 */
+  const infoHead = (r.personal
+    ? "<b>" + r.by + "</b> · " + r.role
+    : "<b>" + r.name + "</b> — " + r.role) + " · " + tempInfo;
 
   el.innerHTML =
     '<div class="d-head">' +
       '<div class="row-top">' + waveBadge(r) + mbadge(r.method) + fitBadge(r) + vBadge(r) + "</div>" +
-      '<span class="selwrap driptitle"><select id="selDripper" aria-label="드리퍼 선택"></select></span>' +
-      '<span class="selwrap titlewrap"><select id="selRecipe" aria-label="레시피 선택"></select></span>' +
-      '<div class="d-by"><b>' + r.by + "</b> · " + r.role + "</div>" +
-      '<p class="d-blurb">' + r.blurb + "</p>" +
+      '<div class="titlerow">' +
+        '<span class="selwrap titlewrap"><select id="selDripper" aria-label="드리퍼 선택"></select></span>' +
+        '<span class="selwrap titlewrap"><select id="selRecipe" aria-label="레시피 선택"></select></span>' +
+      "</div>" +
+      '<p class="d-blurb">' + infoHead + (r.blurb ? "<br>" + r.blurb : "") + "</p>" +
       '<div class="pickbar">' +
         '<span class="selwrap"><select id="selGrinder" aria-label="그라인더"></select></span>' +
+        '<button type="button" class="grindchip" id="grindTile" aria-expanded="false" aria-controls="grindPanel">' +
+          "분쇄 <b>" + gr.text + "</b> <small>" + Math.round(gr.um) + "μm</small></button>" +
         '<span class="selwrap"><select id="selRoast" aria-label="배전도"></select></span>' +
         '<span class="selwrap"><select id="selProc" aria-label="가공방식"></select></span>' +
       "</div>" +
@@ -2337,20 +2363,6 @@ function renderDetail(){
         '<label>클릭당 μm <input type="number" id="calUm" step="1" min="5" max="200"></label>' +
         '<p class="note">평소 <b>중배전 워시드 드립</b>이 잘 나오는 눈금을 기준값에 넣으세요. 그 값이 900μm이 되고, 클릭당 μm으로 나머지를 계산합니다.</p>' +
       "</div>" +
-    "</div>" +
-
-    '<div class="tiles">' +
-      tile("원두 · 물", state.dose + "g / " + gram(c.water),
-           (c.ice ? "얼음 " + gram(c.ice) + " · " : "") +
-           (r.dilute ? "물 더하기 " + gram(c.dose*r.dilute) + " · " : "") + "최종 1 : " + finalRatio) +
-      tile("물 온도", tempFor(r),
-           r.tempFixed ? "배전도 무관 · 끓는 물"
-           : tempShift(r) ? roast().label + "에 맞춰 " + (tempShift(r) > 0 ? "+" : "") + tempShift(r) + "℃"
-           : "원 레시피 그대로") +
-      tile(timeKey(r), timeValue(r), timeSub(r)) +
-      '<button type="button" class="tile tile-btn" id="grindTile" aria-expanded="false" aria-controls="grindPanel">' +
-        '<span class="k">분쇄</span><span class="v">' + gr.text + '</span><span class="s">' +
-        gr.g.unit + " · " + Math.round(gr.um) + "μm</span></button>" +
     "</div>" +
     '<div class="tilepanel" id="grindPanel">' +
       '<dl class="dialinfo">' +
