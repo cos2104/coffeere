@@ -197,8 +197,9 @@ table{border-collapse:collapse}
 
 .sec{padding:18px 20px;border-bottom:1px solid var(--line-soft)}
 .sec:last-child{border-bottom:0}
-.sec-label{font-family:var(--ff-mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-3);
+.sec-label{font-family:var(--ff-mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink-3);flex-wrap:wrap;
   margin:0 0 12px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.sec-label > span:first-child{white-space:nowrap}
 
 /* 분쇄 계기 */
 .gauge{display:flex;gap:16px;align-items:center;flex-wrap:wrap;
@@ -220,8 +221,8 @@ table{border-collapse:collapse}
   background:var(--panel-2);border:1px solid var(--line);border-radius:var(--r-s);padding:13px 15px}
 .clock{font-family:var(--ff-mono);font-size:clamp(38px,6vw,58px);font-weight:600;font-variant-numeric:tabular-nums;letter-spacing:-.01em;line-height:1}
 .clock.run{color:var(--ember)}
-.tbtns{display:flex;gap:7px;margin-left:auto}
-.tbtn{border:1px solid var(--line);border-radius:999px;padding:7px 15px;font-size:12.5px;font-weight:500;
+.tbtns{display:flex;gap:7px;margin-left:auto;flex-wrap:wrap;justify-content:flex-end}
+.tbtn{border:1px solid var(--line);border-radius:999px;padding:7px 15px;font-size:12.5px;font-weight:500;white-space:nowrap;
   background:var(--panel);transition:border-color .15s,color .15s}
 .tbtn:hover{border-color:var(--ember-line);color:var(--ember)}
 .tbtn.primary{background:var(--ember-dim);border-color:var(--ember-line);color:var(--ember)}
@@ -307,7 +308,7 @@ table{border-collapse:collapse}
 .step.pour .lb .k,.step.bloom .lb .k{background:var(--ember)}
 .step.bloom .lb .k{box-shadow:0 0 0 3px var(--ember-dim)}
 .step .pat{font-family:var(--ff-mono);font-size:10.5px;color:var(--ink-3);padding-left:14px;letter-spacing:.04em}
-.pat-in{font-family:var(--ff-mono);font-size:10.5px;color:var(--ink-3);letter-spacing:.03em;font-weight:400}
+.pat-in{font-family:var(--ff-mono);font-size:10.5px;color:var(--ink-3);letter-spacing:.03em;font-weight:400;white-space:nowrap}
 .step .trigger{font-family:var(--ff-sans);font-size:10.5px;color:var(--water);padding-left:14px;line-height:1.4}
 .step .amt{font-family:var(--ff-mono);font-size:13px;font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}
 .step .amt b{font-weight:600}
@@ -1815,6 +1816,14 @@ function renderPickers(){
   }
 }
 
+/* 화면 폭이 바뀌면 드립 카드 위치 보정 — 좁아지면 원위치, 넓어지면 현재 단계로 */
+window.addEventListener("resize", () => {
+  const pour = document.querySelector("#brewSec .pour");
+  if (!pour) return;
+  if (window.innerWidth < 900) pour.style.transform = "";
+  else alignPourCard(shownStep);
+});
+
 /* ESC — 추출 화면 닫기 (타이머는 유지) */
 window.addEventListener("keydown", e => {
   if (e.key === "Escape" && document.body.classList.contains("brewing")) setBrewing(false);  // 추출 화면 닫기 (타이머 유지)
@@ -2355,7 +2364,8 @@ function renderDetail(){
       if (/^\d+차 붓기$/.test(line)) line = line.replace(" 붓기", "") + " " + pl + " 붓기";
       else if (line === "뜸") line = pl;
       else if (line.indexOf("뜸") === 0 && pl.indexOf("뜸") === 0) line = pl + line.slice(1);
-      else if (line.indexOf(pl) < 0) line += ' <span class="pat-in">· ' + pl + "</span>";
+      else if (line.indexOf(pl) < 0 && !(pl.indexOf("뜸") === 0 && line.indexOf("뜸") >= 0))
+        line += ' <span class="pat-in">· ' + pl + "</span>";
     }
     if (s.pat && s.dur && line.indexOf("초") < 0)
       line += ' <span class="pat-in">· ' + (s.durEstimated || s.approx ? "약 " : "") + s.dur + "초</span>";
