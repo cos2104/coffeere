@@ -250,7 +250,7 @@ table{border-collapse:collapse}
 /* ── 물 붓는 모양 : 두 뷰 ──────────────────────────────── */
 .pour{display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap;cursor:pointer;transition:transform .5s cubic-bezier(.3,.9,.3,1);will-change:transform;
   background:var(--panel-2);border:1px solid var(--line);border-radius:var(--r-s);padding:14px 15px}
-.views{display:flex;gap:10px;flex:none}
+.views{display:flex;gap:10px;flex:none;flex-wrap:wrap;align-items:stretch}
 .view{display:flex;flex-direction:column;gap:5px;align-items:center;margin:0}
 .view figcaption{font-family:var(--ff-mono);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--ink-3)}
 .pd,.sv{width:clamp(116px,15vw,160px);height:clamp(116px,15vw,160px);display:block;background:var(--panel);border:1px solid var(--line-soft);border-radius:8px}
@@ -279,6 +279,8 @@ table{border-collapse:collapse}
 .pour-context{margin:0;padding:7px 9px;border-left:2px solid var(--ember);background:var(--ember-dim);
   color:var(--ink-2);font-size:12px;line-height:1.5;border-radius:0 6px 6px 0}
 .pour-attrs{display:flex;flex-wrap:wrap;gap:6px;margin-top:2px}
+.attrcol{display:flex;flex-direction:column;gap:5px;justify-content:center;align-self:stretch;padding-bottom:18px}
+.attrcol .attr{white-space:nowrap}
 .attr{font-family:var(--ff-mono);font-size:11px;border:1px solid var(--line);border-radius:999px;
   padding:3px 9px;color:var(--ink-2);background:var(--panel);display:inline-flex;gap:6px}
 .attr b{color:var(--ink);font-weight:600}
@@ -362,7 +364,7 @@ table{border-collapse:collapse}
   .pour{gap:10px}
   .pour-name{font-size:19px;margin-top:-2px}
   .pour-desc{font-size:12.5px}
-  .pour-attrs{gap:5px}
+  .pour-attrs,.attrcol{gap:5px}
   .attr{padding:2px 8px;font-size:11px}
   .appendix-body{padding:0 15px 18px}
   details.appendix > summary{padding:14px 15px}
@@ -2269,17 +2271,17 @@ function setPourStep(i, play){
         { grpId:"svGrp", streamId:"svStream", splashId:"svSplash", waterId:"svWater",
           waterPx:prevPx, gap:r.gap }) +
         "<figcaption>옆에서</figcaption></figure>" +
+      (p ? '<span class="attrcol">' +
+        '<span class="attr">물줄기 <b>' + stream + "</b></span>" +
+        (flow ? '<span class="attr">유량 <b>' + flow + "</b></span>" : "") +
+        '<span class="attr">수위 <b>' + height + "</b></span>" +
+        '<span class="attr">높이 <b>' + (r.dropCm || m.dropCm) + "</b></span>" +
+      "</span>" : "") +
     "</div>" +
     '<div class="pour-info">' +
       '<p class="pour-name">' + (p ? p.label : s.label) + "</p>" +
       '<p class="pour-desc">' + (p ? (PATTERN_SHORT[s.pat] || p.desc) : "이 단계에는 물을 붓지 않습니다 — " + s.label + ".") + "</p>" +
       (p && context ? '<p class="pour-context">' + context + "</p>" : "") +
-      (p ? '<span class="pour-attrs">' +
-        '<span class="attr">물줄기 <b>' + stream + "</b></span>" +
-        (flow ? '<span class="attr">유량 <b>' + flow + "</b></span>" : "") +
-        '<span class="attr">슬러리 수위 <b>' + height + "</b></span>" +
-        '<span class="attr">붓는 높이 <b>' + (r.dropCm || m.dropCm) + "</b></span>" +
-      "</span>" : "") +
     "</div>";
 
   view = { idx:i, bk, spoutY:sideGeom.spoutY, prevPx, targetPx, dur:s.dur || 3, hasPat:!!p };
