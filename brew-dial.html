@@ -248,7 +248,7 @@ table{border-collapse:collapse}
 .col-read b{color:var(--ink);font-weight:600;font-size:14px}
 
 /* ── 물 붓는 모양 : 두 뷰 ──────────────────────────────── */
-.pour{display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap;transition:transform .5s cubic-bezier(.3,.9,.3,1);will-change:transform;
+.pour{display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap;cursor:pointer;transition:transform .5s cubic-bezier(.3,.9,.3,1);will-change:transform;
   background:var(--panel-2);border:1px solid var(--line);border-radius:var(--r-s);padding:14px 15px}
 .views{display:flex;gap:10px;flex:none}
 .view{display:flex;flex-direction:column;gap:5px;align-items:center;margin:0}
@@ -272,7 +272,7 @@ table{border-collapse:collapse}
 .sv-splash{fill:none;stroke:var(--ember);stroke-width:1.2;opacity:.5}
 .sv-dim{stroke:var(--ink-3);stroke-width:.8;stroke-dasharray:2 3;opacity:.55}
 .sv-hide{opacity:0}
-.pour-info{display:flex;flex-direction:column;gap:8px;min-width:0;flex:1 1 200px}
+.pour-info{display:flex;flex-direction:column;gap:5px;min-width:0;flex:1 1 200px}
 .pour-step{font-family:var(--ff-mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--ember)}
 .pour-name{font-family:var(--ff-display);font-size:22px;font-weight:700;line-height:1.25;margin:0}
 .pour-desc{margin:0;font-size:13px;color:var(--ink-2);font-weight:300;line-height:1.55}
@@ -282,8 +282,6 @@ table{border-collapse:collapse}
 .attr{font-family:var(--ff-mono);font-size:11px;border:1px solid var(--line);border-radius:999px;
   padding:3px 9px;color:var(--ink-2);background:var(--panel);display:inline-flex;gap:6px}
 .attr b{color:var(--ink);font-weight:600}
-.replay{align-self:flex-start;font-size:12px;color:var(--ember);border:1px solid var(--ember-line);
-  border-radius:999px;padding:4px 12px;background:var(--ember-dim)}
 
 /* 타임라인 */
 /* 넓은 화면에서는 드립 모습(왼쪽) · 추출 순서(오른쪽) 2단 */
@@ -358,6 +356,14 @@ table{border-collapse:collapse}
   .step{grid-template-columns:44px 1fr auto;gap:8px;padding:8px 7px}
   .step .lb{font-size:13px}
   .timer{padding:11px 12px;gap:10px}
+  /* 버튼은 시계 아래 한 줄로 — 줄바꿈으로 구멍이 생기지 않게 */
+  .tbtns{flex-basis:100%;margin-left:0;justify-content:flex-start;gap:6px}
+  .tbtn{padding:6px 11px;font-size:12px}
+  .pour{gap:10px}
+  .pour-name{font-size:19px;margin-top:-2px}
+  .pour-desc{font-size:12.5px}
+  .pour-attrs{gap:5px}
+  .attr{padding:2px 8px;font-size:11px}
   .appendix-body{padding:0 15px 18px}
   details.appendix > summary{padding:14px 15px}
 }
@@ -2274,13 +2280,16 @@ function setPourStep(i, play){
         '<span class="attr">슬러리 수위 <b>' + height + "</b></span>" +
         '<span class="attr">붓는 높이 <b>' + (r.dropCm || m.dropCm) + "</b></span>" +
       "</span>" : "") +
-      (p ? '<button type="button" class="replay" id="pdReplay">↻ 다시 재생</button>' : "") +
     "</div>";
 
   view = { idx:i, bk, spoutY:sideGeom.spoutY, prevPx, targetPx, dur:s.dur || 3, hasPat:!!p };
 
-  const rp = document.getElementById("pdReplay");
-  if (rp) rp.addEventListener("click", () => { if (!timer.running) startPreview(); });
+  /* 카드 아무 곳이나 터치하면 붓는 궤적을 다시 재생합니다 (타이머가 돌 때는 무시) */
+  const pp = document.getElementById("pourPanel");
+  if (pp && !pp._tap){
+    pp._tap = true;
+    pp.addEventListener("click", () => { if (!timer.running) startPreview(); });
+  }
 
   if (p && play && !timer.running) startPreview();
   else renderPourFrame(0, false, prevPx);
