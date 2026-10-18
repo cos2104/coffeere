@@ -1350,7 +1350,26 @@ const RECIPES = [
       "쓴맛이 앞서면 물 온도를 낮추기보다 <b>프레스 속도를 더 늦춰</b> 보세요.",
       "농도가 진하면 뜨거운 물 30–60g을 가수해 마십니다."],
     source:"원 레시피 11g / 200g · 공개 영상 자료 정리"
-  }
+  },
+  {
+    id:"kbc-v60-ice", name:"V60 1인 아이스 (급랭)", by:"KBC 챔피언", role:"커디터 채널 시연 · 한국 브루어스컵",
+    dripper:"v60", method:"pourover", fit:"medium", roastBasis:"unspecified", dose:20, ratio:10, iceMul:6.5,
+    temp:"92℃", um:760, tol:25, totalRange:[130,150], total:150,
+    blurb:"20g/200g 농축을 92℃로 짧게 내려 얼음에 급랭하는 1인 아이스. 각 붓기는 이전 물이 거의 빠진 뒤에.",
+    steps: c => [
+      { at:0,   kind:"bloom", label:"뜸 — 30~40초", to:c.water*0.15, pat:"bloom" },
+      { at:40,  kind:"pour",  label:"1차 · 120g까지", to:c.water*0.6, pat:"spiral", triggerText:"물이 거의 다 빠졌을 때 (영상 실측 0:37)" },
+      { at:81,  kind:"pour",  label:"2차 · 160g까지", to:c.water*0.8, pat:"spiral", triggerText:"물이 거의 다 빠졌을 때 (실측 1:21)" },
+      { at:107, kind:"pour",  label:"3차 · 200g까지", to:c.water,     pat:"spiral", triggerText:"물이 거의 다 빠졌을 때 (실측 1:47)" },
+      { at:150, kind:"end",   label:"다 내려오면 완료 (2:10~2:30) · 잔의 얼음 위로" }],
+    tips:[
+      "분쇄 <b>760μm</b>은 영상이 디플루이드 옴니 실측으로 명시한 값 — 내 환산표 기준 <b>K-Ultra 5.1 · 페모북 A2 20~21클릭</b>.",
+      "각 붓기는 <b>이전 물이 거의 다 빠진 뒤</b>에 — 위 시각(0:40 · 1:21 · 1:47)은 영상 실측값입니다.",
+      "서버에 얼음을 넣고 내려 잔의 얼음 위에 붓는 급랭. <b>얼음량은 자막에 없어</b> 최종 음료 기준 약 130g로 추정해 표시합니다.",
+      "배전도는 영상에 적혀 있지 않아 <b>중배전 기준으로 등록</b>했습니다 — 내려보고 맞춰 가세요."],
+    source:"커디터 쇼츠 자막 정리 · 20g / 200g / 92℃ / 760μm · KBC 챔피언 시연",
+    sourceKind:"secondary", sourceUrl:"https://youtube.com/shorts/QxC5oXxRJKM"
+  },
 ];
 
 /* ── 상태 ─────────────────────────────────────────────── */
