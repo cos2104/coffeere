@@ -61,7 +61,10 @@ input{font:inherit;color:inherit}
 :focus-visible{outline:2px solid var(--ember);outline-offset:2px;border-radius:4px}
 table{border-collapse:collapse}
 
-.wrap{max-width:1340px;margin:0 auto;padding:28px 20px 72px;display:flex;flex-direction:column;gap:22px}
+html,body{height:100%}
+body{overflow:hidden}
+.wrap{max-width:1340px;margin:0 auto;padding:16px 20px 0;display:flex;flex-direction:column;gap:14px;
+  height:100vh;height:100dvh}
 
 /* ── 페이지(좌우 스와이프: 저장 | 레시피 | 추출 | 노트·자료) ── */
 .ptabs{display:flex;gap:6px;margin:0 0 12px;position:sticky;top:0;z-index:60;background:var(--bg);padding:10px 0 8px}
@@ -69,9 +72,12 @@ table{border-collapse:collapse}
   border:1px solid var(--line);border-radius:999px;padding:5px 12px;white-space:nowrap}
 .ptabs button.on{color:var(--ember);border-color:var(--ember-line);background:var(--ember-dim)}
 .pager{display:flex;gap:16px;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;
-  scrollbar-width:none;align-items:flex-start}
+  scrollbar-width:none;flex:1 1 auto;min-height:0}
 .pager::-webkit-scrollbar{display:none}
-.page{flex:0 0 100%;min-width:0;scroll-snap-align:center;scroll-snap-stop:always}
+/* 각 페이지는 자기만의 세로 스크롤 — 옆 페이지와 스크롤이 엮이지 않습니다 */
+.page{flex:0 0 100%;min-width:0;scroll-snap-align:center;scroll-snap-stop:always;
+  height:100%;overflow-y:auto;overscroll-behavior-y:contain;-webkit-overflow-scrolling:touch;padding-bottom:48px}
+.page::-webkit-scrollbar{display:none}
 .page > .detail{min-height:180px}
 
 /* 레시피 요약 + 수정 폼 */
@@ -415,7 +421,7 @@ table{border-collapse:collapse}
 
 /* 모바일 여백·크기 조정 */
 @media(max-width:640px){
-  .wrap{padding:18px 14px 56px;gap:16px}
+  .wrap{padding:10px 14px 0;gap:10px}
   .sec{padding:15px 15px}
   .d-head{padding:16px 15px 14px}
   .tile{padding:11px 12px}
@@ -2410,6 +2416,7 @@ function pageTo(i, smooth){
 }
 function setBrewing(on){
   document.body.classList.toggle("brewing", !!on);
+  if (on){ const pb = document.getElementById("pgBrew"); if (pb && pb.parentElement) pb.parentElement.scrollTop = 0; }
   pageTo(on ? 2 : 1);
   updateTimerButtons();
 }
@@ -2441,9 +2448,13 @@ function renderFavs(){
     (favs.length
       ? '<div class="favlist' + (favEditMode ? " editing" : "") + '">' + favs.map(r =>
           '<button type="button" class="favrow" data-id="' + r.id + '">' +
-            '<span class="fname">' + (r.optLabel || r.name) + (r.modded ? " ✎" : "") + "</span>" +
+            '<span class="fname">' + (r.optLabel || r.name) + "</span>" +
+            '<span class="fmeta">' + (function(){
+              const gid = r.cpGrinder || state.grinder;
+              const gObj = GRINDERS.find(x => x.id === gid) || grinder();
+              return (GRINDER_SHORT[gObj.id] || gObj.name) + " " + fmtDial(gObj, micronToDial(gObj, r.um).v);
+            })() + " · " + r.temp + "</span>" +
             '<span class="fmeta">' + (DRIPPER_LABEL[r.dripper] || r.dripper) + "</span>" +
-            '<span class="fmeta">' + r.temp + " · " + Math.round(r.um) + "μm</span>" +
             (favEditMode ? '<span class="fdel" data-del="' + r.id + '" aria-label="삭제">✕</span>' : "") +
           "</button>").join("") + "</div>"
       : '<p class="empty" style="margin:16px 14px">저장한 레시피가 없습니다.</p>');
@@ -2801,7 +2812,7 @@ function renderDetail(){
       const d = e.target.closest(".rowdel");
       if (d) d.parentElement.remove();
     });
-    document.getElementById("edSave").onclick = () => {
+    const readCp = () => {
       const g = v => document.getElementById(v).value;
       const dose = parseInt(g("edDose"), 10) || state.dose;
       const water = parseInt(g("edWater"), 10) || Math.round(c.water);
@@ -2829,25 +2840,41 @@ function renderDetail(){
         lines.push([parseClock(t2), isNaN(gv) ? 0 : gv, li.querySelector(".lbl").value.trim()]);
       });
       lines.sort((a, b) => a[0] - b[0]);
-      if (!lines.length){ toast("단계가 비어 있습니다"); return; }
-
-      /* 그라인더·배전·가공 조합이 같으면 그 사본을 갱신, 다르면 새 레시피로 */
-      const cp = {
+      if (!lines.length){ toast("단계가 비어 있습니다"); return null; }
+      return {
         baseId: r.isCopy ? r.baseId : r.id,
         grinder: state.grinder,
         roast: g("edRoast"), process: g("edProc"),
         dose, water, ice, temp, um: um2, fin, steps: lines,
         tip: document.getElementById("edTip").value.trim()
       };
+    };
+    const commitCp = (cp, target) => {
       state.copies = state.copies || [];
-      const same = state.copies.find(x => x.baseId === cp.baseId && x.grinder === cp.grinder &&
-        x.roast === cp.roast && x.process === cp.process);
-      if (same){ cp.cid = same.cid; Object.assign(same, cp); toast("수정본을 갱신했습니다"); }
-      else { cp.cid = Date.now().toString(36); state.copies.push(cp); toast("새 수정본으로 저장했습니다"); }
+      if (target){ cp.cid = target.cid; Object.assign(target, cp); toast("그 레시피에 저장했습니다"); }
+      else { cp.cid = Date.now().toString(36); state.copies.push(cp); toast("새 레시피로 저장했습니다"); }
       rebuildCopies();
       state.selected = "cp-" + cp.cid;
       editMode = false;
       save(); stopTimer(); renderDetail();
+    };
+    document.getElementById("edSave").onclick = () => {
+      const cp = readCp();
+      if (!cp) return;
+      /* 이미 있는 수정본을 고치는 중이거나 같은 조합의 수정본이 있으면 — 덮어쓸지 새로 만들지 선택 */
+      const target = r.isCopy
+        ? (state.copies || []).find(x => "cp-" + x.cid === r.id)
+        : (state.copies || []).find(x => x.baseId === cp.baseId && x.grinder === cp.grinder &&
+            x.roast === cp.roast && x.process === cp.process);
+      if (!target){ commitCp(cp, null); return; }
+      const bar = document.querySelector(".rsec .ebtns:last-of-type") || document.querySelector(".rsec .ebtns");
+      bar.innerHTML =
+        '<button type="button" class="editbtn" id="svOver">이 레시피에 저장</button>' +
+        '<button type="button" class="editbtn" id="svNew">새 레시피로 저장</button>' +
+        '<button type="button" class="editbtn ghost" id="svBack">취소</button>';
+      document.getElementById("svOver").onclick = () => commitCp(readCp(), target);
+      document.getElementById("svNew").onclick = () => commitCp(readCp(), null);
+      document.getElementById("svBack").onclick = () => renderDetail();
     };
   }
   document.getElementById("noteFold").addEventListener("toggle", e => {
