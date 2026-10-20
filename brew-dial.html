@@ -88,6 +88,7 @@ table{border-collapse:collapse}
 .ein{background:var(--panel);border:1px solid var(--ember-line);border-radius:6px;padding:4px 6px;
   font-family:var(--ff-mono);font-size:13px;color:var(--ink);width:58px;text-align:center}
 .ein.wide{width:92px}
+.ein.sel{width:auto;text-align:left;appearance:auto;-webkit-appearance:auto;padding:4px 8px}
 .erow0{line-height:2.1}
 #edRows .erow{display:grid;grid-template-columns:56px 1fr 64px 28px;gap:6px;align-items:center}
 #edRows .ein{width:100%;text-align:left}
@@ -1509,6 +1510,7 @@ try { const raw = localStorage.getItem(LS); if (raw) Object.assign(state, JSON.p
 if (!state.custom || typeof state.custom.ref !== "number") state.custom = { ref:24, umPerClick:30 };
 if (!DRIPPERS.some(d => d.id === state.dripper)) state.dripper = "all";  /* 옛 저장값(wave 등) 이행 */
 if (state.grinder === "custom") state.grinder = "kultra";
+rebuildCopies();
 function save(){
   try { localStorage.setItem(LS, JSON.stringify(state)); } catch (e) {}
   syncPush();
@@ -1519,7 +1521,7 @@ function save(){
    비어 있으면 조용히 꺼진 채 동작합니다. */
 const FIREBASE = { projectId: "brew-dial", apiKey: "AIzaSyBE6N3wmf3TUL8mkIuqTqttKQ2Osr70bv0" };
 let syncOn = false, syncTimer = 0;
-const SYNC_FIELDS = ["grinder","dripper","roast","process","selected","favs","sound","noteOpen","mods"];
+const SYNC_FIELDS = ["grinder","dripper","roast","process","selected","favs","sound","noteOpen","copies"];
 function syncDocUrl(){
   return "https://firestore.googleapis.com/v1/projects/" + FIREBASE.projectId +
     "/databases/(default)/documents/settings/" + encodeURIComponent(state.syncCode) +
@@ -1549,6 +1551,7 @@ function syncInit(){
       const d = JSON.parse(raw);
       SYNC_FIELDS.forEach(k => { if (d[k] !== undefined) state[k] = d[k]; });
       try { localStorage.setItem(LS, JSON.stringify(state)); } catch (e) {}
+      rebuildCopies();
       ensureSelection();
     }
     renderDetail();
@@ -1916,6 +1919,12 @@ function renderPickers(){
   if (el){
     const vis = visible();
     let html = "";
+    const cps = vis.filter(x => x.isCopy);
+    if (cps.length){
+      html += '<optgroup label="✎ 내 수정본">' +
+        cps.map(x => '<option value="' + x.id + '">' + x.optLabel + "</option>").join("") +
+        "</optgroup>";
+    }
     MY_BEANS.forEach(b => {
       const mine = vis.filter(r => r.personal && r.id.startsWith("my-" + b.id + "-"));
       if (!mine.length) return;
@@ -1996,6 +2005,7 @@ function waveBadge(r){
   return '<span class="meta-badge wave" title="사이즈 근거' + basis + '">' + (WAVE_SIZE_LABEL[key] || WAVE_SIZE_LABEL.unspecified) + "</span>";
 }
 function vBadge(r){
+  if (r.isCopy) return '<span class="vbadge v-part">내 수정본</span>';
   if (!r.personal) return "";
   const map = { "검증됨":["v-ok","검증됨"], "부분검증":["v-part","부분검증"], "추천(미검증)":["v-todo","추천 · 미검증"] };
   const m = map[r.vstatus] || ["v-todo", r.vstatus || "내 기록"];
@@ -2344,6 +2354,29 @@ function buildModSteps(lines, fin){
     return out;
   };
 }
+const GRINDER_SHORT = { m01:"밀랩", c40:"코만단테", kultra:"K-Ultra", a2:"A2", ek43s:"EK43s", c3:"C3", encore:"엔코어" };
+/* 저장된 사본(state.copies)을 선택 가능한 레시피로 — 그라인더·배전·가공 조합마다 별개 */
+function copyToRecipe(cp){
+  const base = RECIPES.find(x => x.id === cp.baseId && !x.isCopy) || { name:"레시피", tips:[] };
+  const label = (base.optLabel || base.name) + " ✎ " + (GRINDER_SHORT[cp.grinder] || cp.grinder);
+  return Object.assign({}, base, {
+    id: "cp-" + cp.cid, isCopy: true, baseId: cp.baseId,
+    name: label, optLabel: label,
+    personal: true, fit: cp.roast, fitProcess: cp.process, cpGrinder: cp.grinder,
+    dose: cp.dose, ratio: cp.water / cp.dose,
+    iceMul: cp.ice > 0 ? cp.ice / cp.dose : undefined,
+    temp: cp.temp, tempFixed: true, um: cp.um, lockAdjust: true,
+    total: cp.fin[1], totalRange: cp.fin[0] !== cp.fin[1] ? cp.fin.slice() : null, totalLabel: null,
+    steps: buildModSteps(cp.steps, cp.fin),
+    tips: (cp.tip ? ["내 메모 · " + cp.tip] : []).concat(base.tips || []),
+    vstatus: null, refDials: null
+  });
+}
+function rebuildCopies(){
+  for (let i = RECIPES.length - 1; i >= 0; i--) if (RECIPES[i].isCopy) RECIPES.splice(i, 1);
+  (state.copies || []).forEach(cp => { try { RECIPES.push(copyToRecipe(cp)); } catch (e) {} });
+}
+
 function applyMods(r){
   const m = r && state.mods && state.mods[r.id];
   if (!m) return r;
@@ -2502,6 +2535,7 @@ function setPourStep(i, play){
 function renderDetail(){
   const el = document.getElementById("pgMain");
   let r = RECIPES.find(x => x.id === state.selected);
+  if (r && r.cpGrinder && GRINDERS.some(g => g.id === r.cpGrinder)) state.grinder = r.cpGrinder;
   /* 내 레시피는 원두 고정 — 배전도·가공을 잠그되, 떠날 때 원래 선택을 복원합니다 */
   if (r && r.personal){
     if (!state.keepRoast){ state.keepRoast = state.roast; state.keepProc = state.process; }
@@ -2602,21 +2636,21 @@ function renderDetail(){
     : "<b>" + r.name + "</b> — " + r.role;
 
   /* ── 레시피 섹션 — ✎를 누르면 이 자리가 그대로 입력칸으로 바뀝니다 ── */
-  const mod = state.mods && state.mods[RECIPES.find(x => x.id === state.selected).id];
+  const cpObj = r.isCopy ? (state.copies || []).find(x => "cp-" + x.cid === r.id) : null;
   let recipeSec;
   if (!editMode){
     const stepRows = steps.map(st =>
       '<li><i>' + mmss(st.at) + "</i><span>" + stepLineText(st) + "</span>" +
       (st.add > 0 ? "<b>" + Math.round(st.to) + "g</b>" : "<b></b>") + "</li>").join("");
     recipeSec =
-      '<div class="sec rsec"><p class="sec-label"><span>레시피' + (r.modded ? " · 내 수정본" : "") + "</span></p>" +
+      '<div class="sec rsec"><p class="sec-label"><span>레시피' + (r.isCopy ? " · 내 수정본" : "") + "</span></p>" +
         '<p class="rsum"><b>' + state.dose + "g</b> · 물 <b>" + gram(c.water) + "</b>" +
         (c.ice ? " · 얼음 <b>" + gram(c.ice) + "</b>" : "") +
         " · <b>" + tempFor(r) + "</b> · <b>" + Math.round(gr.um) + "μm</b> · 완료 <b>" + timeValue(r) + "</b></p>" +
         '<ol class="rsteps">' + stepRows + "</ol>" +
-        ((mod && mod.tip) ? '<p class="mytip">내 팁 · ' + mod.tip + "</p>" : "") +
+        ((cpObj && cpObj.tip) ? '<p class="mytip">내 팁 · ' + cpObj.tip + "</p>" : "") +
         '<div class="ebtns"><button type="button" class="editbtn" id="editBtn">✎ 수정</button>' +
-        (r.modded ? '<button type="button" class="editbtn ghost" id="editReset">원본으로</button>' : "") + "</div>" +
+        (r.isCopy ? '<button type="button" class="editbtn ghost" id="cpDel">삭제</button>' : "") + "</div>" +
       "</div>";
   } else {
     const finStr = r.totalRange ? mmss(r.totalRange[0]) + "~" + mmss(r.totalRange[1]) : mmss(r.total || 180);
@@ -2637,12 +2671,16 @@ function renderDetail(){
           '<small class="eunit">' + gr.g.unit + "</small> · 완료 " +
           '<input class="ein wide" id="edFin" type="text" value="' + finStr + '">' +
         "</p>" +
+        '<p class="rsum erow0">배전 <select class="ein sel" id="edRoast">' +
+          ROASTS.map(o => '<option value="' + o.id + '"' + (o.id === state.roast ? " selected" : "") + ">" + o.label + "</option>").join("") +
+        "</select> · 가공 <select class=\"ein sel\" id=\"edProc\">" +
+          PROCESSES.map(o => '<option value="' + o.id + '"' + (o.id === state.process ? " selected" : "") + ">" + o.label + "</option>").join("") +
+        "</select></p>" +
         '<ol class="rsteps" id="edRows">' + editRows + "</ol>" +
         '<button type="button" class="editbtn ghost" id="edAdd">+ 단계</button>' +
-        '<label class="etip">나의 팁<textarea id="edTip" rows="2">' + escA((mod && mod.tip) || "") + "</textarea></label>" +
+        '<label class="etip">나의 팁<textarea id="edTip" rows="2">' + escA((cpObj && cpObj.tip) || "") + "</textarea></label>" +
         '<div class="ebtns"><button type="button" class="editbtn" id="edSave">저장</button>' +
-        '<button type="button" class="editbtn ghost" id="edCancel">취소</button>' +
-        (r.modded ? '<button type="button" class="editbtn ghost" id="editReset">원본으로</button>' : "") + "</div>" +
+        '<button type="button" class="editbtn ghost" id="edCancel">취소</button></div>' +
       "</div>";
   }
 
@@ -2713,11 +2751,15 @@ function renderDetail(){
   /* 레시피 인라인 편집 배선 */
   const eb = document.getElementById("editBtn");
   if (eb) eb.onclick = () => { editMode = true; renderDetail(); };
-  const er = document.getElementById("editReset");
-  if (er) er.onclick = () => {
-    if (state.mods) delete state.mods[RECIPES.find(x => x.id === state.selected).id];
+  const cd = document.getElementById("cpDel");
+  if (cd) cd.onclick = () => {
+    const id = state.selected;
+    state.copies = (state.copies || []).filter(x => "cp-" + x.cid !== id);
+    state.favs = (state.favs || []).filter(f => f !== id);
+    rebuildCopies();
+    state.selected = r.baseId;
     editMode = false;
-    save(); toast("원본 레시피로 되돌렸습니다"); renderDetail();
+    save(); toast("수정본을 삭제했습니다"); renderDetail();
   };
   if (editMode){
     document.getElementById("edCancel").onclick = () => { editMode = false; renderDetail(); };
@@ -2761,26 +2803,24 @@ function renderDetail(){
     });
     document.getElementById("edSave").onclick = () => {
       const g = v => document.getElementById(v).value;
-      const m2 = {};
-      const dose = parseInt(g("edDose"), 10), water = parseInt(g("edWater"), 10), ice = parseInt(g("edIce"), 10);
-      if (dose > 0) m2.dose = dose;
-      if (water > 0) m2.water = water;
-      if (!isNaN(ice)) m2.ice = ice;
-      if (g("edTemp").trim()) m2.temp = g("edTemp").trim();
-      /* 분쇄는 현재 그라인더의 클릭수로 입력 — μm로 역환산해 저장하므로 다른 그라인더에서도 맞게 보입니다 */
+      const dose = parseInt(g("edDose"), 10) || state.dose;
+      const water = parseInt(g("edWater"), 10) || Math.round(c.water);
+      const ice = parseInt(g("edIce"), 10) || 0;
+      const temp = g("edTemp").trim() || r.temp;
+      /* 분쇄는 현재 그라인더의 클릭수 입력 → μm로 역환산 저장 */
+      let um2 = Math.round(r.um);
       const dialRaw = g("edDial").trim();
       if (dialRaw){
         const gObj = grinder();
         let clicks = parseFloat(dialRaw.replace(",", "."));
         if (!isNaN(clicks)){
           if (gObj.base) clicks = Math.round(clicks * gObj.base);
-          const um2 = Math.round(dialToMicron(gObj, clicks));
-          if (um2 >= 300 && Math.round(um2) !== Math.round(r.um)) m2.um = um2;
-          else if (r.modded && mod && mod.um) m2.um = mod.um;   /* 바꾸지 않았으면 기존 수정값 유지 */
+          const v2 = Math.round(dialToMicron(gObj, clicks));
+          if (v2 >= 300) um2 = v2;
         }
       }
-      const fin = g("edFin").split(/[~\-–]/).map(parseClock).filter(n => n > 0);
-      if (fin.length) m2.fin = [fin[0], fin[fin.length - 1]];
+      const fin0 = g("edFin").split(/[~\-–]/).map(parseClock).filter(n => n > 0);
+      const fin = fin0.length ? [fin0[0], fin0[fin0.length - 1]] : [r.total || 180, r.total || 180];
       const lines = [];
       document.querySelectorAll("#edRows .erow").forEach(li => {
         const t2 = li.querySelector(".t").value.trim();
@@ -2789,13 +2829,25 @@ function renderDetail(){
         lines.push([parseClock(t2), isNaN(gv) ? 0 : gv, li.querySelector(".lbl").value.trim()]);
       });
       lines.sort((a, b) => a[0] - b[0]);
-      if (lines.length) m2.steps = lines;
-      const tip = document.getElementById("edTip").value.trim();
-      if (tip) m2.tip = tip;
-      state.mods = state.mods || {};
-      state.mods[RECIPES.find(x => x.id === state.selected).id] = m2;
+      if (!lines.length){ toast("단계가 비어 있습니다"); return; }
+
+      /* 그라인더·배전·가공 조합이 같으면 그 사본을 갱신, 다르면 새 레시피로 */
+      const cp = {
+        baseId: r.isCopy ? r.baseId : r.id,
+        grinder: state.grinder,
+        roast: g("edRoast"), process: g("edProc"),
+        dose, water, ice, temp, um: um2, fin, steps: lines,
+        tip: document.getElementById("edTip").value.trim()
+      };
+      state.copies = state.copies || [];
+      const same = state.copies.find(x => x.baseId === cp.baseId && x.grinder === cp.grinder &&
+        x.roast === cp.roast && x.process === cp.process);
+      if (same){ cp.cid = same.cid; Object.assign(same, cp); toast("수정본을 갱신했습니다"); }
+      else { cp.cid = Date.now().toString(36); state.copies.push(cp); toast("새 수정본으로 저장했습니다"); }
+      rebuildCopies();
+      state.selected = "cp-" + cp.cid;
       editMode = false;
-      save(); toast("수정본을 저장했습니다"); stopTimer(); renderDetail();
+      save(); stopTimer(); renderDetail();
     };
   }
   document.getElementById("noteFold").addEventListener("toggle", e => {
