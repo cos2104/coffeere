@@ -84,15 +84,20 @@ table{border-collapse:collapse}
 .ebtns{display:flex;gap:7px;margin-top:12px}
 .editbtn{font-size:12.5px;color:var(--ember);border:1px solid var(--ember-line);border-radius:999px;padding:6px 14px;background:var(--ember-dim)}
 .editbtn.ghost{color:var(--ink-3);border-color:var(--line);background:transparent}
-.editform{display:flex;flex-direction:column;gap:8px;margin-top:12px;padding:12px;border:1px dashed var(--ember-line);border-radius:var(--r-s)}
-.editform label{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--ink-2)}
-.editform label span{flex:0 0 58px}
-.editform label.col{flex-direction:column;align-items:stretch;gap:4px}
-.editform input,.editform textarea{background:var(--panel);border:1px solid var(--line);border-radius:6px;
-  padding:7px 9px;font-family:var(--ff-mono);font-size:13px;min-width:0;color:var(--ink)}
-.editform input{flex:1}
-.editform textarea{resize:vertical;line-height:1.5}
-.editform .ebtns{margin-top:2px}
+.rsec.editing{border-left:2px solid var(--ember-line)}
+.ein{background:var(--panel);border:1px solid var(--ember-line);border-radius:6px;padding:4px 6px;
+  font-family:var(--ff-mono);font-size:13px;color:var(--ink);width:58px;text-align:center}
+.ein.wide{width:92px}
+.erow0{line-height:2.1}
+#edRows .erow{display:grid;grid-template-columns:56px 1fr 64px 28px;gap:6px;align-items:center}
+#edRows .ein{width:100%;text-align:left}
+#edRows .ein.t,#edRows .ein.g{text-align:center}
+.rowdel{color:var(--ink-3);font-size:13px}
+.rowdel:hover{color:var(--alert)}
+.etip{display:flex;flex-direction:column;gap:4px;margin-top:10px;font-size:12.5px;color:var(--ink-2)}
+.etip textarea{background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:7px 9px;
+  font-family:var(--ff-mono);font-size:12.5px;line-height:1.5;color:var(--ink);resize:vertical}
+.mytip{margin:10px 0 0;font-size:13px;color:var(--ember);border-left:2px solid var(--ember-line);padding-left:9px}
 
 /* 즐겨찾기 */
 .favbtn{font-size:24px;line-height:1;color:var(--ink-3);flex:none;padding:0 2px;align-self:center;transition:color .15s,transform .15s}
@@ -1945,6 +1950,7 @@ function renderPickers(){
     el.value = state.selected;
     el.onchange = () => {
       state.selected = el.value;
+      editMode = false;
       const nr = RECIPES.find(x => x.id === el.value);
       /* 레시피의 드리퍼로 선택을 맞춥니다 — 155·185 공용(wave)은 현재 선택을 유지 */
       if (nr && DRIPPERS.some(d => d.id === nr.dripper)) state.dripper = nr.dripper;
@@ -1957,7 +1963,7 @@ function renderPickers(){
     state.grinder, v => { state.grinder = v; save(); refreshAll(); });
 
   fillSelect("selDripper", DRIPPERS.map(d => ({ id:d.id, label:d.label, n:countFor(d.id) })),
-    state.dripper, v => { state.dripper = v; ensureSelection(); save(); stopTimer(); refreshAll(); });
+    state.dripper, v => { state.dripper = v; editMode = false; ensureSelection(); save(); stopTimer(); refreshAll(); });
 
   /* 내 레시피는 원두가 고정이라 배전도·가공을 바꿀 수 없습니다 (잠금·복원은 renderDetail에서) */
   const sel = applyMods(byId(RECIPES, state.selected));
@@ -2077,7 +2083,9 @@ let preview = { playing:false, t0:0, dur:3 };
 let view = { idx:-1, bk:"cone", spoutY:20, prevPx:0, targetPx:0, dur:3, hasPat:false };
 let fired = { step:-1, ticks:{}, stops:{} };
 let raf = 0, shownStep = -1;
-let scrub = { on:false };   /* 슬라이더 드래그 중 — 사운드 억제용 */
+let scrub = { on:false };
+let editMode = false;   /* 레시피 섹션 인라인 편집 중 */
+const escA = v => String(v).replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;");   /* 슬라이더 드래그 중 — 사운드 억제용 */
 
 function ensureLoop(){ if (!raf) raf = requestAnimationFrame(tickAll); }
 function tickAll(){
@@ -2341,7 +2349,8 @@ function buildModSteps(lines, fin){
         label:(st[2] || (i === 0 ? "뜸" : (i + 1) + "차 붓기")),
         pat:i === 0 ? "bloom" : "spiral" });
     });
-    out.push({ at:fin[1], kind:"end", label:"다 내려오면 완료 (" + mmss(fin[0]) + "~" + mmss(fin[1]) + ")" });
+    out.push({ at:fin[1], kind:"end",
+      label:"다 내려오면 완료 (" + (fin[0] === fin[1] ? mmss(fin[1]) : mmss(fin[0]) + "~" + mmss(fin[1])) + ")" });
     return out;
   };
 }
@@ -2418,6 +2427,7 @@ function renderFavs(){
       const del = e.target.closest("[data-del]");
       if (del){ e.stopPropagation(); toggleFavId(del.getAttribute("data-del")); return; }
       state.selected = b.getAttribute("data-id");
+      editMode = false;
       const nr = RECIPES.find(x => x.id === state.selected);
       if (nr && DRIPPERS.some(d => d.id === nr.dripper)) state.dripper = nr.dripper;
       save(); stopTimer(); renderDetail(); pageTo(1);
@@ -2596,32 +2606,48 @@ function renderDetail(){
     ? "<b>" + r.by + "</b> · " + r.role
     : "<b>" + r.name + "</b> — " + r.role;
 
-  /* ── 레시피 요약 + 수정 폼 (레시피 페이지) ── */
+  /* ── 레시피 섹션 — ✎를 누르면 이 자리가 그대로 입력칸으로 바뀝니다 ── */
   const mod = state.mods && state.mods[RECIPES.find(x => x.id === state.selected).id];
-  const stepRows = steps.map(st =>
-    '<li><i>' + mmss(st.at) + "</i><span>" + stepLineText(st) + "</span>" +
-    (st.add > 0 ? "<b>" + Math.round(st.to) + "g</b>" : "<b></b>") + "</li>").join("");
-  const recipeSec =
-    '<div class="sec rsec"><p class="sec-label"><span>레시피' + (r.modded ? " · 내 수정본" : "") + "</span></p>" +
-      '<p class="rsum"><b>' + state.dose + "g</b> · 물 <b>" + gram(c.water) + "</b>" +
-      (c.ice ? " · 얼음 <b>" + gram(c.ice) + "</b>" : "") +
-      " · <b>" + tempFor(r) + "</b> · 완료 <b>" + timeValue(r) + "</b></p>" +
-      '<ol class="rsteps">' + stepRows + "</ol>" +
-      '<div class="ebtns"><button type="button" class="editbtn" id="editBtn">✎ 수정</button>' +
-      (r.modded ? '<button type="button" class="editbtn" id="editReset">원본으로</button>' : "") + "</div>" +
-      '<div class="editform" id="editForm" hidden>' +
-        '<label><span>원두 g</span><input type="number" id="edDose" min="5" max="60" step="1"></label>' +
-        '<label><span>물 g</span><input type="number" id="edWater" min="50" max="900" step="5"></label>' +
-        '<label><span>얼음 g</span><input type="number" id="edIce" min="0" max="400" step="5"></label>' +
-        '<label><span>온도</span><input type="text" id="edTemp"></label>' +
-        '<label><span>분쇄 μm</span><input type="number" id="edUm" min="300" max="1500" step="5"></label>' +
-        '<label><span>완료</span><input type="text" id="edFin" placeholder="2:10~2:30"></label>' +
-        '<label class="col"><span>단계</span><textarea id="edSteps" rows="5" placeholder="0:00 40 뜸"></textarea></label>' +
-        '<label class="col"><span>나의 팁</span><textarea id="edTip" rows="2"></textarea></label>' +
+  let recipeSec;
+  if (!editMode){
+    const stepRows = steps.map(st =>
+      '<li><i>' + mmss(st.at) + "</i><span>" + stepLineText(st) + "</span>" +
+      (st.add > 0 ? "<b>" + Math.round(st.to) + "g</b>" : "<b></b>") + "</li>").join("");
+    recipeSec =
+      '<div class="sec rsec"><p class="sec-label"><span>레시피' + (r.modded ? " · 내 수정본" : "") + "</span></p>" +
+        '<p class="rsum"><b>' + state.dose + "g</b> · 물 <b>" + gram(c.water) + "</b>" +
+        (c.ice ? " · 얼음 <b>" + gram(c.ice) + "</b>" : "") +
+        " · <b>" + tempFor(r) + "</b> · <b>" + Math.round(gr.um) + "μm</b> · 완료 <b>" + timeValue(r) + "</b></p>" +
+        '<ol class="rsteps">' + stepRows + "</ol>" +
+        ((mod && mod.tip) ? '<p class="mytip">내 팁 · ' + mod.tip + "</p>" : "") +
+        '<div class="ebtns"><button type="button" class="editbtn" id="editBtn">✎ 수정</button>' +
+        (r.modded ? '<button type="button" class="editbtn ghost" id="editReset">원본으로</button>' : "") + "</div>" +
+      "</div>";
+  } else {
+    const finStr = r.totalRange ? mmss(r.totalRange[0]) + "~" + mmss(r.totalRange[1]) : mmss(r.total || 180);
+    const editRows = steps.filter(st => st.kind === "bloom" || st.kind === "pour").map(st =>
+      '<li class="erow"><input class="ein t" value="' + mmss(st.at) + '">' +
+      '<input class="ein lbl" value="' + escA(String(st.label).replace(/<[^>]*>/g, "")) + '">' +
+      '<input class="ein g" type="number" value="' + Math.round(st.to) + '">' +
+      '<button type="button" class="rowdel" aria-label="단계 삭제">✕</button></li>').join("");
+    recipeSec =
+      '<div class="sec rsec editing"><p class="sec-label"><span>레시피 수정</span></p>' +
+        '<p class="rsum erow0">' +
+          '<input class="ein" id="edDose" type="number" value="' + state.dose + '">g · 물 ' +
+          '<input class="ein" id="edWater" type="number" value="' + Math.round(c.water) + '">g · 얼음 ' +
+          '<input class="ein" id="edIce" type="number" value="' + Math.round(c.ice || 0) + '">g<br>' +
+          '온도 <input class="ein wide" id="edTemp" type="text" value="' + escA(r.temp) + '"> · 분쇄 ' +
+          '<input class="ein" id="edUm" type="number" value="' + Math.round(r.um) + '">μm · 완료 ' +
+          '<input class="ein wide" id="edFin" type="text" value="' + finStr + '">' +
+        "</p>" +
+        '<ol class="rsteps" id="edRows">' + editRows + "</ol>" +
+        '<button type="button" class="editbtn ghost" id="edAdd">+ 단계</button>' +
+        '<label class="etip">나의 팁<textarea id="edTip" rows="2">' + escA((mod && mod.tip) || "") + "</textarea></label>" +
         '<div class="ebtns"><button type="button" class="editbtn" id="edSave">저장</button>' +
-        '<button type="button" class="editbtn ghost" id="edCancel">취소</button></div>' +
-      "</div>" +
-    "</div>";
+        '<button type="button" class="editbtn ghost" id="edCancel">취소</button>' +
+        (r.modded ? '<button type="button" class="editbtn ghost" id="editReset">원본으로</button>' : "") + "</div>" +
+      "</div>";
+  }
 
   el.innerHTML =
     '<div class="d-head">' +
@@ -2687,31 +2713,30 @@ function renderDetail(){
     fb.onclick = () => toggleFavId(r.id);
   }
 
-  /* 레시피 수정 폼 */
-  const ef = document.getElementById("editForm"), eb = document.getElementById("editBtn");
-  if (eb && ef){
-    eb.onclick = () => {
-      ef.hidden = !ef.hidden;
-      if (!ef.hidden){
-        document.getElementById("edDose").value = state.dose;
-        document.getElementById("edWater").value = Math.round(c.water);
-        document.getElementById("edIce").value = Math.round(c.ice || 0);
-        document.getElementById("edTemp").value = r.temp;
-        document.getElementById("edUm").value = Math.round(r.um);
-        document.getElementById("edFin").value = r.totalRange
-          ? mmss(r.totalRange[0]) + "~" + mmss(r.totalRange[1]) : mmss(r.total || 180);
-        document.getElementById("edSteps").value = steps
-          .filter(st => st.kind === "bloom" || st.kind === "pour")
-          .map(st => mmss(st.at) + " " + Math.round(st.to) + " " + String(st.label).replace(/<[^>]*>/g, "")).join("\n");
-        document.getElementById("edTip").value = (mod && mod.tip) || "";
-      }
+  /* 레시피 인라인 편집 배선 */
+  const eb = document.getElementById("editBtn");
+  if (eb) eb.onclick = () => { editMode = true; renderDetail(); };
+  const er = document.getElementById("editReset");
+  if (er) er.onclick = () => {
+    if (state.mods) delete state.mods[RECIPES.find(x => x.id === state.selected).id];
+    editMode = false;
+    save(); toast("원본 레시피로 되돌렸습니다"); renderDetail();
+  };
+  if (editMode){
+    document.getElementById("edCancel").onclick = () => { editMode = false; renderDetail(); };
+    document.getElementById("edAdd").onclick = () => {
+      const li = document.createElement("li");
+      li.className = "erow";
+      li.innerHTML = '<input class="ein t" value="" placeholder="1:30">' +
+        '<input class="ein lbl" value="" placeholder="4차 붓기">' +
+        '<input class="ein g" type="number" value="" placeholder="g">' +
+        '<button type="button" class="rowdel" aria-label="단계 삭제">✕</button>';
+      document.getElementById("edRows").appendChild(li);
     };
-    const er = document.getElementById("editReset");
-    if (er) er.onclick = () => {
-      if (state.mods) delete state.mods[RECIPES.find(x => x.id === state.selected).id];
-      save(); toast("원본 레시피로 되돌렸습니다"); renderDetail();
-    };
-    document.getElementById("edCancel").onclick = () => { ef.hidden = true; };
+    document.getElementById("edRows").addEventListener("click", e => {
+      const d = e.target.closest(".rowdel");
+      if (d) d.parentElement.remove();
+    });
     document.getElementById("edSave").onclick = () => {
       const g = v => document.getElementById(v).value;
       const m2 = {};
@@ -2723,14 +2748,20 @@ function renderDetail(){
       const um2 = parseInt(g("edUm"), 10); if (um2 >= 300) m2.um = um2;
       const fin = g("edFin").split(/[~\-–]/).map(parseClock).filter(n => n > 0);
       if (fin.length) m2.fin = [fin[0], fin[fin.length - 1]];
-      const lines = g("edSteps").split("\n").map(l => l.trim()).filter(Boolean).map(l => {
-        const mm = l.match(/^(\S+)\s+(\d+)\s*g?\s*(.*)$/);
-        return mm ? [parseClock(mm[1]), parseInt(mm[2], 10), mm[3] || ""] : null;
-      }).filter(Boolean);
+      const lines = [];
+      document.querySelectorAll("#edRows .erow").forEach(li => {
+        const t2 = li.querySelector(".t").value.trim();
+        const gv = parseInt(li.querySelector(".g").value, 10);
+        if (t2 === "" && isNaN(gv)) return;
+        lines.push([parseClock(t2), isNaN(gv) ? 0 : gv, li.querySelector(".lbl").value.trim()]);
+      });
+      lines.sort((a, b) => a[0] - b[0]);
       if (lines.length) m2.steps = lines;
-      if (g("edTip").trim()) m2.tip = g("edTip").trim();
+      const tip = document.getElementById("edTip").value.trim();
+      if (tip) m2.tip = tip;
       state.mods = state.mods || {};
       state.mods[RECIPES.find(x => x.id === state.selected).id] = m2;
+      editMode = false;
       save(); toast("수정본을 저장했습니다"); stopTimer(); renderDetail();
     };
   }
