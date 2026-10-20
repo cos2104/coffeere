@@ -63,6 +63,38 @@ table{border-collapse:collapse}
 
 .wrap{max-width:1340px;margin:0 auto;padding:28px 20px 72px;display:flex;flex-direction:column;gap:22px}
 
+/* ── 페이지(좌우 스와이프: 저장 | 레시피 | 추출 | 노트·자료) ── */
+.ptabs{display:flex;gap:6px;margin:0 0 12px;position:sticky;top:0;z-index:60;background:var(--bg);padding:10px 0 8px}
+.ptabs button{font-family:var(--ff-mono);font-size:11px;letter-spacing:.08em;color:var(--ink-3);
+  border:1px solid var(--line);border-radius:999px;padding:5px 12px;white-space:nowrap}
+.ptabs button.on{color:var(--ember);border-color:var(--ember-line);background:var(--ember-dim)}
+.pager{display:flex;gap:16px;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;
+  scrollbar-width:none;align-items:flex-start}
+.pager::-webkit-scrollbar{display:none}
+.page{flex:0 0 100%;min-width:0;scroll-snap-align:center;scroll-snap-stop:always}
+.page > .detail{min-height:180px}
+
+/* 즐겨찾기 */
+.favbtn{font-size:24px;line-height:1;color:var(--ink-3);flex:none;padding:0 2px;align-self:center;transition:color .15s,transform .15s}
+.favbtn.on{color:var(--ember)}
+.favbtn:active{transform:scale(1.25)}
+.favhead{font-family:var(--ff-display);font-size:19px;font-weight:700;margin:8px 0 2px}
+.favlist{display:flex;flex-direction:column;gap:8px;padding:14px}
+.favrow{display:flex;flex-direction:column;gap:2px;text-align:left;border:1px solid var(--line);
+  border-radius:var(--r-s);padding:11px 36px 11px 13px;background:var(--panel-2);position:relative}
+.favrow:hover{border-color:var(--ember-line)}
+.favrow .fname{font-family:var(--ff-display);font-weight:700;font-size:16px;line-height:1.3}
+.favrow .fmeta{font-family:var(--ff-mono);font-size:11px;color:var(--ink-3)}
+.favrow .fdel{position:absolute;right:8px;top:8px;color:var(--ink-3);font-size:13px;padding:5px}
+.favrow .fdel:hover{color:var(--alert)}
+.syncline{padding:2px 14px 14px;font-family:var(--ff-mono);font-size:11px;color:var(--ink-3)}
+
+/* 토스트 */
+.toast{position:fixed;left:50%;bottom:30px;transform:translate(-50%,8px);background:var(--ink);color:var(--bg);
+  padding:9px 18px;border-radius:999px;font-size:13.5px;font-weight:500;opacity:0;pointer-events:none;z-index:300;
+  transition:opacity .2s,transform .2s;white-space:nowrap}
+.toast.on{opacity:1;transform:translate(-50%,0)}
+
 /* ── 선택 컨트롤 ─────────────────────────────────────────── */
 .selwrap{position:relative;display:block}
 .selwrap::after{content:"";position:absolute;right:12px;top:50%;width:6px;height:6px;
@@ -81,11 +113,14 @@ table{border-collapse:collapse}
 .selwrap optgroup{background:var(--panel);color:var(--ink-3);font-style:normal}
 
 /* 제목 줄 = 드리퍼 선택(반) + 레시피 선택(반) */
-.titlerow{display:flex;gap:14px;margin:7px 0 2px}
+.titlerow{display:flex;gap:12px;margin:7px 0 2px;align-items:center}
 .titlerow .selwrap{flex:1 1 50%;min-width:0}
 .titlerow .titlewrap{margin:0}
 .titlerow .titlewrap select{font-size:clamp(16px,2.6vw,21px)}
-@media(max-width:560px){.titlerow{flex-direction:column;gap:4px}}
+@media(max-width:560px){
+  .titlerow{flex-direction:column;gap:4px;position:relative;padding-right:36px;align-items:stretch}
+  .titlerow .favbtn{position:absolute;right:2px;bottom:6px}
+}
 
 /* 레시피 제목이 곧 선택 — 제목을 눌러 레시피를 고릅니다 */
 .titlewrap{display:block;margin:7px 0 2px}
@@ -436,7 +471,19 @@ details.fold[open] > summary.sec-label{margin:0 0 12px}
 
 <div class="wrap">
 
-  <section class="detail" id="detail" aria-live="polite"></section>
+  <nav class="ptabs" id="ptabs" aria-label="페이지">
+    <button type="button" data-pg="0">★ 저장</button>
+    <button type="button" data-pg="1" class="on">레시피</button>
+    <button type="button" data-pg="2">추출</button>
+    <button type="button" data-pg="3">노트 · 자료</button>
+  </nav>
+
+  <div class="pager" id="pager">
+    <section class="page"><div class="detail" id="pgFav"></div></section>
+    <section class="page"><div class="detail" id="pgMain" aria-live="polite"></div></section>
+    <section class="page"><div class="detail" id="pgBrew"></div></section>
+    <section class="page">
+      <div class="detail" id="moreRecipe"></div>
 
   <details class="appendix">
     <summary>핸드드립 vs 푸어오버 · 물 붓는 모양 사전</summary>
@@ -527,6 +574,8 @@ details.fold[open] > summary.sec-label{margin:0 0 12px}
     코노 점드립 <a href="https://brunch.co.kr/@coffeepd/60">brunch</a>.
     나머지는 공개된 영상·강연 자료를 정리한 것으로 실제 최신 버전과 다를 수 있습니다. 표시값은 출발점으로 쓰고 맛으로 마무리하세요.
   </p>
+    </section>
+  </div>
 </div>
 
 <script>
@@ -582,15 +631,11 @@ const PROCESSES = [
   { id:"decaf",     label:"디카페인",      d:88, note:"3–4클릭 굵게" }
 ];
 
-/* 내가 쓰는 드리퍼(V60 · 스위치 · 스텐 · 칼리타)를 위로, 나머지는 아래로 */
+/* 내가 가진 드리퍼만 */
 const DRIPPERS = [
   { id:"all", label:"전체 드리퍼" },
   { id:"v60", label:"V60" }, { id:"switch", label:"하리오 스위치" },
-  { id:"steel", label:"스텐 이중망 (빈플러스)" },
-  { id:"wave155", label:"칼리타 웨이브 155" }, { id:"wave185", label:"칼리타 웨이브 185" },
-  { id:"origami", label:"오리가미" }, { id:"kono", label:"코노" }, { id:"nel", label:"융드립" },
-  { id:"clever", label:"클레버" }, { id:"chemex", label:"케멕스" },
-  { id:"frenchpress", label:"프렌치프레스" }, { id:"aeropress", label:"에어로프레스" }
+  { id:"steel", label:"스텐 이중망 (빈플러스)" }, { id:"wave185", label:"칼리타 웨이브 185" }
 ];
 /* 'wave'는 155·185 공용 레시피 — 어느 쪽을 골라도 보입니다 */
 const dripperMatch = (r, want) =>
@@ -1455,6 +1500,10 @@ RECIPES.forEach(r => {
     else if (r.waveSize === "185") r.dripper = "wave185";
   }
 });
+/* 내가 가진 드리퍼(V60·스위치·스텐·칼리타185)의 레시피만 남깁니다 — 'wave'는 155·185 공용이라 185로 봅니다 */
+const OWNED = ["v60", "switch", "steel", "wave185", "wave"];
+for (let i = RECIPES.length - 1; i >= 0; i--)
+  if (OWNED.indexOf(RECIPES[i].dripper) < 0) RECIPES.splice(i, 1);
 
 const LS = "brew-dial-v3";
 const state = {
@@ -1464,7 +1513,59 @@ const state = {
 try { const raw = localStorage.getItem(LS); if (raw) Object.assign(state, JSON.parse(raw)); } catch (e) {}
 if (!state.custom || typeof state.custom.ref !== "number") state.custom = { ref:24, umPerClick:30 };
 if (!DRIPPERS.some(d => d.id === state.dripper)) state.dripper = "all";  /* 옛 저장값(wave 등) 이행 */
-function save(){ try { localStorage.setItem(LS, JSON.stringify(state)); } catch (e) {} }
+function save(){
+  try { localStorage.setItem(LS, JSON.stringify(state)); } catch (e) {}
+  syncPush();
+}
+
+/* ── 기기 간 동기화 (Firebase Firestore REST) ─────────────
+   Firebase 콘솔 → 프로젝트 설정 → 웹 앱 추가에서 나오는 두 값을 채우면 켜집니다.
+   비어 있으면 조용히 꺼진 채 동작합니다. */
+const FIREBASE = { projectId: "", apiKey: "" };
+let syncOn = false, syncTimer = 0;
+const SYNC_FIELDS = ["grinder","dripper","roast","process","selected","custom","favs","sound","noteOpen"];
+function syncDocUrl(){
+  return "https://firestore.googleapis.com/v1/projects/" + FIREBASE.projectId +
+    "/databases/(default)/documents/settings/" + encodeURIComponent(state.syncCode) +
+    "?key=" + FIREBASE.apiKey;
+}
+function syncInit(){
+  let q = null;
+  try { q = new URLSearchParams(location.search).get("sync"); } catch (e) {}
+  if (q) state.syncCode = q;
+  if (!state.syncCode) state.syncCode = "brew-" + Math.random().toString(36).slice(2, 8);
+  try { localStorage.setItem(LS, JSON.stringify(state)); } catch (e) {}
+  if (!FIREBASE.projectId || !FIREBASE.apiKey) return;
+  try {   /* 북마크가 코드를 포함하도록 주소에 붙입니다 */
+    const u = new URL(location.href);
+    if (location.protocol.indexOf("http") === 0 && u.searchParams.get("sync") !== state.syncCode){
+      u.searchParams.set("sync", state.syncCode);
+      history.replaceState(null, "", u);
+    }
+  } catch (e) {}
+  fetch(syncDocUrl()).then(res => res.ok ? res.json() : null).then(doc => {
+    const raw = doc && doc.fields && doc.fields.data && doc.fields.data.stringValue;
+    syncOn = true;
+    if (raw){
+      const d = JSON.parse(raw);
+      SYNC_FIELDS.forEach(k => { if (d[k] !== undefined) state[k] = d[k]; });
+      try { localStorage.setItem(LS, JSON.stringify(state)); } catch (e) {}
+      ensureSelection();
+    }
+    renderDetail();
+  }).catch(() => {});
+}
+function syncPush(){
+  if (!syncOn) return;
+  clearTimeout(syncTimer);
+  syncTimer = setTimeout(() => {
+    const d = {}; SYNC_FIELDS.forEach(k => { d[k] = state[k]; });
+    fetch(syncDocUrl() + "&updateMask.fieldPaths=data", {
+      method: "PATCH", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ fields: { data: { stringValue: JSON.stringify(d) } } })
+    }).catch(() => {});
+  }, 1200);
+}
 
 const byId = (arr, id) => arr.find(x => x.id === id) || arr[0];
 const grinder = () => state.grinder === "custom" ? customGrinder() : byId(GRINDERS, state.grinder);
@@ -2203,51 +2304,62 @@ function alignPourCard(idx){
   pour.style.transform = "translateY(" + ty.toFixed(0) + "px)";
 }
 
-/* 추출 화면 전환 — 추출 순서 위·아래 내용이 접히며 사라지고, 나올 때 다시 펼쳐집니다 */
-function brewCollapsibles(){
-  const out = [], detail = document.getElementById("detail");
-  if (detail) Array.prototype.forEach.call(detail.children, el => { if (el.id !== "brewSec") out.push(el); });
-  const wrap = detail ? detail.parentElement : null;
-  if (wrap) Array.prototype.forEach.call(wrap.children, el => { if (el !== detail) out.push(el); });
-  return out;
-}
-let brewAnim = 0;
-/* 접힌 상태를 즉시 적용 — 추출 중 재렌더로 새 요소가 생겨도 접힘을 유지합니다 */
-function collapseNow(el){
-  el.style.height = "0px"; el.style.overflow = "hidden"; el.style.opacity = "0";
-  el.style.marginTop = "0"; el.style.marginBottom = "0";
-  el.style.paddingTop = "0"; el.style.paddingBottom = "0";
+/* 페이지 이동 — 좌우 스와이프 또는 상단 탭. 추출 화면 = 3번째 페이지 */
+function pageTo(i, smooth){
+  const pg = document.getElementById("pager");
+  if (pg) pg.scrollTo({ left: pg.clientWidth * i, behavior: smooth === false ? "auto" : "smooth" });
 }
 function setBrewing(on){
-  on = !!on;
-  const body = document.body;
-  if (body.classList.contains("brewing") === on){ updateTimerButtons(); return; }
-  clearTimeout(brewAnim);
-  const els = brewCollapsibles();
-  body.classList.toggle("brewing", on);   /* 오버레이가 아니라 같은 화면 — 클래스는 버튼·표기 전환용 */
-  if (on){
-    els.forEach(el => {
-      el.style.height = el.offsetHeight + "px"; el.style.overflow = "hidden";
-      void el.offsetHeight;
-      if (!REDUCE) el.style.transition = "height .35s ease, opacity .25s ease, margin .35s ease, padding .35s ease";
-      el.style.height = "0px"; el.style.opacity = "0";
-      el.style.marginTop = "0"; el.style.marginBottom = "0";
-      el.style.paddingTop = "0"; el.style.paddingBottom = "0";
-    });
-    window.scrollTo({ top: 0, behavior: REDUCE ? "auto" : "smooth" });
-    brewAnim = setTimeout(() => alignPourCard(shownStep), REDUCE ? 0 : 380);
-  } else {
-    const pour = document.querySelector("#brewSec .pour"); if (pour) pour.style.transform = "";
-    els.forEach(el => {
-      el.style.transition = REDUCE ? "" : "height .35s ease, opacity .3s ease, margin .35s ease, padding .35s ease";
-      el.style.height = el.scrollHeight + "px"; el.style.opacity = "1";
-      el.style.marginTop = ""; el.style.marginBottom = "";
-      el.style.paddingTop = ""; el.style.paddingBottom = "";
-    });
-    brewAnim = setTimeout(() => { els.forEach(el => { el.style.cssText = ""; }); }, REDUCE ? 0 : 400);
-  }
+  document.body.classList.toggle("brewing", !!on);
+  pageTo(on ? 2 : 1);
   updateTimerButtons();
 }
+
+/* ── 즐겨찾기 — ★로 저장, 왼쪽 페이지에 모입니다 ── */
+function toggleFavId(id){
+  if (!id) return;
+  state.favs = state.favs || [];
+  const i = state.favs.indexOf(id);
+  if (i >= 0){ state.favs.splice(i, 1); toast("즐겨찾기에서 뺐습니다"); }
+  else { state.favs.push(id); toast("★ 저장했습니다 — 왼쪽 페이지에 모아둬요"); }
+  save(); renderDetail();
+}
+function toast(msg){
+  let t = document.getElementById("toast");
+  if (!t){ t = document.createElement("div"); t.id = "toast"; t.className = "toast"; document.body.appendChild(t); }
+  t.textContent = msg; t.classList.add("on");
+  clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove("on"), 1600);
+}
+function renderFavs(){
+  const el = document.getElementById("pgFav");
+  if (!el) return;
+  const favs = (state.favs || []).map(id => RECIPES.find(r => r.id === id)).filter(Boolean);
+  el.innerHTML =
+    '<div class="d-head"><div class="row-top"><span class="brand">브루 다이얼</span></div>' +
+      '<p class="favhead">저장한 레시피</p></div>' +
+    (favs.length
+      ? '<div class="favlist">' + favs.map(r =>
+          '<button type="button" class="favrow" data-id="' + r.id + '">' +
+            '<span class="fname">' + (r.optLabel || r.name) + (r.personal ? "" : " — " + r.by) + "</span>" +
+            '<span class="fmeta">' + (DRIPPER_LABEL[r.dripper] || r.dripper) + " · " + r.temp + " · " + Math.round(r.um) + "μm</span>" +
+            '<span class="fdel" data-del="' + r.id + '" aria-label="삭제">✕</span>' +
+          "</button>").join("") + "</div>"
+      : '<p class="empty" style="margin:16px 14px">레시피 제목 옆 <b>☆</b>을 누르면 여기에 저장됩니다.</p>') +
+    '<p class="syncline">' + (syncOn
+      ? "동기화 켜짐 · 코드 " + state.syncCode + " (주소에 포함 — 이 주소를 북마크하세요)"
+      : "기기 간 동기화 꺼짐 — Firebase 설정 대기") + "</p>";
+  el.querySelectorAll(".favrow").forEach(b => {
+    b.addEventListener("click", e => {
+      const del = e.target.closest("[data-del]");
+      if (del){ e.stopPropagation(); toggleFavId(del.getAttribute("data-del")); return; }
+      state.selected = b.getAttribute("data-id");
+      const nr = RECIPES.find(x => x.id === state.selected);
+      if (nr && DRIPPERS.some(d => d.id === nr.dripper)) state.dripper = nr.dripper;
+      save(); stopTimer(); renderDetail(); pageTo(1);
+    });
+  });
+}
+
 function updateTimerButtons(){
   const b = document.getElementById("tPlay");
   if (b) b.textContent = timer.running ? "⏸ 일시정지" : (timer.elapsed > 0 ? "▶ 이어서" : "▶ 시작");
@@ -2318,7 +2430,7 @@ function setPourStep(i, play){
 
 /* ── 상세 ─────────────────────────────────────────────── */
 function renderDetail(){
-  const el = document.getElementById("detail"), r = RECIPES.find(x => x.id === state.selected);
+  const el = document.getElementById("pgMain"), r = RECIPES.find(x => x.id === state.selected);
   /* 내 레시피는 원두 고정 — 배전도·가공을 잠그되, 떠날 때 원래 선택을 복원합니다 */
   if (r && r.personal){
     if (!state.keepRoast){ state.keepRoast = state.roast; state.keepProc = state.process; }
@@ -2438,6 +2550,7 @@ function renderDetail(){
       '<div class="titlerow">' +
         '<span class="selwrap titlewrap"><select id="selDripper" aria-label="드리퍼 선택"></select></span>' +
         '<span class="selwrap titlewrap"><select id="selRecipe" aria-label="레시피 선택"></select></span>' +
+        '<button type="button" class="favbtn" id="favBtn" aria-label="즐겨찾기 저장">☆</button>' +
       "</div>" +
       '<p class="d-blurb">' + infoHead + (r.blurb ? "<br>" + r.blurb : "") + "</p>" +
       '<div class="pickbar">' +
@@ -2460,8 +2573,9 @@ function renderDetail(){
         drow("계산 근거", trail) +
         (roastNote ? drow("배전도 맞춤", roastNote) : "") +
       "</dl>" + flagNote + refNote + bandNote +
-    "</div>" +
+    "</div>";
 
+  document.getElementById("pgBrew").innerHTML =
     '<div class="sec" id="brewSec"><p class="sec-label"><span>추출 순서</span><span>단계나 물량 바를 누르면 그 시점으로 이동합니다</span></p>' +
       '<div class="timer">' +
         '<span class="t-step" id="tStep" hidden><b></b><i></i></span>' +
@@ -2482,13 +2596,22 @@ function renderDetail(){
         '<div class="tl" id="tl">' + tl + "</div>" +
       "</div>" +
     "</div>" +
-    finish +
+    finish;
+
+  document.getElementById("moreRecipe").innerHTML =
     '<details class="sec fold" id="noteFold"' + (state.noteOpen ? " open" : "") + '><summary class="sec-label">브루잉 노트 · 팁 ' + r.tips.length + "개</summary>" +
       '<ul class="tips">' + r.tips.map(t => "<li>" + t + "</li>").join("") + "</ul>" +
       sourceBlock(r) + "</details>";
 
   renderPickers();
-  if (document.body.classList.contains("brewing")) brewCollapsibles().forEach(collapseNow);
+  renderFavs();
+  const fb = document.getElementById("favBtn");
+  if (fb){
+    const fav = (state.favs || []).indexOf(r.id) >= 0;
+    fb.textContent = fav ? "★" : "☆";
+    fb.classList.toggle("on", fav);
+    fb.onclick = () => toggleFavId(r.id);
+  }
   document.getElementById("noteFold").addEventListener("toggle", e => {
     state.noteOpen = e.target.open; save();   // 원두량·배전도를 바꿔도 펼침 상태 유지
   });
@@ -2628,4 +2751,23 @@ function renderAppendix(){
 ensureSelection();
 renderDetail();
 renderAppendix();
+
+/* 페이지 탭·스와이프 — 시작은 가운데(레시피) */
+(function(){
+  const pg = document.getElementById("pager");
+  const tabs = Array.prototype.slice.call(document.querySelectorAll("#ptabs button"));
+  tabs.forEach(b => b.addEventListener("click", () => pageTo(parseInt(b.getAttribute("data-pg"), 10))));
+  if (pg){
+    pg.addEventListener("scroll", () => {
+      const i = Math.round(pg.scrollLeft / Math.max(1, pg.clientWidth));
+      tabs.forEach((b, k) => b.classList.toggle("on", k === i));
+    }, { passive: true });
+    pageTo(1, false);
+    window.addEventListener("resize", () => {
+      const i = tabs.findIndex(b => b.classList.contains("on"));
+      pageTo(i < 0 ? 1 : i, false);
+    });
+  }
+})();
+syncInit();
 </script>
