@@ -74,17 +74,37 @@ table{border-collapse:collapse}
 .page{flex:0 0 100%;min-width:0;scroll-snap-align:center;scroll-snap-stop:always}
 .page > .detail{min-height:180px}
 
+/* 레시피 요약 + 수정 폼 */
+.rsum{margin:0 0 10px;font-size:14px;color:var(--ink-2)}
+.rsum b{color:var(--ink);font-family:var(--ff-mono);font-weight:600}
+.rsteps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:5px}
+.rsteps li{display:grid;grid-template-columns:44px 1fr auto;gap:10px;align-items:baseline;font-size:13.5px}
+.rsteps i{font-style:normal;font-family:var(--ff-mono);font-size:12px;color:var(--ink-3)}
+.rsteps li > b{font-family:var(--ff-mono);font-size:12.5px;color:var(--ember);font-weight:600}
+.ebtns{display:flex;gap:7px;margin-top:12px}
+.editbtn{font-size:12.5px;color:var(--ember);border:1px solid var(--ember-line);border-radius:999px;padding:6px 14px;background:var(--ember-dim)}
+.editbtn.ghost{color:var(--ink-3);border-color:var(--line);background:transparent}
+.editform{display:flex;flex-direction:column;gap:8px;margin-top:12px;padding:12px;border:1px dashed var(--ember-line);border-radius:var(--r-s)}
+.editform label{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--ink-2)}
+.editform label span{flex:0 0 58px}
+.editform label.col{flex-direction:column;align-items:stretch;gap:4px}
+.editform input,.editform textarea{background:var(--panel);border:1px solid var(--line);border-radius:6px;
+  padding:7px 9px;font-family:var(--ff-mono);font-size:13px;min-width:0;color:var(--ink)}
+.editform input{flex:1}
+.editform textarea{resize:vertical;line-height:1.5}
+.editform .ebtns{margin-top:2px}
+
 /* 즐겨찾기 */
 .favbtn{font-size:24px;line-height:1;color:var(--ink-3);flex:none;padding:0 2px;align-self:center;transition:color .15s,transform .15s}
 .favbtn.on{color:var(--ember)}
 .favbtn:active{transform:scale(1.25)}
 .favhead{font-family:var(--ff-display);font-size:19px;font-weight:700;margin:8px 0 2px}
-.favlist{display:flex;flex-direction:column;gap:8px;padding:14px}
+.favlist{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;padding:14px}
 .favrow{display:flex;flex-direction:column;gap:2px;text-align:left;border:1px solid var(--line);
   border-radius:var(--r-s);padding:11px 36px 11px 13px;background:var(--panel-2);position:relative}
 .favrow:hover{border-color:var(--ember-line)}
-.favrow .fname{font-family:var(--ff-display);font-weight:700;font-size:16px;line-height:1.3}
-.favrow .fmeta{font-family:var(--ff-mono);font-size:11px;color:var(--ink-3)}
+.favrow .fname{font-family:var(--ff-display);font-weight:700;font-size:15px;line-height:1.3;margin-bottom:2px}
+.favrow .fmeta{font-family:var(--ff-mono);font-size:10.5px;color:var(--ink-3);line-height:1.5}
 .favrow .fdel{position:absolute;right:8px;top:8px;color:var(--ink-3);font-size:13px;padding:5px}
 .favrow .fdel:hover{color:var(--alert)}
 .syncline{padding:2px 14px 14px;font-family:var(--ff-mono);font-size:11px;color:var(--ink-3)}
@@ -489,7 +509,6 @@ details.fold[open] > summary.sec-label{margin:0 0 12px}
     <summary>핸드드립 vs 푸어오버 · 물 붓는 모양 사전</summary>
     <div class="appendix-body">
       <div class="vs" id="vsGrid"></div>
-      <p class="pat-hint">카드를 누르면 붓는 궤적이 재생됩니다.</p>
       <div class="patgrid" id="patGrid"></div>
       <div>
         <div class="tblwrap">
@@ -566,7 +585,7 @@ details.fold[open] > summary.sec-label{margin:0 0 12px}
     (코만단테: V60 20–25클릭대 일치 · K‑Ultra: 프렌치프레스 9–10 일치).
     <b>페모북 A2</b>는 610–830μm에서 내 레시피 파일(10/8)의 통일 환산값을 그대로 쓰고, 그 밖은 두 실측 표의 절충입니다.
     <b>타임모어 C3</b>(공식 83μm/클릭 · 매뉴얼 권장 푸어오버 13–16클릭)와 <b>바라짜 엔코어</b>(공식 매뉴얼 권장 V60 15 · 프렌치프레스 28)는 공식 자료 기준 근사,
-    <b>EK43s</b>는 커뮤니티 실측 기반 근사로 개체차가 큽니다. 어느 쪽이든 「내 그라인더」에서 직접 보정할 수 있습니다.<br>
+    <b>EK43s</b>는 커뮤니티 실측 기반 근사로 개체차가 큽니다.<br>
     <b>레시피 출처</b> — 전주연 <a href="https://coffee4m.com/%EC%B9%BC%EB%A6%AC%ED%83%80-%EC%9B%A8%EC%9D%B4%EB%B8%8C-%EB%93%9C%EB%A6%AC%ED%8D%BC-%EB%A0%88%EC%8B%9C%ED%94%BC/">coffee4m</a> ·
     두 지아닝 <a href="https://www.timer.coffee/recipes/origami-dripper/jia-ning-du-origami-dripper-recipe/">timer.coffee</a> ·
     WAC 2023 <a href="https://aeropress.com/blogs/w-a-c-aeropress-recipes/1st-tay-wipvasutt-thailand-2023">aeropress.com</a> ·
@@ -603,12 +622,6 @@ const GRINDERS = [
   { id:"encore", name:"바라짜 엔코어", unit:"눈금", dec:0, hint:"공식 매뉴얼 권장 기준 근사 · 0–40",
     curve:[[300,0],[480,8],[700,12],[780,15],[860,18],[920,20],[1200,28],[1700,40]] }
 ];
-function customGrinder(){
-  const c = state.custom, pts = [];
-  for (let um = 300; um <= 1500; um += 100) pts.push([um, Math.max(0, c.ref + (um - 900) / c.umPerClick)]);
-  return { id:"custom", name:"내 그라인더", unit:"클릭", dec:1,
-    hint:"기준 " + c.ref + " = 900μm · 클릭당 " + c.umPerClick + "μm", curve:pts };
-}
 
 /* ── 배전도 · 가공방식 보정 (μm) ───────────────────────── */
 const ROASTS = [
@@ -1478,7 +1491,7 @@ function buildPersonal(){
         personal:true, vstatus:rec.v,
         name:b.short + " · " + (MY_DRIP_SHORT[dr] || dr) + " " + (rec.s === "ice" ? "아이스" : "핫") + (rec.g !== 20 ? " " + rec.g + "g" : ""),
         optLabel:b.short + " " + (rec.s === "ice" ? "아이스" : "핫") + (rec.g !== 20 ? " " + rec.g + "g" : ""),
-        by:b.roaster, role:b.name + " — " + b.roast + " · " + (b.proc || "가공 미상") + (b.owned ? "" : " · 미보유"),
+        by:b.roaster, role:b.name + (b.owned ? "" : " · 미보유"),
         dripper:dr, method:(rec.bm || "").indexOf("침출") === 0 ? "immersion" : (rec.bm || "").indexOf("하이브리드") === 0 ? "hybrid" : "pourover",
         fit:MY_ROAST[b.roast] || "medium", fitProcess:MY_PROC[b.proc] || "washed", procUnknown:!b.proc,
         dose:rec.g, ratio:rec.w / rec.g, iceMul:rec.i ? rec.i / rec.g : undefined,
@@ -1513,6 +1526,7 @@ const state = {
 try { const raw = localStorage.getItem(LS); if (raw) Object.assign(state, JSON.parse(raw)); } catch (e) {}
 if (!state.custom || typeof state.custom.ref !== "number") state.custom = { ref:24, umPerClick:30 };
 if (!DRIPPERS.some(d => d.id === state.dripper)) state.dripper = "all";  /* 옛 저장값(wave 등) 이행 */
+if (state.grinder === "custom") state.grinder = "kultra";
 function save(){
   try { localStorage.setItem(LS, JSON.stringify(state)); } catch (e) {}
   syncPush();
@@ -1521,9 +1535,9 @@ function save(){
 /* ── 기기 간 동기화 (Firebase Firestore REST) ─────────────
    Firebase 콘솔 → 프로젝트 설정 → 웹 앱 추가에서 나오는 두 값을 채우면 켜집니다.
    비어 있으면 조용히 꺼진 채 동작합니다. */
-const FIREBASE = { projectId: "", apiKey: "" };
+const FIREBASE = { projectId: "brew-dial", apiKey: "AIzaSyBE6N3wmf3TUL8mkIuqTqttKQ2Osr70bv0" };
 let syncOn = false, syncTimer = 0;
-const SYNC_FIELDS = ["grinder","dripper","roast","process","selected","custom","favs","sound","noteOpen"];
+const SYNC_FIELDS = ["grinder","dripper","roast","process","selected","favs","sound","noteOpen","mods"];
 function syncDocUrl(){
   return "https://firestore.googleapis.com/v1/projects/" + FIREBASE.projectId +
     "/databases/(default)/documents/settings/" + encodeURIComponent(state.syncCode) +
@@ -1543,9 +1557,12 @@ function syncInit(){
       history.replaceState(null, "", u);
     }
   } catch (e) {}
-  fetch(syncDocUrl()).then(res => res.ok ? res.json() : null).then(doc => {
-    const raw = doc && doc.fields && doc.fields.data && doc.fields.data.stringValue;
+  fetch(syncDocUrl()).then(res => {
+    if (res.status === 403 || res.status === 400) return null;   /* DB 미설정이면 조용히 꺼짐 */
     syncOn = true;
+    return res.ok ? res.json() : null;
+  }).then(doc => {
+    const raw = doc && doc.fields && doc.fields.data && doc.fields.data.stringValue;
     if (raw){
       const d = JSON.parse(raw);
       SYNC_FIELDS.forEach(k => { if (d[k] !== undefined) state[k] = d[k]; });
@@ -1568,7 +1585,7 @@ function syncPush(){
 }
 
 const byId = (arr, id) => arr.find(x => x.id === id) || arr[0];
-const grinder = () => state.grinder === "custom" ? customGrinder() : byId(GRINDERS, state.grinder);
+const grinder = () => byId(GRINDERS, state.grinder);
 const roast   = () => byId(ROASTS, state.roast);
 const proc    = () => byId(PROCESSES, state.process);
 
@@ -1591,6 +1608,8 @@ function fmtDial(g, v){
 const roastIdx = id => Math.max(0, ROASTS.findIndex(x => x.id === id));
 /* 보정은 '중배전'이 아니라 각 레시피가 설계된 배전도를 기준으로 계산합니다 */
 function deltas(r){
+  /* 내 수정본은 적은 분쇄값 그대로 — 배전도·가공 보정 없음 */
+  if (r.lockAdjust) return { dR: 0, dP: 0, fit: state.roast, fitLabel: roast().label, sens: 1 };
   const fit = r.fit || "medium";
   const sens = r.roastSens == null ? 1 : r.roastSens;
   const dR = (ROASTS[roastIdx(state.roast)].d - ROASTS[roastIdx(fit)].d) * sens;
@@ -1620,6 +1639,21 @@ function grindFor(r){
 }
 
 /* ── 포맷 ─────────────────────────────────────────────── */
+/* 라벨·패턴·시간을 한 줄로 — "2차 나선 붓기 · 13초". 추출 순서와 레시피 요약이 같이 씁니다 */
+function stepLineText(s){
+  const pl = s.pat && PATTERNS[s.pat] ? PATTERNS[s.pat].label : "";
+  let line = String(s.label);
+  if (pl){
+    if (/^\d+차 붓기$/.test(line)) line = line.replace(" 붓기", "") + " " + pl + " 붓기";
+    else if (line === "뜸") line = pl;
+    else if (line.indexOf("뜸") === 0 && pl.indexOf("뜸") === 0) line = pl + line.slice(1);
+    else if (line.indexOf(pl) < 0 && !(pl.indexOf("뜸") === 0 && line.indexOf("뜸") >= 0))
+      line += ' <span class="pat-in">· ' + pl + "</span>";
+  }
+  if (s.pat && s.dur && line.indexOf("초") < 0)
+    line += ' <span class="pat-in">· ' + (s.durEstimated || s.approx ? "약 " : "") + s.dur + "초</span>";
+  return line;
+}
 const mmss = s => Math.floor(s/60) + ":" + String(Math.floor(s%60)).padStart(2,"0");
 const gram = n => Math.round(n) + "g";
 const fmtRatio = v => (Math.round(v * 10) / 10).toFixed(1).replace(/\.0$/, "");
@@ -1893,6 +1927,7 @@ function renderPickers(){
       if (!mine.length) return;
       html += '<optgroup label="내 원두 · ' + b.short + '">' +
         mine.map(r => '<option value="' + r.id + '">' + (r.optLabel || r.name) +
+          (state.mods && state.mods[r.id] ? " ✎" : "") +
           (r.vstatus === "검증됨" ? " ✓" : r.vstatus === "부분검증" ? " ◐" : "") + "</option>").join("") +
         "</optgroup>";
     });
@@ -1902,7 +1937,8 @@ function renderPickers(){
       const nBy = {};
       famous.forEach(r => { nBy[r.by] = (nBy[r.by] || 0) + 1; });
       html += '<optgroup label="유명 레시피">' +
-        famous.map(r => '<option value="' + r.id + '">' + (nBy[r.by] > 1 ? r.by + " · " + r.name : r.by) + "</option>").join("") +
+        famous.map(r => '<option value="' + r.id + '">' + (nBy[r.by] > 1 ? r.by + " · " + r.name : r.by) +
+          (state.mods && state.mods[r.id] ? " ✎" : "") + "</option>").join("") +
         "</optgroup>";
     }
     el.innerHTML = html;
@@ -1917,31 +1953,23 @@ function renderPickers(){
   }
 
   fillSelect("selGrinder",
-    GRINDERS.map(g => ({ id:g.id, label:g.name })).concat([{ id:"custom", label:"내 그라인더 (직접 보정)" }]),
+    GRINDERS.map(g => ({ id:g.id, label:g.name })),
     state.grinder, v => { state.grinder = v; save(); refreshAll(); });
 
   fillSelect("selDripper", DRIPPERS.map(d => ({ id:d.id, label:d.label, n:countFor(d.id) })),
     state.dripper, v => { state.dripper = v; ensureSelection(); save(); stopTimer(); refreshAll(); });
 
   /* 내 레시피는 원두가 고정이라 배전도·가공을 바꿀 수 없습니다 (잠금·복원은 renderDetail에서) */
-  const sel = byId(RECIPES, state.selected);
+  const sel = applyMods(byId(RECIPES, state.selected));
   fillSelect("selRoast", ROASTS.map(r => ({ id:r.id, label:r.label })),
     state.roast, v => { state.roast = v; save(); refreshAll(); });
   fillSelect("selProc", PROCESSES.map(p => ({ id:p.id, label:p.label })),
     state.process, v => { state.process = v; save(); refreshAll(); });
+  /* 내 원두는 배전·가공이 원두에 적혀 있으므로 선택 자체를 숨깁니다 */
   const rSel = document.getElementById("selRoast"), pSel = document.getElementById("selProc");
-  if (rSel) rSel.disabled = !!sel.personal;
-  if (pSel) pSel.disabled = !!sel.personal;
-  if (pSel && sel.personal && sel.procUnknown) pSel.innerHTML = "<option selected>가공 미상</option>";
+  if (rSel) rSel.parentElement.style.display = sel.personal ? "none" : "";
+  if (pSel) pSel.parentElement.style.display = sel.personal ? "none" : "";
 
-  const cal = document.getElementById("calib");
-  if (cal){
-    cal.classList.toggle("on", state.grinder === "custom");
-    const cr = document.getElementById("calRef"), cu = document.getElementById("calUm");
-    cr.value = state.custom.ref; cu.value = state.custom.umPerClick;
-    cr.oninput = e => { const v = parseFloat(e.target.value); if (!isNaN(v)){ state.custom.ref = v; save(); renderDetail(); } };
-    cu.oninput = e => { const v = parseFloat(e.target.value); if (!isNaN(v) && v >= 5){ state.custom.umPerClick = v; save(); renderDetail(); } };
-  }
 }
 
 /* 화면 폭이 바뀌면 드립 카드 위치 보정 — 좁아지면 원위치, 넓어지면 현재 단계로 */
@@ -2088,7 +2116,7 @@ const elapsedNow = () => timer.running ? timer.elapsed + (performance.now() - ti
 
 /* 원하는 시각으로 이동 — 돌던 중이면 그 시각부터 계속, 멈춰 있으면 그 시각에 멈춰 둡니다 */
 function seekTo(t){
-  const r = byId(RECIPES, state.selected), steps = stepsFor(r);
+  const r = applyMods(byId(RECIPES, state.selected)), steps = stepsFor(r);
   const total = Math.max(r.total || 0, steps.length ? steps[steps.length - 1].at : 0);
   t = Math.max(0, Math.min(total, t));
   timer.elapsed = t;
@@ -2179,7 +2207,7 @@ function startPreview(){
 }
 
 function paintTimer(){
-  const r = byId(RECIPES, state.selected), clock = document.getElementById("clock");
+  const r = applyMods(byId(RECIPES, state.selected)), clock = document.getElementById("clock");
   if (!clock) return;
   const steps = stepsFor(r), c = ctxFor(r), t = elapsedNow();
   const isImm = r.method === "immersion";
@@ -2209,7 +2237,7 @@ function paintTimer(){
   if (stepEl && nextEl){
     if (t === 0){
       stepEl.hidden = true;
-      nextEl.textContent = "시작을 누르면 추출 순서를 따라갑니다.";
+      nextEl.textContent = "";
     } else {
       const cur = steps[Math.max(0, curIdx)], next = steps[curIdx + 1];
       const nm = String(cur.label).match(/^(\d+)차/);
@@ -2304,6 +2332,45 @@ function alignPourCard(idx){
   pour.style.transform = "translateY(" + ty.toFixed(0) + "px)";
 }
 
+/* ── 레시피 수정본 — 원본 위에 내 값(온도·분쇄·물·단계·팁)을 덮어씁니다 ── */
+function buildModSteps(lines, fin){
+  return c => {
+    const out = [];
+    lines.forEach((st, i) => {
+      out.push({ at:st[0], kind:i === 0 ? "bloom" : "pour", to:st[1],
+        label:(st[2] || (i === 0 ? "뜸" : (i + 1) + "차 붓기")),
+        pat:i === 0 ? "bloom" : "spiral" });
+    });
+    out.push({ at:fin[1], kind:"end", label:"다 내려오면 완료 (" + mmss(fin[0]) + "~" + mmss(fin[1]) + ")" });
+    return out;
+  };
+}
+function applyMods(r){
+  const m = r && state.mods && state.mods[r.id];
+  if (!m) return r;
+  const o = Object.assign({}, r);
+  if (m.temp){ o.temp = m.temp; o.tempFixed = true; }   /* 적은 온도 그대로 */
+  if (m.um){ o.um = m.um; o.lockAdjust = true; }        /* 적은 분쇄 그대로 */
+  if (m.dose) o.dose = m.dose;
+  const dose = m.dose || r.dose;
+  if (m.water) o.ratio = m.water / dose;
+  if (m.ice !== undefined) o.iceMul = m.ice > 0 ? m.ice / dose : undefined;
+  if (m.fin){
+    o.total = m.fin[1];
+    o.totalRange = m.fin[0] !== m.fin[1] ? m.fin.slice() : null;
+    o.totalLabel = null;
+  }
+  if (m.steps && m.steps.length) o.steps = buildModSteps(m.steps, m.fin || [r.total || 180, r.total || 180]);
+  if (m.tip) o.tips = ["내 메모 · " + m.tip].concat(r.tips || []);
+  o.modded = true;
+  return o;
+}
+function parseClock(t){
+  const m = String(t).trim().match(/^(\d+):(\d{1,2})$/);
+  if (m) return parseInt(m[1], 10) * 60 + parseInt(m[2], 10);
+  const n = parseInt(t, 10); return isNaN(n) ? 0 : n;
+}
+
 /* 페이지 이동 — 좌우 스와이프 또는 상단 탭. 추출 화면 = 3번째 페이지 */
 function pageTo(i, smooth){
   const pg = document.getElementById("pager");
@@ -2333,21 +2400,19 @@ function toast(msg){
 function renderFavs(){
   const el = document.getElementById("pgFav");
   if (!el) return;
-  const favs = (state.favs || []).map(id => RECIPES.find(r => r.id === id)).filter(Boolean);
+  const favs = (state.favs || []).map(id => { const r0 = RECIPES.find(x => x.id === id); return r0 ? applyMods(r0) : null; }).filter(Boolean);
   el.innerHTML =
     '<div class="d-head"><div class="row-top"><span class="brand">브루 다이얼</span></div>' +
       '<p class="favhead">저장한 레시피</p></div>' +
     (favs.length
       ? '<div class="favlist">' + favs.map(r =>
           '<button type="button" class="favrow" data-id="' + r.id + '">' +
-            '<span class="fname">' + (r.optLabel || r.name) + (r.personal ? "" : " — " + r.by) + "</span>" +
-            '<span class="fmeta">' + (DRIPPER_LABEL[r.dripper] || r.dripper) + " · " + r.temp + " · " + Math.round(r.um) + "μm</span>" +
+            '<span class="fname">' + (r.optLabel || r.name) + (r.modded ? " ✎" : "") + "</span>" +
+            '<span class="fmeta">' + (DRIPPER_LABEL[r.dripper] || r.dripper) + "</span>" +
+            '<span class="fmeta">' + r.temp + " · " + Math.round(r.um) + "μm</span>" +
             '<span class="fdel" data-del="' + r.id + '" aria-label="삭제">✕</span>' +
           "</button>").join("") + "</div>"
-      : '<p class="empty" style="margin:16px 14px">레시피 제목 옆 <b>☆</b>을 누르면 여기에 저장됩니다.</p>') +
-    '<p class="syncline">' + (syncOn
-      ? "동기화 켜짐 · 코드 " + state.syncCode + " (주소에 포함 — 이 주소를 북마크하세요)"
-      : "기기 간 동기화 꺼짐 — Firebase 설정 대기") + "</p>";
+      : '<p class="empty" style="margin:16px 14px">저장한 레시피가 없습니다.</p>');
   el.querySelectorAll(".favrow").forEach(b => {
     b.addEventListener("click", e => {
       const del = e.target.closest("[data-del]");
@@ -2373,7 +2438,7 @@ function updateTimerButtons(){
 }
 
 function setPourStep(i, play){
-  const r = byId(RECIPES, state.selected), steps = stepsFor(r), s = steps[i];
+  const r = applyMods(byId(RECIPES, state.selected)), steps = stepsFor(r), s = steps[i];
   if (!s) return;
   shownStep = i;
   const panel = document.getElementById("pourPanel");
@@ -2430,7 +2495,8 @@ function setPourStep(i, play){
 
 /* ── 상세 ─────────────────────────────────────────────── */
 function renderDetail(){
-  const el = document.getElementById("pgMain"), r = RECIPES.find(x => x.id === state.selected);
+  const el = document.getElementById("pgMain");
+  let r = RECIPES.find(x => x.id === state.selected);
   /* 내 레시피는 원두 고정 — 배전도·가공을 잠그되, 떠날 때 원래 선택을 복원합니다 */
   if (r && r.personal){
     if (!state.keepRoast){ state.keepRoast = state.roast; state.keepProc = state.process; }
@@ -2448,6 +2514,7 @@ function renderDetail(){
     }
     return renderDetail();
   }
+  r = applyMods(r);
   state.dose = r.dose || 20;   /* 원두량은 원 레시피 값으로 고정 — 양이 바뀌면 붓는 법·시간도 달라지므로 */
   const c = ctxFor(r), steps = stepsFor(r), gr = grindFor(r), m = METHODS[r.method];
 
@@ -2499,18 +2566,7 @@ function renderDetail(){
     const kind = s.kind === "bloom" ? "bloom" : s.kind === "pour" ? "pour" : "act";
     const amt = s.add > 0 ? "<b>+" + gram(s.add) + '</b><br><span class="cum">누적 ' + gram(s.to) + "</span>"
       : (s.kind === "end" ? "종료" : "동작");
-    const pl = s.pat && PATTERNS[s.pat] ? PATTERNS[s.pat].label : "";
-    /* 라벨·패턴·시간을 한 줄로 합칩니다 — "2차 나선 붓기 · 13초" */
-    let line = String(s.label);
-    if (pl){
-      if (/^\d+차 붓기$/.test(line)) line = line.replace(" 붓기", "") + " " + pl + " 붓기";
-      else if (line === "뜸") line = pl;
-      else if (line.indexOf("뜸") === 0 && pl.indexOf("뜸") === 0) line = pl + line.slice(1);
-      else if (line.indexOf(pl) < 0 && !(pl.indexOf("뜸") === 0 && line.indexOf("뜸") >= 0))
-        line += ' <span class="pat-in">· ' + pl + "</span>";
-    }
-    if (s.pat && s.dur && line.indexOf("초") < 0)
-      line += ' <span class="pat-in">· ' + (s.durEstimated || s.approx ? "약 " : "") + s.dur + "초</span>";
+    const line = stepLineText(s);
     return '<button type="button" class="step ' + kind + '" data-i="' + i + '" aria-pressed="false">' +
       '<span class="at">' + mmss(s.at) + "</span>" +
       '<span class="lb"><span class="top"><span class="k"></span>' + line + "</span>" +
@@ -2535,14 +2591,37 @@ function renderDetail(){
         " = 총 " + gram(c.water + c.ice) + "</span></span></div></div>";
   }
 
-  /* 온도는 정보 줄에 — 보정이 있으면 괄호로 덧붙입니다 */
-  const ts0 = tempShift(r);
-  const tempInfo = "물 <b>" + tempFor(r) + "</b>" +
-    (r.tempFixed ? "" : (ts0 && !r.personal ? " (" + roast().label + " 보정 " + (ts0 > 0 ? "+" : "") + ts0 + "℃)" : ""));
-  /* 만든 사람은 제목 셀렉트에 이미 있으므로 정보 줄에는 레시피명·이력·온도만 */
-  const infoHead = (r.personal
+  /* 배전·가공은 배지/원두명에, 온도·물은 아래 레시피 요약에 — 여기선 한 번씩만 */
+  const infoHead = r.personal
     ? "<b>" + r.by + "</b> · " + r.role
-    : "<b>" + r.name + "</b> — " + r.role) + " · " + tempInfo;
+    : "<b>" + r.name + "</b> — " + r.role;
+
+  /* ── 레시피 요약 + 수정 폼 (레시피 페이지) ── */
+  const mod = state.mods && state.mods[RECIPES.find(x => x.id === state.selected).id];
+  const stepRows = steps.map(st =>
+    '<li><i>' + mmss(st.at) + "</i><span>" + stepLineText(st) + "</span>" +
+    (st.add > 0 ? "<b>" + Math.round(st.to) + "g</b>" : "<b></b>") + "</li>").join("");
+  const recipeSec =
+    '<div class="sec rsec"><p class="sec-label"><span>레시피' + (r.modded ? " · 내 수정본" : "") + "</span></p>" +
+      '<p class="rsum"><b>' + state.dose + "g</b> · 물 <b>" + gram(c.water) + "</b>" +
+      (c.ice ? " · 얼음 <b>" + gram(c.ice) + "</b>" : "") +
+      " · <b>" + tempFor(r) + "</b> · 완료 <b>" + timeValue(r) + "</b></p>" +
+      '<ol class="rsteps">' + stepRows + "</ol>" +
+      '<div class="ebtns"><button type="button" class="editbtn" id="editBtn">✎ 수정</button>' +
+      (r.modded ? '<button type="button" class="editbtn" id="editReset">원본으로</button>' : "") + "</div>" +
+      '<div class="editform" id="editForm" hidden>' +
+        '<label><span>원두 g</span><input type="number" id="edDose" min="5" max="60" step="1"></label>' +
+        '<label><span>물 g</span><input type="number" id="edWater" min="50" max="900" step="5"></label>' +
+        '<label><span>얼음 g</span><input type="number" id="edIce" min="0" max="400" step="5"></label>' +
+        '<label><span>온도</span><input type="text" id="edTemp"></label>' +
+        '<label><span>분쇄 μm</span><input type="number" id="edUm" min="300" max="1500" step="5"></label>' +
+        '<label><span>완료</span><input type="text" id="edFin" placeholder="2:10~2:30"></label>' +
+        '<label class="col"><span>단계</span><textarea id="edSteps" rows="5" placeholder="0:00 40 뜸"></textarea></label>' +
+        '<label class="col"><span>나의 팁</span><textarea id="edTip" rows="2"></textarea></label>' +
+        '<div class="ebtns"><button type="button" class="editbtn" id="edSave">저장</button>' +
+        '<button type="button" class="editbtn ghost" id="edCancel">취소</button></div>' +
+      "</div>" +
+    "</div>";
 
   el.innerHTML =
     '<div class="d-head">' +
@@ -2560,11 +2639,6 @@ function renderDetail(){
         '<span class="selwrap"><select id="selRoast" aria-label="배전도"></select></span>' +
         '<span class="selwrap"><select id="selProc" aria-label="가공방식"></select></span>' +
       "</div>" +
-      '<div class="calib" id="calib">' +
-        '<label>기준 눈금 <input type="number" id="calRef" step="0.5" min="0" max="200"></label>' +
-        '<label>클릭당 μm <input type="number" id="calUm" step="1" min="5" max="200"></label>' +
-        '<p class="note">평소 <b>중배전 워시드 드립</b>이 잘 나오는 눈금을 기준값에 넣으세요. 그 값이 900μm이 되고, 클릭당 μm으로 나머지를 계산합니다.</p>' +
-      "</div>" +
     "</div>" +
     '<div class="tilepanel" id="grindPanel">' +
       '<dl class="dialinfo">' +
@@ -2573,14 +2647,14 @@ function renderDetail(){
         drow("계산 근거", trail) +
         (roastNote ? drow("배전도 맞춤", roastNote) : "") +
       "</dl>" + flagNote + refNote + bandNote +
-    "</div>";
+    "</div>" + recipeSec;
 
   document.getElementById("pgBrew").innerHTML =
-    '<div class="sec" id="brewSec"><p class="sec-label"><span>추출 순서</span><span>단계나 물량 바를 누르면 그 시점으로 이동합니다</span></p>' +
+    '<div class="sec" id="brewSec"><p class="sec-label"><span>추출 순서</span></p>' +
       '<div class="timer">' +
         '<span class="t-step" id="tStep" hidden><b></b><i></i></span>' +
         '<span class="clock" id="clock">0:00</span>' +
-        '<span class="t-next" id="tNext">시작을 누르면 순서대로 따라갑니다.</span>' +
+        '<span class="t-next" id="tNext"></span>' +
         '<span class="tbtns">' +
           '<button type="button" class="tbtn primary" id="tPlay">▶ 시작</button>' +
           '<button type="button" class="tbtn" id="tReset">■ 리셋</button>' +
@@ -2611,6 +2685,54 @@ function renderDetail(){
     fb.textContent = fav ? "★" : "☆";
     fb.classList.toggle("on", fav);
     fb.onclick = () => toggleFavId(r.id);
+  }
+
+  /* 레시피 수정 폼 */
+  const ef = document.getElementById("editForm"), eb = document.getElementById("editBtn");
+  if (eb && ef){
+    eb.onclick = () => {
+      ef.hidden = !ef.hidden;
+      if (!ef.hidden){
+        document.getElementById("edDose").value = state.dose;
+        document.getElementById("edWater").value = Math.round(c.water);
+        document.getElementById("edIce").value = Math.round(c.ice || 0);
+        document.getElementById("edTemp").value = r.temp;
+        document.getElementById("edUm").value = Math.round(r.um);
+        document.getElementById("edFin").value = r.totalRange
+          ? mmss(r.totalRange[0]) + "~" + mmss(r.totalRange[1]) : mmss(r.total || 180);
+        document.getElementById("edSteps").value = steps
+          .filter(st => st.kind === "bloom" || st.kind === "pour")
+          .map(st => mmss(st.at) + " " + Math.round(st.to) + " " + String(st.label).replace(/<[^>]*>/g, "")).join("\n");
+        document.getElementById("edTip").value = (mod && mod.tip) || "";
+      }
+    };
+    const er = document.getElementById("editReset");
+    if (er) er.onclick = () => {
+      if (state.mods) delete state.mods[RECIPES.find(x => x.id === state.selected).id];
+      save(); toast("원본 레시피로 되돌렸습니다"); renderDetail();
+    };
+    document.getElementById("edCancel").onclick = () => { ef.hidden = true; };
+    document.getElementById("edSave").onclick = () => {
+      const g = v => document.getElementById(v).value;
+      const m2 = {};
+      const dose = parseInt(g("edDose"), 10), water = parseInt(g("edWater"), 10), ice = parseInt(g("edIce"), 10);
+      if (dose > 0) m2.dose = dose;
+      if (water > 0) m2.water = water;
+      if (!isNaN(ice)) m2.ice = ice;
+      if (g("edTemp").trim()) m2.temp = g("edTemp").trim();
+      const um2 = parseInt(g("edUm"), 10); if (um2 >= 300) m2.um = um2;
+      const fin = g("edFin").split(/[~\-–]/).map(parseClock).filter(n => n > 0);
+      if (fin.length) m2.fin = [fin[0], fin[fin.length - 1]];
+      const lines = g("edSteps").split("\n").map(l => l.trim()).filter(Boolean).map(l => {
+        const mm = l.match(/^(\S+)\s+(\d+)\s*g?\s*(.*)$/);
+        return mm ? [parseClock(mm[1]), parseInt(mm[2], 10), mm[3] || ""] : null;
+      }).filter(Boolean);
+      if (lines.length) m2.steps = lines;
+      if (g("edTip").trim()) m2.tip = g("edTip").trim();
+      state.mods = state.mods || {};
+      state.mods[RECIPES.find(x => x.id === state.selected).id] = m2;
+      save(); toast("수정본을 저장했습니다"); stopTimer(); renderDetail();
+    };
   }
   document.getElementById("noteFold").addEventListener("toggle", e => {
     state.noteOpen = e.target.open; save();   // 원두량·배전도를 바꿔도 펼침 상태 유지
