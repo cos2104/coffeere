@@ -63,22 +63,105 @@ table{border-collapse:collapse}
 
 html,body{height:100%}
 body{overflow:hidden}
-.wrap{max-width:1340px;margin:0 auto;padding:16px 20px 0;display:flex;flex-direction:column;gap:14px;
+.wrap{position:relative;max-width:1340px;margin:0 auto;padding:16px 20px 0;display:flex;flex-direction:column;gap:14px;
   height:100vh;height:100dvh}
 
 /* ── 페이지(좌우 스와이프: 저장 | 레시피 | 추출 | 노트·자료) ── */
-.ptabs{display:flex;gap:6px;margin:0 0 12px;position:sticky;top:0;z-index:60;background:var(--bg);padding:10px 0 8px}
-.ptabs button{font-family:var(--ff-mono);font-size:11px;letter-spacing:.08em;color:var(--ink-3);
-  border:1px solid var(--line);border-radius:999px;padding:5px 12px;white-space:nowrap}
-.ptabs button.on{color:var(--ember);border-color:var(--ember-line);background:var(--ember-dim)}
-.pager{display:flex;gap:16px;overflow-x:auto;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;
-  scrollbar-width:none;flex:1 1 auto;min-height:0}
-.pager::-webkit-scrollbar{display:none}
-/* 각 페이지는 자기만의 세로 스크롤 — 옆 페이지와 스크롤이 엮이지 않습니다 */
-.page{flex:0 0 100%;min-width:0;scroll-snap-align:center;scroll-snap-stop:always;
-  height:100%;overflow-y:auto;overscroll-behavior-y:contain;-webkit-overflow-scrolling:touch;padding-bottom:48px}
-.page::-webkit-scrollbar{display:none}
-.page > .detail{min-height:180px}
+/* ── 하단 탭 앱 구조 ── */
+.tabpages{flex:1 1 auto;min-height:0;position:relative}
+.tabpage{height:100%;overflow-y:auto;overscroll-behavior-y:contain;-webkit-overflow-scrolling:touch;
+  padding:4px 2px 110px;scrollbar-width:none}
+.tabpage::-webkit-scrollbar{display:none}
+.lhead{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin:6px 0 12px}
+.lhead h1{font-family:var(--ff-display);font-size:30px;font-weight:700;margin:0}
+.sortbtn{font-family:var(--ff-mono);font-size:11px;color:var(--ink-3);border:1px solid var(--line);
+  border-radius:999px;padding:5px 11px}
+.searchin{width:100%;background:var(--panel);border:1px solid var(--line);border-radius:12px;
+  padding:11px 14px;font:inherit;font-size:14px;color:var(--ink);margin:0 0 10px}
+.searchin::placeholder{color:var(--ink-3)}
+.fchips{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 12px}
+.fchips button{font-size:12px;color:var(--ink-3);border:1px solid var(--line);border-radius:999px;padding:5px 12px;white-space:nowrap}
+.fchips button.on{color:var(--ember);border-color:var(--ember-line);background:var(--ember-dim)}
+.cardlist{display:flex;flex-direction:column;gap:9px}
+.rcard{display:grid;grid-template-columns:1fr auto;gap:2px 10px;text-align:left;background:var(--panel);
+  border:1px solid var(--line);border-radius:var(--r-s);padding:13px 14px;align-items:center}
+.rcard:hover{border-color:var(--ember-line)}
+.rcard .rn{font-family:var(--ff-display);font-size:16.5px;font-weight:700;line-height:1.3}
+.rcard .rm{font-family:var(--ff-mono);font-size:11px;color:var(--ink-3);grid-column:1}
+.rcard .rstar{grid-row:1 / span 3;grid-column:2;font-size:20px;color:var(--ink-3);padding:6px}
+.rcard .rstar.on{color:var(--ember)}
+.rcard .rbadges{grid-column:1;display:flex;gap:5px;flex-wrap:wrap;margin-top:2px}
+.tabbar{flex:none;display:flex;gap:4px;background:var(--panel);border:1px solid var(--line);
+  border-radius:999px;padding:6px;margin:8px 0 10px;box-shadow:var(--shadow)}
+.tabbar button{flex:1;display:flex;flex-direction:column;align-items:center;gap:1px;padding:7px 0;
+  border-radius:999px;color:var(--ink-3);font-size:11px}
+.tabbar button i{font-style:normal;font-size:17px;line-height:1}
+.tabbar button.on{color:var(--ember);background:var(--ember-dim)}
+.fab{position:absolute;right:22px;bottom:92px;width:54px;height:54px;border-radius:50%;z-index:40;
+  background:var(--ember);color:var(--bg);font-size:26px;line-height:1;box-shadow:var(--shadow)}
+.fab:hover{background:var(--ember-2)}
+
+/* 추가/수정 폼 */
+.formview{z-index:80}
+.fmok{margin-left:auto}
+.fmbody{padding:14px;display:flex;flex-direction:column;gap:16px}
+.fmsec h3{font-family:var(--ff-mono);font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--ink-3);margin:0 0 8px;font-weight:500}
+.fmrow{display:flex;flex-direction:column;gap:10px;background:var(--panel-2);border:1px solid var(--line);
+  border-radius:var(--r-s);padding:13px}
+.fmin{width:100%;background:transparent;border:0;border-bottom:1px solid var(--line);padding:7px 2px;
+  font:inherit;font-size:15px;color:var(--ink)}
+.fmin::placeholder{color:var(--ink-3)}
+.fmin:focus{outline:none;border-bottom-color:var(--ember)}
+.fmlabel{font-size:12px;color:var(--ink-3)}
+.fmgrid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.steprow{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.steprow span{font-size:13px;color:var(--ink-2)}
+.stepbox{display:flex;align-items:center;gap:9px}
+.stepbox button{width:34px;height:34px;border-radius:50%;background:var(--ember-dim);color:var(--ember);
+  border:1px solid var(--ember-line);font-size:16px;flex:none}
+.stepbox b{font-family:var(--ff-mono);font-size:17px;min-width:64px;text-align:center}
+.stepbox b small{font-size:11px;color:var(--ink-3);font-weight:400}
+.dripicons{display:flex;gap:8px;flex-wrap:wrap}
+.dripicons button{display:flex;flex-direction:column;align-items:center;gap:3px;border:1px solid var(--line);
+  border-radius:12px;padding:9px 13px;font-size:11.5px;color:var(--ink-3);min-width:64px}
+.dripicons button.on{color:var(--ember);border-color:var(--ember-line);background:var(--ember-dim)}
+.dripicons button i{font-style:normal;font-size:18px}
+.stars{display:flex;gap:4px;font-size:27px;color:var(--line)}
+.stars button{color:inherit;padding:0 2px}
+.stars button.on{color:var(--ember)}
+.fmta{width:100%;min-height:74px;background:transparent;border:1px solid var(--line);border-radius:8px;
+  padding:9px 11px;font:inherit;font-size:14px;color:var(--ink);resize:vertical}
+.notecats .nc{margin:7px 0 3px;font-size:11px;color:var(--ink-3)}
+
+/* 변환·설정 위젯 */
+.cvs{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:16px;margin-bottom:12px}
+.cvs .selwrap{display:block;margin:4px 0 10px}
+.cvrow{display:flex;align-items:center;gap:12px;justify-content:center;margin:8px 0 4px}
+.cvstep{width:42px;height:42px;border-radius:50%;background:var(--ember-dim);color:var(--ember);font-size:20px;border:1px solid var(--ember-line)}
+.cvval{font-family:var(--ff-mono);font-size:15px;color:var(--ink-2)}
+.cvval b{font-size:30px;color:var(--ink);font-weight:600}
+.cvval small{display:block;text-align:center;color:var(--ink-3);font-size:11px}
+#cvRange{width:100%;accent-color:var(--ember);margin:8px 0 2px}
+.cvum{text-align:center;font-size:13px;color:var(--ink-3);margin:8px 0 0}
+.cvum b{color:var(--ink);font-family:var(--ff-mono)}
+.cvout{font-family:var(--ff-mono);font-size:15px;margin:6px 0 4px}
+.cvout b{font-size:32px;color:var(--ember);font-weight:600}
+.cvmeta{font-size:12px;color:var(--ink-3);margin:3px 0;display:flex;align-items:center;gap:8px;justify-content:space-between}
+.cvnote{font-size:11.5px;color:var(--ink-3);font-weight:300;line-height:1.6;margin:4px 2px 14px;text-align:center}
+.cgform{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0 6px}
+.cgform .ein{width:84px}
+.cgform .ein.wide{flex:1;min-width:120px;text-align:left}
+
+/* 레시피 상세 — 전체 화면 오버레이 */
+.detailview{position:fixed;inset:0;z-index:70;background:var(--bg);overflow-y:auto;
+  -webkit-overflow-scrolling:touch;padding:0 14px 60px}
+.detailview > .detail{max-width:1100px;margin:0 auto 14px}
+.dbar{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:10px;background:var(--bg);
+  padding:12px 2px 10px;max-width:1100px;margin:0 auto}
+.dback{font-size:20px;color:var(--ember);padding:2px 10px;border:1px solid var(--ember-line);border-radius:999px;background:var(--ember-dim)}
+.dbar-t{font-family:var(--ff-display);font-weight:700;font-size:15px;color:var(--ink-2);
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
 /* 레시피 요약 + 수정 폼 */
 .rsum{margin:0 0 10px;font-size:14px;color:var(--ink-2)}
@@ -152,6 +235,7 @@ body{overflow:hidden}
 
 /* 제목 줄 = 드리퍼 선택(반) + 레시피 선택(반) */
 .titlerow{display:flex;gap:12px;margin:7px 0 2px;align-items:center}
+.dname{font-family:var(--ff-display);font-size:clamp(20px,4vw,26px);font-weight:700;margin:0;flex:1;min-width:0;line-height:1.3}
 .titlerow .selwrap{flex:1 1 50%;min-width:0}
 .titlerow .titlewrap{margin:0}
 .titlerow .titlewrap select{font-size:clamp(16px,2.6vw,21px)}
@@ -509,19 +593,24 @@ details.fold[open] > summary.sec-label{margin:0 0 12px}
 
 <div class="wrap">
 
-  <nav class="ptabs" id="ptabs" aria-label="페이지">
-    <button type="button" data-pg="0">★ 저장</button>
-    <button type="button" data-pg="1" class="on">레시피</button>
-    <button type="button" data-pg="2">추출</button>
-    <button type="button" data-pg="3">노트 · 자료</button>
-  </nav>
+  <main class="tabpages" id="tabpages">
 
-  <div class="pager" id="pager">
-    <section class="page"><div class="detail" id="pgFav"></div></section>
-    <section class="page"><div class="detail" id="pgMain" aria-live="polite"></div></section>
-    <section class="page"><div class="detail" id="pgBrew"></div></section>
-    <section class="page">
-      <div class="detail" id="moreRecipe"></div>
+    <section class="tabpage" id="tabRecipes">
+      <div class="lhead"><h1>레시피</h1><button type="button" class="sortbtn" id="rcSort">↕ 기본순</button></div>
+      <input type="search" class="searchin" id="rcSearch" placeholder="이름, 원두, 드리퍼 검색">
+      <div class="fchips" id="rcChips"></div>
+      <div class="cardlist" id="rcList"></div>
+    </section>
+
+    <section class="tabpage" id="tabBeans" hidden>
+      <div class="lhead"><h1>원두</h1></div>
+      <input type="search" class="searchin" id="bnSearch" placeholder="이름, 로스터리 검색">
+      <div class="cardlist" id="bnList"></div>
+    </section>
+
+    <section class="tabpage" id="tabConvert" hidden>
+      <div class="lhead"><h1>그라인더 변환</h1></div>
+      <div id="cvBox"></div>
 
   <details class="appendix">
     <summary>핸드드립 vs 푸어오버 · 물 붓는 모양 사전</summary>
@@ -581,9 +670,42 @@ details.fold[open] > summary.sec-label{margin:0 0 12px}
       </div>
     </div>
   </details>
-
     </section>
+
+    <section class="tabpage" id="tabSettings" hidden>
+      <div class="lhead"><h1>설정</h1></div>
+      <div id="setBox"></div>
+    </section>
+
+  </main>
+
+  <div class="detailview formview" id="formView" hidden>
+    <div class="dbar">
+      <button type="button" class="dback" id="fmCancel">취소</button>
+      <span class="dbar-t" id="fmTitle"></span>
+      <button type="button" class="dback fmok" id="fmSave">저장</button>
+    </div>
+    <div class="detail fmbody" id="fmBody"></div>
   </div>
+
+  <div class="detailview" id="detailView" hidden>
+    <div class="dbar">
+      <button type="button" class="dback" id="dBack" aria-label="뒤로">←</button>
+      <span class="dbar-t" id="dBarT"></span>
+    </div>
+    <div class="detail" id="pgMain" aria-live="polite"></div>
+    <div class="detail" id="pgBrew"></div>
+    <div class="detail" id="moreRecipe"></div>
+  </div>
+
+  <nav class="tabbar" id="tabbar">
+    <button type="button" data-tab="tabRecipes" class="on"><i>☕</i><span>레시피</span></button>
+    <button type="button" data-tab="tabBeans"><i>🍃</i><span>원두</span></button>
+    <button type="button" data-tab="tabConvert"><i>⇅</i><span>변환</span></button>
+    <button type="button" data-tab="tabSettings"><i>⚙︎</i><span>설정</span></button>
+  </nav>
+
+  <button type="button" class="fab" id="fabAdd" aria-label="추가">＋</button>
 </div>
 
 <script>
@@ -644,6 +766,7 @@ const dripperMatch = (r, want) =>
   want === "all" || r.dripper === want ||
   (r.dripper === "wave" && (want === "wave155" || want === "wave185"));
 const DRIPPER_LABEL = Object.fromEntries(DRIPPERS.map(d => [d.id, d.label]));
+const DRIPPER_SHORT = { v60:"V60", switch:"스위치", steel:"스텐", wave185:"칼리타 185" };
 DRIPPER_LABEL.wave = "칼리타 웨이브";  /* 155·185 공용 레시피 */
 const WAVE_SIZE_LABEL = { "155":"Wave 155", "185":"Wave 185", both:"155·185 공용", unspecified:"크기 미지정" };
 const ROAST_BASIS_LABEL = {
@@ -1527,7 +1650,7 @@ function save(){
    비어 있으면 조용히 꺼진 채 동작합니다. */
 const FIREBASE = { projectId: "brew-dial", apiKey: "AIzaSyBE6N3wmf3TUL8mkIuqTqttKQ2Osr70bv0" };
 let syncOn = false, syncTimer = 0;
-const SYNC_FIELDS = ["grinder","dripper","roast","process","selected","favs","sound","noteOpen","copies"];
+const SYNC_FIELDS = ["grinder","dripper","roast","process","selected","favs","sound","noteOpen","copies","theme","ownedGs","customGs","beanMeta","myBeans"];
 function syncDocUrl(){
   return "https://firestore.googleapis.com/v1/projects/" + FIREBASE.projectId +
     "/databases/(default)/documents/settings/" + encodeURIComponent(state.syncCode) +
@@ -1559,8 +1682,10 @@ function syncInit(){
       try { localStorage.setItem(LS, JSON.stringify(state)); } catch (e) {}
       rebuildCopies();
       ensureSelection();
+      applyTheme();
     }
-    renderDetail();
+    renderRecipeList(); renderBeanList();
+    if (!document.getElementById("detailView").hidden) renderDetail();
   }).catch(() => {});
 }
 function syncPush(){
@@ -1576,7 +1701,7 @@ function syncPush(){
 }
 
 const byId = (arr, id) => arr.find(x => x.id === id) || arr[0];
-const grinder = () => byId(GRINDERS, state.grinder);
+const grinder = () => allGrinders().find(g => g.id === state.grinder) || GRINDERS[2];
 const roast   = () => byId(ROASTS, state.roast);
 const proc    = () => byId(PROCESSES, state.process);
 
@@ -1920,54 +2045,9 @@ function fillSelect(id, items, current, onChange){
   el.onchange = () => onChange(el.value);
 }
 function renderPickers(){
-  /* 제목 = 레시피 선택 (내 레시피는 원두별 그룹, 유명 레시피는 드리퍼 매칭만) */
-  const el = document.getElementById("selRecipe");
-  if (el){
-    const vis = visible();
-    let html = "";
-    const cps = vis.filter(x => x.isCopy);
-    if (cps.length){
-      html += '<optgroup label="✎ 내 수정본">' +
-        cps.map(x => '<option value="' + x.id + '">' + x.optLabel + "</option>").join("") +
-        "</optgroup>";
-    }
-    MY_BEANS.forEach(b => {
-      const mine = vis.filter(r => r.personal && r.id.startsWith("my-" + b.id + "-"));
-      if (!mine.length) return;
-      html += '<optgroup label="내 원두 · ' + b.short + '">' +
-        mine.map(r => '<option value="' + r.id + '">' + (r.optLabel || r.name) +
-          (state.mods && state.mods[r.id] ? " ✎" : "") +
-          (r.vstatus === "검증됨" ? " ✓" : r.vstatus === "부분검증" ? " ◐" : "") + "</option>").join("") +
-        "</optgroup>";
-    });
-    const famous = vis.filter(r => !r.personal);
-    if (famous.length){
-      /* 만든 사람만 — 같은 사람의 레시피가 둘 이상 보일 때만 레시피명을 덧붙입니다 */
-      const nBy = {};
-      famous.forEach(r => { nBy[r.by] = (nBy[r.by] || 0) + 1; });
-      html += '<optgroup label="유명 레시피">' +
-        famous.map(r => '<option value="' + r.id + '">' + (nBy[r.by] > 1 ? r.by + " · " + r.name : r.by) +
-          (state.mods && state.mods[r.id] ? " ✎" : "") + "</option>").join("") +
-        "</optgroup>";
-    }
-    el.innerHTML = html;
-    el.value = state.selected;
-    el.onchange = () => {
-      state.selected = el.value;
-      editMode = false;
-      const nr = RECIPES.find(x => x.id === el.value);
-      /* 레시피의 드리퍼로 선택을 맞춥니다 — 155·185 공용(wave)은 현재 선택을 유지 */
-      if (nr && DRIPPERS.some(d => d.id === nr.dripper)) state.dripper = nr.dripper;
-      save(); stopTimer(); renderDetail();
-    };
-  }
-
   fillSelect("selGrinder",
-    GRINDERS.map(g => ({ id:g.id, label:g.name })),
+    allGrinders().map(g => ({ id:g.id, label:g.name })),
     state.grinder, v => { state.grinder = v; save(); refreshAll(); });
-
-  fillSelect("selDripper", DRIPPERS.map(d => ({ id:d.id, label:d.label, n:countFor(d.id) })),
-    state.dripper, v => { state.dripper = v; editMode = false; ensureSelection(); save(); stopTimer(); refreshAll(); });
 
   /* 내 레시피는 원두가 고정이라 배전도·가공을 바꿀 수 없습니다 (잠금·복원은 renderDetail에서) */
   const sel = applyMods(byId(RECIPES, state.selected));
@@ -1992,7 +2072,9 @@ window.addEventListener("resize", () => {
 
 /* ESC — 추출 화면 닫기 (타이머는 유지) */
 window.addEventListener("keydown", e => {
-  if (e.key === "Escape" && document.body.classList.contains("brewing")) setBrewing(false);  // 추출 화면 닫기 (타이머 유지)
+  if (e.key !== "Escape") return;
+  if (document.body.classList.contains("brewing")) setBrewing(false);
+  else if (!document.getElementById("detailView").hidden) closeRecipe();
 });
 function ensureSelection(){
   const vis = visible();
@@ -2363,10 +2445,14 @@ function buildModSteps(lines, fin){
 const GRINDER_SHORT = { m01:"밀랩", c40:"코만단테", kultra:"K-Ultra", a2:"A2", ek43s:"EK43s", c3:"C3", encore:"엔코어" };
 /* 저장된 사본(state.copies)을 선택 가능한 레시피로 — 그라인더·배전·가공 조합마다 별개 */
 function copyToRecipe(cp){
-  const base = RECIPES.find(x => x.id === cp.baseId && !x.isCopy) || { name:"레시피", tips:[] };
-  const label = (base.optLabel || base.name) + " ✎ " + (GRINDER_SHORT[cp.grinder] || cp.grinder);
+  const base = (cp.baseId && RECIPES.find(x => x.id === cp.baseId && !x.isCopy)) ||
+    { name:"내 레시피", tips:[], method:cp.method || "pourover", dripper:cp.dripper || "v60",
+      by:"내 레시피", role:"직접 만든 레시피", blurb:"", fit:cp.roast || "medium", fitProcess:cp.process || "washed" };
+  const label = cp.name || ((base.optLabel || base.name) + " ✎ " + (GRINDER_SHORT[cp.grinder] || cp.grinder));
   return Object.assign({}, base, {
     id: "cp-" + cp.cid, isCopy: true, baseId: cp.baseId,
+    method: cp.method || base.method, dripper: cp.dripper || base.dripper,
+    beanId: cp.beanId || null, rating: cp.rating || 0,
     name: label, optLabel: label,
     personal: true, fit: cp.roast, fitProcess: cp.process, cpGrinder: cp.grinder,
     dose: cp.dose, ratio: cp.water / cp.dose,
@@ -2409,15 +2495,306 @@ function parseClock(t){
   const n = parseInt(t, 10); return isNaN(n) ? 0 : n;
 }
 
-/* 페이지 이동 — 좌우 스와이프 또는 상단 탭. 추출 화면 = 3번째 페이지 */
-function pageTo(i, smooth){
-  const pg = document.getElementById("pager");
-  if (pg) pg.scrollTo({ left: pg.clientWidth * i, behavior: smooth === false ? "auto" : "smooth" });
+/* ── 공용 폼 오버레이 ── */
+function openForm(title, bodyHtml, onSave){
+  const fv = document.getElementById("formView");
+  document.getElementById("fmTitle").textContent = title;
+  document.getElementById("fmBody").innerHTML = bodyHtml;
+  fv.hidden = false; fv.scrollTop = 0;
+  document.getElementById("fmCancel").onclick = () => { fv.hidden = true; };
+  document.getElementById("fmSave").onclick = () => { if (onSave() !== false) fv.hidden = true; };
+}
+function starsWidget(id, val){
+  return '<div class="stars" id="' + id + '" data-v="' + (val || 0) + '">' +
+    [1,2,3,4,5].map(n => '<button type="button" data-n="' + n + '"' + (val >= n ? ' class="on"' : "") + ">★</button>").join("") + "</div>";
+}
+function wireStars(id){
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.querySelectorAll("button").forEach(b => b.onclick = () => {
+    const n = parseInt(b.getAttribute("data-n"), 10);
+    const cur = parseFloat(el.getAttribute("data-v")) || 0;
+    const v = cur === n ? 0 : n;
+    el.setAttribute("data-v", v);
+    el.querySelectorAll("button").forEach(x => x.classList.toggle("on", parseInt(x.getAttribute("data-n"), 10) <= v));
+  });
+}
+function chipsWidget(id, items, selected, multi){
+  return '<div class="fchips" id="' + id + '" data-multi="' + (multi ? 1 : 0) + '">' +
+    items.map(x => '<button type="button" data-v="' + x + '"' +
+      ((multi ? (selected || []).indexOf(x) >= 0 : selected === x) ? ' class="on"' : "") + ">" + x + "</button>").join("") + "</div>";
+}
+function wireChips(id){
+  const el = document.getElementById(id);
+  if (!el) return;
+  const multi = el.getAttribute("data-multi") === "1";
+  el.querySelectorAll("button").forEach(b => b.onclick = () => {
+    if (multi) b.classList.toggle("on");
+    else { el.querySelectorAll("button").forEach(x => x.classList.remove("on")); b.classList.add("on"); }
+  });
+}
+function chipValues(id){
+  return Array.prototype.map.call(document.querySelectorAll("#" + id + " button.on"), b => b.getAttribute("data-v"));
+}
+
+/* ── 원두 폼 ── */
+const NOTE_PRESET = {
+  "과일": ["블루베리","딸기","블랙커런트","레몬","오렌지","자몽","사과","자두","복숭아","망고","패션프루츠","포도","체리","파인애플","리치"],
+  "꽃·차": ["자스민","장미","라벤더","우롱티","홍차"],
+  "견과": ["아몬드","헤이즐넛","호두","피넛버터"],
+  "초콜릿": ["다크초콜릿","밀크초콜릿","코코아"],
+  "기타": ["캐러멜","꿀","바닐라","시나몬","브라운슈가","흑설탕","당밀","몰트","요거트","스모키"]
+};
+const ROAST_CHIP = ["라이트","미디엄 라이트","미디엄","미디엄 다크","다크"];
+const ROAST_CHIP_MAP = { "라이트":"약배전", "미디엄 라이트":"중약배전", "미디엄":"중배전", "미디엄 다크":"중강배전", "다크":"강배전" };
+const ROAST_TO_CHIP = { "약배전":"라이트", "중약배전":"미디엄 라이트", "중배전":"미디엄", "중강배전":"미디엄 다크", "강배전":"다크",
+  "미디엄 (에스프레소용)":"미디엄" };
+const PROC_CHIP = ["워시드","내추럴","허니","혐기성","디카페인","기타"];
+
+function allBeans(){
+  const mine = state.myBeans || [];
+  const shadowed = {};
+  mine.forEach(b => { if (b.seedId) shadowed[b.seedId] = b; });
+  return MY_BEANS.map(b => shadowed[b.id] ? Object.assign({ id:b.id, seed:true, recipes:b.recipes, short:b.short }, shadowed[b.id]) :
+      Object.assign({ seed:true }, b))
+    .concat(mine.filter(b => !b.seedId).map(b => Object.assign({ recipes: [] }, b)));
+}
+function openBeanForm(beanId){
+  const all = allBeans();
+  const b = beanId ? all.find(x => x.id === beanId) : null;
+  const esc = v => escA(v == null ? "" : v);
+  const noteHtml = Object.keys(NOTE_PRESET).map(cat =>
+    '<p class="nc">' + cat + "</p>" +
+    chipsWidget("bnN-" + cat, NOTE_PRESET[cat], (b && b.notes) || [], true)).join("");
+  openForm(b ? "원두 수정" : "새 원두",
+    '<div class="fmsec"><h3>기본 정보</h3><div class="fmrow">' +
+      '<input class="fmin" id="bfName" placeholder="원두명" value="' + esc(b && b.name) + '">' +
+      '<input class="fmin" id="bfRoaster" placeholder="로스터리" value="' + esc(b && b.roaster) + '">' +
+    "</div></div>" +
+    '<div class="fmsec"><h3>원산지 (선택)</h3><div class="fmrow"><div class="fmgrid2">' +
+      '<input class="fmin" id="bfOrigin" placeholder="국가·지역" value="' + esc(b && b.origin) + '">' +
+      '<input class="fmin" id="bfFarm" placeholder="농장·생산자" value="' + esc(b && b.farm) + '">' +
+      '<input class="fmin" id="bfVariety" placeholder="품종" value="' + esc(b && b.variety) + '">' +
+      '<input class="fmin" id="bfAlt" placeholder="재배 고도" value="' + esc(b && b.alt) + '">' +
+    "</div></div></div>" +
+    '<div class="fmsec"><h3>로스팅 / 가공</h3><div class="fmrow">' +
+      '<span class="fmlabel">로스팅 레벨</span>' + chipsWidget("bfRoast", ROAST_CHIP, ROAST_TO_CHIP[b && b.roast] || (b && b.roast) || "미디엄", false) +
+      '<span class="fmlabel">가공법</span>' + chipsWidget("bfProc", PROC_CHIP, (b && b.procChip) || guessProcChip(b && b.proc), false) +
+      '<div class="fmgrid2">' +
+        '<label class="fmlabel">로스팅 날짜<input class="fmin" type="date" id="bfRDate" value="' + esc(b && b.rdate) + '"></label>' +
+        '<label class="fmlabel">구매 날짜<input class="fmin" type="date" id="bfPDate" value="' + esc(b && b.pdate) + '"></label>' +
+      "</div>" +
+      '<label class="fmlabel" style="display:flex;align-items:center;gap:8px">소진(다 마심) ' +
+        '<input type="checkbox" id="bfOut"' + (b && b.owned === false ? " checked" : "") + "></label>" +
+    "</div></div>" +
+    '<div class="fmsec"><h3>향미 노트 (선택)</h3><div class="fmrow notecats">' + noteHtml +
+      '<input class="fmin" id="bfNoteCustom" placeholder="직접 입력 (쉼표로 구분)">' +
+    "</div></div>" +
+    '<div class="fmsec"><h3>평점 (선택)</h3><div class="fmrow">' + starsWidget("bfStars", b && b.rating) + "</div></div>" +
+    '<div class="fmsec"><h3>메모 (선택)</h3><textarea class="fmta" id="bfMemo">' + esc(b && b.memo) + "</textarea></div>" +
+    (b && !b.seedOnly && (b.seedId || !b.seed) ? '<button type="button" class="editbtn ghost" id="bfDel">이 원두 삭제</button>' : ""),
+    () => {
+      const name = document.getElementById("bfName").value.trim();
+      if (!name){ toast("원두명을 입력하세요"); return false; }
+      const notes = Object.keys(NOTE_PRESET).reduce((a, cat) => a.concat(chipValues("bnN-" + cat)), [])
+        .concat(document.getElementById("bfNoteCustom").value.split(",").map(x => x.trim()).filter(Boolean));
+      const roastChip = chipValues("bfRoast")[0] || "미디엄";
+      const nb = {
+        id: b ? (b.seedId || b.id) : "ub-" + Date.now().toString(36),
+        name, roaster: document.getElementById("bfRoaster").value.trim(),
+        origin: document.getElementById("bfOrigin").value.trim(),
+        farm: document.getElementById("bfFarm").value.trim(),
+        variety: document.getElementById("bfVariety").value.trim(),
+        alt: document.getElementById("bfAlt").value.trim(),
+        roast: ROAST_CHIP_MAP[roastChip] || roastChip, procChip: chipValues("bfProc")[0] || "",
+        proc: chipValues("bfProc")[0] || "",
+        rdate: document.getElementById("bfRDate").value, pdate: document.getElementById("bfPDate").value,
+        notes, rating: parseFloat(document.getElementById("bfStars").getAttribute("data-v")) || 0,
+        memo: document.getElementById("bfMemo").value.trim(),
+        owned: !document.getElementById("bfOut").checked,
+        short: name.slice(0, 10)
+      };
+      if (b && b.seed) nb.seedId = b.id;
+      state.myBeans = state.myBeans || [];
+      const i = state.myBeans.findIndex(x => (x.seedId || x.id) === nb.id);
+      if (i >= 0) state.myBeans[i] = Object.assign(state.myBeans[i], nb);
+      else state.myBeans.push(nb);
+      save(); toast(b ? "원두를 수정했습니다" : "원두를 추가했습니다"); renderBeanList();
+    });
+  Object.keys(NOTE_PRESET).forEach(cat => wireChips("bnN-" + cat));
+  wireChips("bfRoast"); wireChips("bfProc"); wireStars("bfStars");
+  const del = document.getElementById("bfDel");
+  if (del) del.onclick = () => {
+    state.myBeans = (state.myBeans || []).filter(x => x !== undefined && (x.seedId || x.id) !== (b.seedId || b.id));
+    save(); document.getElementById("formView").hidden = true;
+    toast("삭제했습니다 (기본 원두는 원래 정보로 복원)"); renderBeanList();
+  };
+}
+function guessProcChip(proc){
+  if (!proc) return "";
+  if (proc.indexOf("워시드") >= 0) return "워시드";
+  if (proc.indexOf("내추럴") >= 0) return "내추럴";
+  if (proc.indexOf("디카페인") >= 0) return "디카페인";
+  if (proc.indexOf("허니") >= 0) return "허니";
+  return "기타";
+}
+
+/* ── 레시피 폼 (새 레시피 = 내 수정본과 같은 저장소, baseId 없음) ── */
+const METHOD_CHIP = [["pourover", "푸어오버"], ["hybrid", "하이브리드"], ["immersion", "침출식"]];
+function openRecipeForm(editCp){
+  const cp = editCp || null;
+  const gs = allGrinders();
+  const gid = cp ? cp.grinder : state.grinder;
+  const gObj = gs.find(g => g.id === gid) || gs[0];
+  const um0 = cp ? cp.um : 700;
+  const dial0 = fmtDial(gObj, micronToDial(gObj, um0).v);
+  const beans = allBeans();
+  const esc = v => escA(v == null ? "" : v);
+  const stepsRows = (cp ? cp.steps : [[0, 40, "뜸"], [40, 140, ""], [80, 200, ""]]).map(st =>
+    '<li class="erow"><input class="ein t" value="' + mmss(st[0]) + '">' +
+    '<input class="ein lbl" value="' + esc(st[2]) + '">' +
+    '<input class="ein g" type="number" value="' + st[1] + '">' +
+    '<button type="button" class="rowdel">✕</button></li>').join("");
+  openForm(cp ? "레시피 수정" : "새 레시피",
+    '<div class="fmsec"><h3>추출 방식</h3><div class="fmrow">' +
+      chipsWidget("rfMethod", METHOD_CHIP.map(x => x[1]), (METHOD_CHIP.find(x => x[0] === (cp && cp.method)) || METHOD_CHIP[0])[1], false) +
+      '<div class="dripicons" id="rfDrip">' +
+        DRIPPERS.filter(d => d.id !== "all").map(d =>
+          '<button type="button" data-v="' + d.id + '"' + ((cp ? cp.dripper : "v60") === d.id ? ' class="on"' : "") +
+          "><i>◌</i>" + (DRIPPER_SHORT[d.id] || d.label) + "</button>").join("") +
+      "</div>" +
+    "</div></div>" +
+    '<div class="fmsec"><h3>기본 정보</h3><div class="fmrow">' +
+      '<input class="fmin" id="rfName" placeholder="레시피 이름" value="' + esc(cp && cp.name) + '">' +
+      '<span class="fmlabel">원두 연결 (선택)</span>' +
+      '<span class="selwrap"><select id="rfBean"><option value="">연결 안 함</option>' +
+        beans.map(b => '<option value="' + b.id + '"' + ((cp && cp.beanId) === b.id ? " selected" : "") + ">" + b.name + "</option>").join("") +
+      "</select></span>" +
+    "</div></div>" +
+    '<div class="fmsec"><h3>추출 파라미터</h3><div class="fmrow"><div class="fmgrid2">' +
+      '<label class="fmlabel">원두량 g<input class="fmin" type="number" step="0.5" id="rfDose" value="' + (cp ? cp.dose : 20) + '"></label>' +
+      '<label class="fmlabel">물 g<input class="fmin" type="number" id="rfWater" value="' + (cp ? cp.water : 300) + '"></label>' +
+      '<label class="fmlabel">얼음 g<input class="fmin" type="number" id="rfIce" value="' + (cp ? cp.ice : 0) + '"></label>' +
+      '<label class="fmlabel">수온 ℃<input class="fmin" id="rfTemp" value="' + esc(cp ? cp.temp : "92℃") + '"></label>' +
+      '<label class="fmlabel">완료 (예 2:30~3:00)<input class="fmin" id="rfFin" value="' +
+        (cp ? (cp.fin[0] === cp.fin[1] ? mmss(cp.fin[1]) : mmss(cp.fin[0]) + "~" + mmss(cp.fin[1])) : "3:00") + '"></label>' +
+      '<label class="fmlabel">그라인더<span class="selwrap"><select id="rfG">' +
+        gs.map(g => '<option value="' + g.id + '"' + (g.id === gid ? " selected" : "") + ">" + g.name + "</option>").join("") +
+      "</select></span></label>" +
+    "</div>" +
+    '<label class="fmlabel">분쇄 (<span id="rfGUnit">' + gObj.unit + '</span>)<input class="fmin" id="rfDial" inputmode="decimal" value="' + dial0 + '"></label>' +
+    "</div></div>" +
+    '<div class="fmsec"><h3>푸어링 스텝</h3><div class="fmrow">' +
+      '<ol class="rsteps" id="edRows">' + stepsRows + "</ol>" +
+      '<button type="button" class="editbtn ghost" id="rfAddStep">+ 스텝 추가</button>' +
+    "</div></div>" +
+    '<div class="fmsec"><h3>평점 (선택)</h3><div class="fmrow">' + starsWidget("rfStars", cp && cp.rating) + "</div></div>" +
+    '<div class="fmsec"><h3>메모 · 팁 (선택)</h3><textarea class="fmta" id="rfMemo">' + esc(cp && cp.tip) + "</textarea></div>",
+    () => {
+      const name = document.getElementById("rfName").value.trim();
+      if (!name){ toast("레시피 이름을 입력하세요"); return false; }
+      const g = v => document.getElementById(v).value;
+      const gSel = allGrinders().find(x => x.id === g("rfG")) || grinder();
+      let um = 700;
+      let clicks = parseFloat(g("rfDial").replace(",", "."));
+      if (!isNaN(clicks)){
+        if (gSel.base) clicks = Math.round(clicks * gSel.base);
+        const v2 = Math.round(dialToMicron(gSel, clicks));
+        if (v2 >= 300) um = v2;
+      }
+      const fin0 = g("rfFin").split(/[~\-–]/).map(parseClock).filter(n => n > 0);
+      const fin = fin0.length ? [fin0[0], fin0[fin0.length - 1]] : [180, 180];
+      const lines = [];
+      document.querySelectorAll("#edRows .erow").forEach(li => {
+        const t2 = li.querySelector(".t").value.trim();
+        const gv = parseInt(li.querySelector(".g").value, 10);
+        if (t2 === "" && isNaN(gv)) return;
+        lines.push([parseClock(t2), isNaN(gv) ? 0 : gv, li.querySelector(".lbl").value.trim()]);
+      });
+      lines.sort((a, b2) => a[0] - b2[0]);
+      if (!lines.length){ toast("스텝을 한 줄 이상 넣으세요"); return false; }
+      const methodLabel = chipValues("rfMethod")[0] || "푸어오버";
+      const nc = {
+        cid: cp ? cp.cid : Date.now().toString(36),
+        baseId: cp ? cp.baseId : null,
+        name,
+        method: (METHOD_CHIP.find(x => x[1] === methodLabel) || METHOD_CHIP[0])[0],
+        dripper: chipValues("rfDrip")[0] || "v60",
+        beanId: g("rfBean") || null,
+        grinder: g("rfG"),
+        roast: cp ? cp.roast : state.roast, process: cp ? cp.process : state.process,
+        dose: parseFloat(g("rfDose")) || 20, water: parseInt(g("rfWater"), 10) || 300,
+        ice: parseInt(g("rfIce"), 10) || 0,
+        temp: g("rfTemp").trim() || "92℃", um, fin, steps: lines,
+        rating: parseFloat(document.getElementById("rfStars").getAttribute("data-v")) || 0,
+        tip: document.getElementById("rfMemo").value.trim()
+      };
+      state.copies = state.copies || [];
+      const i = state.copies.findIndex(x => x.cid === nc.cid);
+      if (i >= 0) state.copies[i] = nc; else state.copies.push(nc);
+      rebuildCopies();
+      save(); toast(cp ? "레시피를 수정했습니다" : "레시피를 추가했습니다");
+      renderRecipeList();
+      if (!document.getElementById("detailView").hidden){
+        state.selected = "cp-" + nc.cid; renderDetail();
+        document.getElementById("dBarT").textContent = nc.name;
+      }
+    });
+  wireChips("rfMethod"); wireStars("rfStars");
+  const dr = document.getElementById("rfDrip");
+  dr.querySelectorAll("button").forEach(b => b.onclick = () => {
+    dr.querySelectorAll("button").forEach(x => x.classList.remove("on")); b.classList.add("on");
+  });
+  document.getElementById("rfG").onchange = e => {
+    const g2 = allGrinders().find(x => x.id === e.target.value);
+    document.getElementById("rfGUnit").textContent = g2.unit;
+    const umv = parseFloat(document.getElementById("rfDial").getAttribute("data-um")) || um0;
+    document.getElementById("rfDial").value = fmtDial(g2, micronToDial(g2, umv).v);
+  };
+  document.getElementById("rfAddStep").onclick = () => {
+    const li = document.createElement("li");
+    li.className = "erow";
+    li.innerHTML = '<input class="ein t" value="" placeholder="1:30"><input class="ein lbl" value="" placeholder="라벨">' +
+      '<input class="ein g" type="number" placeholder="g"><button type="button" class="rowdel">✕</button>';
+    document.getElementById("edRows").appendChild(li);
+  };
+  document.getElementById("edRows").addEventListener("click", e => {
+    const d = e.target.closest(".rowdel");
+    if (d) d.parentElement.remove();
+  });
+}
+
+/* ── 탭 전환 ── */
+function showTab(id){
+  document.querySelectorAll(".tabpage").forEach(x => { x.hidden = x.id !== id; });
+  document.querySelectorAll("#tabbar button").forEach(b => b.classList.toggle("on", b.getAttribute("data-tab") === id));
+  const fab = document.getElementById("fabAdd");
+  if (fab) fab.hidden = !(id === "tabRecipes" || id === "tabBeans");
+  if (id === "tabRecipes") renderRecipeList();
+  if (id === "tabBeans") renderBeanList();
+  if (id === "tabConvert") renderConvert();
+  if (id === "tabSettings") renderSettings();
+}
+/* ── 레시피 상세 열고 닫기 ── */
+function openRecipe(id){
+  state.selected = id; editMode = false;
+  const nr = RECIPES.find(x => x.id === id);
+  if (nr && DRIPPERS.some(d => d.id === nr.dripper)) state.dripper = nr.dripper;
+  save(); stopTimer(); renderDetail();
+  const dv = document.getElementById("detailView");
+  document.getElementById("dBarT").textContent = nr ? (applyMods(nr).optLabel || nr.name) : "";
+  dv.hidden = false; dv.scrollTop = 0;
+}
+function closeRecipe(){
+  document.getElementById("detailView").hidden = true;
+  document.body.classList.remove("brewing");
+  updateTimerButtons();
+  renderRecipeList();
 }
 function setBrewing(on){
   document.body.classList.toggle("brewing", !!on);
-  if (on){ const pb = document.getElementById("pgBrew"); if (pb && pb.parentElement) pb.parentElement.scrollTop = 0; }
-  pageTo(on ? 2 : 1);
+  const dv = document.getElementById("detailView"), pb = document.getElementById("pgBrew");
+  if (dv && pb) dv.scrollTo({ top: on ? pb.offsetTop - 54 : 0, behavior: REDUCE ? "auto" : "smooth" });
   updateTimerButtons();
 }
 
@@ -2427,8 +2804,10 @@ function toggleFavId(id){
   state.favs = state.favs || [];
   const i = state.favs.indexOf(id);
   if (i >= 0){ state.favs.splice(i, 1); toast("즐겨찾기에서 뺐습니다"); }
-  else { state.favs.push(id); toast("★ 저장했습니다 — 왼쪽 페이지에 모아둬요"); }
-  save(); renderDetail();
+  else { state.favs.push(id); toast("★ 즐겨찾기에 저장했습니다"); }
+  save();
+  if (!document.getElementById("detailView").hidden) renderDetail();
+  renderRecipeList();
 }
 function toast(msg){
   let t = document.getElementById("toast");
@@ -2436,42 +2815,183 @@ function toast(msg){
   t.textContent = msg; t.classList.add("on");
   clearTimeout(toast._t); toast._t = setTimeout(() => t.classList.remove("on"), 1600);
 }
-function renderFavs(){
-  const el = document.getElementById("pgFav");
+/* ── 레시피 목록 탭 ── */
+let rcQuery = "", rcFav = false, rcDrip = "all", rcSortName = false;
+function grindLine(r){
+  const gid = r.cpGrinder || state.grinder;
+  const gObj = allGrinders().find(x => x.id === gid) || grinder();
+  return (GRINDER_SHORT[gObj.id] || gObj.name) + " " + fmtDial(gObj, micronToDial(gObj, r.um).v);
+}
+function renderRecipeChips(){
+  const el = document.getElementById("rcChips");
   if (!el) return;
-  const favs = (state.favs || []).map(id => { const r0 = RECIPES.find(x => x.id === id); return r0 ? applyMods(r0) : null; }).filter(Boolean);
-  if (!favs.length) favEditMode = false;
-  el.innerHTML =
-    '<div class="d-head"><div class="row-top"><span class="brand">브루 다이얼</span>' +
-      (favs.length ? '<button type="button" class="editbtn ghost favedit" id="favEditBtn">' + (favEditMode ? "완료" : "편집") + "</button>" : "") +
-      '</div><p class="favhead">저장한 레시피</p></div>' +
-    (favs.length
-      ? '<div class="favlist' + (favEditMode ? " editing" : "") + '">' + favs.map(r =>
-          '<button type="button" class="favrow" data-id="' + r.id + '">' +
-            '<span class="fname">' + (r.optLabel || r.name) + "</span>" +
-            '<span class="fmeta">' + (function(){
-              const gid = r.cpGrinder || state.grinder;
-              const gObj = GRINDERS.find(x => x.id === gid) || grinder();
-              return (GRINDER_SHORT[gObj.id] || gObj.name) + " " + fmtDial(gObj, micronToDial(gObj, r.um).v);
-            })() + " · " + r.temp + "</span>" +
-            '<span class="fmeta">' + (DRIPPER_LABEL[r.dripper] || r.dripper) + "</span>" +
-            (favEditMode ? '<span class="fdel" data-del="' + r.id + '" aria-label="삭제">✕</span>' : "") +
-          "</button>").join("") + "</div>"
-      : '<p class="empty" style="margin:16px 14px">저장한 레시피가 없습니다.</p>');
-  const feb = document.getElementById("favEditBtn");
-  if (feb) feb.onclick = () => { favEditMode = !favEditMode; renderFavs(); };
-  el.querySelectorAll(".favrow").forEach(b => {
-    b.addEventListener("click", e => {
-      const del = e.target.closest("[data-del]");
-      if (del){ e.stopPropagation(); toggleFavId(del.getAttribute("data-del")); return; }
-      if (favEditMode) return;   /* 편집 중에는 이동하지 않음 */
-      state.selected = b.getAttribute("data-id");
-      editMode = false;
-      const nr = RECIPES.find(x => x.id === state.selected);
-      if (nr && DRIPPERS.some(d => d.id === nr.dripper)) state.dripper = nr.dripper;
-      save(); stopTimer(); renderDetail(); pageTo(1);
-    });
+  const drips = [{ id:"all", label:"전체" }].concat(DRIPPERS.filter(d => d.id !== "all").map(d => ({ id:d.id, label:(DRIPPER_SHORT[d.id] || d.label) })));
+  el.innerHTML = '<button type="button" data-k="fav"' + (rcFav ? ' class="on"' : "") + ">♥ 즐겨찾기</button>" +
+    drips.map(d => '<button type="button" data-d="' + d.id + '"' + (rcDrip === d.id ? ' class="on"' : "") + ">" + d.label + "</button>").join("");
+  el.querySelectorAll("button").forEach(b => b.onclick = () => {
+    if (b.getAttribute("data-k") === "fav") rcFav = !rcFav;
+    else rcDrip = b.getAttribute("data-d");
+    renderRecipeChips(); renderRecipeList();
   });
+}
+function renderRecipeList(){
+  const el = document.getElementById("rcList");
+  if (!el) return;
+  let list = RECIPES.map(r0 => applyMods(r0));
+  if (rcDrip !== "all") list = list.filter(r => dripperMatch(r, rcDrip));
+  if (rcFav) list = list.filter(r => (state.favs || []).indexOf(r.id) >= 0);
+  if (rcQuery){
+    const q = rcQuery.toLowerCase();
+    list = list.filter(r => ((r.optLabel || r.name) + " " + (r.by || "") + " " + (DRIPPER_LABEL[r.dripper] || "")).toLowerCase().indexOf(q) >= 0);
+  }
+  const rank = r => r.isCopy ? 0 : r.personal ? 1 : 2;
+  list.sort(rcSortName
+    ? (a, b) => (a.optLabel || a.name).localeCompare(b.optLabel || b.name, "ko")
+    : (a, b) => rank(a) - rank(b));
+  el.innerHTML = list.length ? list.map(r =>
+    '<button type="button" class="rcard" data-id="' + r.id + '">' +
+      '<span class="rn">' + (r.optLabel || r.name) +
+        (r.rating ? ' <small style="color:var(--ember);font-size:12px">' + "★".repeat(Math.round(r.rating)) + "</small>" : "") + "</span>" +
+      '<span class="rstar' + ((state.favs || []).indexOf(r.id) >= 0 ? " on" : "") + '" data-fav="' + r.id + '">' +
+        ((state.favs || []).indexOf(r.id) >= 0 ? "★" : "☆") + "</span>" +
+      '<span class="rm">' + grindLine(r) + " · " + r.temp + "</span>" +
+      '<span class="rm">' + (DRIPPER_LABEL[r.dripper] || r.dripper) + (r.personal && !r.isCopy ? "" : r.isCopy ? "" : " · " + r.by) + "</span>" +
+      '<span class="rbadges">' + vBadge(r) + (r.isCopy ? "" : r.personal ? "" : fitBadge(r)) + "</span>" +
+    "</button>").join("")
+    : '<p class="empty" style="margin:30px 10px">조건에 맞는 레시피가 없습니다.</p>';
+  el.querySelectorAll(".rcard").forEach(b => b.addEventListener("click", e => {
+    const f = e.target.closest("[data-fav]");
+    if (f){ e.stopPropagation(); toggleFavId(f.getAttribute("data-fav")); return; }
+    openRecipe(b.getAttribute("data-id"));
+  }));
+}
+
+/* ── 원두 탭 ── */
+let bnQuery = "";
+function renderBeanList(){
+  const el = document.getElementById("bnList");
+  if (!el) return;
+  let list = allBeans();
+  if (bnQuery){
+    const q = bnQuery.toLowerCase();
+    list = list.filter(b => ((b.name || "") + " " + (b.roaster || "")).toLowerCase().indexOf(q) >= 0);
+  }
+  const linked = id => (state.copies || []).filter(c => c.beanId === id).length + ((MY_BEANS.find(x => x.id === id) || { recipes: [] }).recipes || []).length;
+  el.innerHTML = list.map(b =>
+    '<button type="button" class="rcard" data-bean="' + b.id + '">' +
+      '<span class="rn">' + b.name + (b.rating ? ' <small style="color:var(--ember)">' + "★".repeat(Math.round(b.rating)) + "</small>" : "") + "</span>" +
+      '<span class="rm">' + (b.roaster || "") + "</span>" +
+      '<span class="rm">' + b.roast + (b.proc ? " · " + b.proc : "") + (b.owned === false ? " · 소진" : "") + "</span>" +
+      '<span class="rbadges">' + (b.notes || []).slice(0, 4).map(n => '<span class="vbadge v-todo">' + n + "</span>").join("") + "</span>" +
+      '<span class="rstar">' + linked(b.id) + "</span>" +
+    "</button>").join("") || '<p class="empty" style="margin:30px 10px">원두를 추가해보세요.</p>';
+  el.querySelectorAll(".rcard").forEach(b => b.onclick = () => openBeanForm(b.getAttribute("data-bean")));
+}
+
+/* ── 변환 탭 ── */
+let cvFrom = "kultra", cvTo = "c40", cvClicks = null;
+function allGrinders(){
+  const customs = (state.customGs || []).map(c => {
+    const pts = [];
+    for (let um = 300; um <= 1500; um += 100) pts.push([um, Math.max(0, c.ref + (um - 900) / c.upc)]);
+    return { id:"cg-" + c.id, name:c.name, unit:"클릭", dec:1, hint:"커스텀 · 기준 " + c.ref + " = 900μm · 클릭당 " + c.upc + "μm", curve:pts, custom:true };
+  });
+  const owned = state.ownedGs && state.ownedGs.length ? GRINDERS.filter(g => state.ownedGs.indexOf(g.id) >= 0) : GRINDERS;
+  return owned.concat(customs);
+}
+function renderConvert(){
+  const el = document.getElementById("cvBox");
+  if (!el) return;
+  const gs = allGrinders();
+  if (!gs.some(g => g.id === cvFrom)) cvFrom = gs[0].id;
+  if (!gs.some(g => g.id === cvTo)) cvTo = (gs[1] || gs[0]).id;
+  const gf = gs.find(g => g.id === cvFrom), gt = gs.find(g => g.id === cvTo);
+  const lo = Math.ceil(gf.curve[0][1]), hi = Math.floor(gf.curve[gf.curve.length - 1][1]);
+  if (cvClicks == null || cvClicks < lo || cvClicks > hi) cvClicks = Math.round((lo + hi) / 2);
+  const um = Math.round(dialToMicron(gf, cvClicks));
+  const outV = micronToDial(gt, um);
+  const opts = g2 => gs.map(x => '<option value="' + x.id + '"' + (x.id === g2 ? " selected" : "") + ">" + x.name + "</option>").join("");
+  el.innerHTML =
+    '<div class="sec cvs"><p class="sec-label"><span>변환할 그라인더</span></p>' +
+      '<span class="selwrap"><select id="cvFrom">' + opts(cvFrom) + "</select></span>" +
+      '<div class="cvrow"><button type="button" class="cvstep" id="cvMinus">−</button>' +
+        '<span class="cvval"><b id="cvC">' + cvClicks + "</b> 클릭 <small>" + fmtDial(gf, cvClicks) + " " + gf.unit + "</small></span>" +
+        '<button type="button" class="cvstep" id="cvPlus">＋</button></div>' +
+      '<input type="range" id="cvRange" min="' + lo + '" max="' + hi + '" value="' + cvClicks + '">' +
+      '<p class="cvum">약 <b>' + um + "μm</b></p>" +
+    "</div>" +
+    '<div class="sec cvs"><p class="sec-label"><span>결과 <small style="letter-spacing:0">참고값</small></span></p>' +
+      '<span class="selwrap"><select id="cvTo">' + opts(cvTo) + "</select></span>" +
+      '<p class="cvout"><b>' + fmtDial(gt, outV.v) + "</b> " + gt.unit + (outV.flag ? " (범위 밖)" : "") + "</p>" +
+      '<p class="cvmeta">세팅 범위 ' + fmtDial(gt, gt.curve[0][1]) + " ~ " + fmtDial(gt, gt.curve[gt.curve.length - 1][1]) +
+      " · 입자 크기 약 " + Math.round(dialToMicron(gt, Math.round(outV.v))) + "μm</p>" +
+    "</div>" +
+    '<p class="cvnote">대략적인 참고값입니다 — 배전도·원두 밀도·개체 차이·버 마모에 따라 달라질 수 있습니다. μm은 실측 기반 환산표 기준.</p>';
+  document.getElementById("cvFrom").onchange = e => { cvFrom = e.target.value; cvClicks = null; renderConvert(); };
+  document.getElementById("cvTo").onchange = e => { cvTo = e.target.value; renderConvert(); };
+  document.getElementById("cvMinus").onclick = () => { cvClicks = Math.max(lo, cvClicks - 1); renderConvert(); };
+  document.getElementById("cvPlus").onclick = () => { cvClicks = Math.min(hi, cvClicks + 1); renderConvert(); };
+  document.getElementById("cvRange").oninput = e => { cvClicks = parseInt(e.target.value, 10); renderConvert(); };
+}
+
+/* ── 설정 탭 ── */
+function renderSettings(){
+  const el = document.getElementById("setBox");
+  if (!el) return;
+  const owned = state.ownedGs && state.ownedGs.length ? state.ownedGs : GRINDERS.map(g => g.id);
+  el.innerHTML =
+    '<div class="sec cvs"><p class="sec-label"><span>보유 그라인더</span></p><div class="fchips">' +
+      GRINDERS.map(g => '<button type="button" data-g="' + g.id + '"' + (owned.indexOf(g.id) >= 0 ? ' class="on"' : "") + ">" + g.name + "</button>").join("") +
+    "</div></div>" +
+    '<div class="sec cvs"><p class="sec-label"><span>커스텀 그라인더</span></p>' +
+      ((state.customGs || []).map(c => '<p class="cvmeta">' + c.name + " — 기준 " + c.ref + "클릭 = 900μm · 클릭당 " + c.upc +
+        'μm <button type="button" class="fdel" data-cg="' + c.id + '" style="position:static">✕</button></p>').join("")) +
+      '<div class="cgform">' +
+        '<input class="ein wide" id="cgName" type="text" placeholder="이름">' +
+        '<input class="ein" id="cgRef" type="number" placeholder="기준클릭">' +
+        '<input class="ein" id="cgUpc" type="number" placeholder="μm/클릭">' +
+        '<button type="button" class="editbtn" id="cgAdd">추가</button>' +
+      "</div>" +
+      '<p class="cvnote">평소 중배전 드립이 잘 나오는 눈금(기준클릭 = 900μm)과 클릭당 μm을 넣으면 변환·레시피에 함께 나옵니다.</p>' +
+    "</div>" +
+    '<div class="sec cvs"><p class="sec-label"><span>외관</span></p><div class="fchips">' +
+      [["system", "시스템"], ["light", "라이트"], ["dark", "다크"]].map(t =>
+        '<button type="button" data-th="' + t[0] + '"' + ((state.theme || "system") === t[0] ? ' class="on"' : "") + ">" + t[1] + "</button>").join("") +
+    "</div></div>" +
+    '<div class="sec cvs"><p class="sec-label"><span>데이터</span></p>' +
+      '<p class="cvmeta">' + (syncOn ? "동기화 켜짐 · 코드 " + state.syncCode : "동기화 연결 중…") + "</p>" +
+    "</div>" +
+    '<div class="sec cvs"><p class="sec-label"><span>앱 정보</span></p><p class="cvmeta">브루 다이얼 2.0</p></div>';
+  el.querySelectorAll("[data-g]").forEach(b => b.onclick = () => {
+    let o = state.ownedGs && state.ownedGs.length ? state.ownedGs.slice() : GRINDERS.map(g => g.id);
+    const id = b.getAttribute("data-g"), i = o.indexOf(id);
+    if (i >= 0){ if (o.length > 1) o.splice(i, 1); } else o.push(id);
+    state.ownedGs = o;
+    if (o.indexOf(state.grinder) < 0) state.grinder = o[0];
+    save(); renderSettings();
+  });
+  el.querySelectorAll("[data-th]").forEach(b => b.onclick = () => {
+    state.theme = b.getAttribute("data-th"); applyTheme(); save(); renderSettings();
+  });
+  el.querySelectorAll("[data-cg]").forEach(b => b.onclick = () => {
+    state.customGs = (state.customGs || []).filter(c => String(c.id) !== b.getAttribute("data-cg"));
+    save(); renderSettings();
+  });
+  const add = document.getElementById("cgAdd");
+  if (add) add.onclick = () => {
+    const name = document.getElementById("cgName").value.trim();
+    const ref = parseFloat(document.getElementById("cgRef").value);
+    const upc = parseFloat(document.getElementById("cgUpc").value);
+    if (!name || !(ref >= 0) || !(upc >= 3)){ toast("이름·기준클릭·μm/클릭을 확인하세요"); return; }
+    state.customGs = state.customGs || [];
+    state.customGs.push({ id: Date.now().toString(36), name, ref, upc });
+    save(); renderSettings(); toast("커스텀 그라인더를 추가했습니다");
+  };
+}
+function applyTheme(){
+  const t = state.theme || "system";
+  if (t === "system") delete document.documentElement.dataset.theme;
+  else document.documentElement.dataset.theme = t;
 }
 
 function updateTimerButtons(){
@@ -2642,9 +3162,11 @@ function renderDetail(){
   }
 
   /* 배전·가공은 배지/원두명에, 온도·물은 아래 레시피 요약에 — 여기선 한 번씩만 */
-  const infoHead = r.personal
+  const linkedBean = r.beanId ? allBeans().find(b => b.id === r.beanId) : null;
+  const infoHead = (r.personal
     ? "<b>" + r.by + "</b> · " + r.role
-    : "<b>" + r.name + "</b> — " + r.role;
+    : "<b>" + r.name + "</b> — " + r.role) +
+    (linkedBean ? " · 원두 <b>" + linkedBean.name + "</b>" : "");
 
   /* ── 레시피 섹션 — ✎를 누르면 이 자리가 그대로 입력칸으로 바뀝니다 ── */
   const cpObj = r.isCopy ? (state.copies || []).find(x => "cp-" + x.cid === r.id) : null;
@@ -2699,8 +3221,7 @@ function renderDetail(){
     '<div class="d-head">' +
       '<div class="row-top"><span class="brand">브루 다이얼</span>' + waveBadge(r) + mbadge(r.method) + fitBadge(r) + vBadge(r) + "</div>" +
       '<div class="titlerow">' +
-        '<span class="selwrap titlewrap"><select id="selDripper" aria-label="드리퍼 선택"></select></span>' +
-        '<span class="selwrap titlewrap"><select id="selRecipe" aria-label="레시피 선택"></select></span>' +
+        '<h2 class="dname">' + (r.optLabel || r.name) + "</h2>" +
         '<button type="button" class="favbtn" id="favBtn" aria-label="즐겨찾기 저장">☆</button>' +
       "</div>" +
       '<p class="d-blurb">' + infoHead + (r.blurb ? "<br>" + r.blurb : "") + "</p>" +
@@ -2750,7 +3271,6 @@ function renderDetail(){
       sourceBlock(r) + "</details>";
 
   renderPickers();
-  renderFavs();
   const fb = document.getElementById("favBtn");
   if (fb){
     const fav = (state.favs || []).indexOf(r.id) >= 0;
@@ -2761,7 +3281,10 @@ function renderDetail(){
 
   /* 레시피 인라인 편집 배선 */
   const eb = document.getElementById("editBtn");
-  if (eb) eb.onclick = () => { editMode = true; renderDetail(); };
+  if (eb) eb.onclick = () => {
+    if (r.isCopy && cpObj){ openRecipeForm(cpObj); return; }   /* 내 레시피는 풀 폼으로 */
+    editMode = true; renderDetail();
+  };
   const cd = document.getElementById("cpDel");
   if (cd) cd.onclick = () => {
     const id = state.selected;
@@ -3014,25 +3537,24 @@ function renderAppendix(){
 
 /* ── 시작 ─────────────────────────────────────────────── */
 ensureSelection();
-renderDetail();
+applyTheme();
 renderAppendix();
+renderRecipeChips();
+renderRecipeList();
 
-/* 페이지 탭·스와이프 — 시작은 가운데(레시피) */
-(function(){
-  const pg = document.getElementById("pager");
-  const tabs = Array.prototype.slice.call(document.querySelectorAll("#ptabs button"));
-  tabs.forEach(b => b.addEventListener("click", () => pageTo(parseInt(b.getAttribute("data-pg"), 10))));
-  if (pg){
-    pg.addEventListener("scroll", () => {
-      const i = Math.round(pg.scrollLeft / Math.max(1, pg.clientWidth));
-      tabs.forEach((b, k) => b.classList.toggle("on", k === i));
-    }, { passive: true });
-    pageTo(1, false);
-    window.addEventListener("resize", () => {
-      const i = tabs.findIndex(b => b.classList.contains("on"));
-      pageTo(i < 0 ? 1 : i, false);
-    });
-  }
-})();
+document.querySelectorAll("#tabbar button").forEach(b =>
+  b.addEventListener("click", () => showTab(b.getAttribute("data-tab"))));
+document.getElementById("dBack").addEventListener("click", closeRecipe);
+document.getElementById("rcSearch").addEventListener("input", e => { rcQuery = e.target.value.trim(); renderRecipeList(); });
+document.getElementById("bnSearch").addEventListener("input", e => { bnQuery = e.target.value.trim(); renderBeanList(); });
+document.getElementById("rcSort").addEventListener("click", e => {
+  rcSortName = !rcSortName;
+  e.target.textContent = rcSortName ? "↕ 이름순" : "↕ 기본순";
+  renderRecipeList();
+});
+document.getElementById("fabAdd").addEventListener("click", () => {
+  const beansTab = !document.getElementById("tabBeans").hidden;
+  if (beansTab) openBeanForm(); else openRecipeForm();
+});
 syncInit();
 </script>
