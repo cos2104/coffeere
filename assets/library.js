@@ -5,6 +5,26 @@
    =========================================================== */
 const LIBRARY = [
   {
+    id:"jaafar-wbrc2026", name:"UFO V3 · 2단 스위치", by:"나스 자파르", role:"2026 월드 브루어스컵 챔피언",
+    dripper:"switch", method:"hybrid", fit:"light", dose:15, ratio:200/15, temp:"92℃",
+    um:700, tol:50, total:130,
+    blurb:"UFO V3 드리퍼를 하리오 스위치 위에 올려 쓴다. 앞 100g은 스위치를 열어 투과로 받고, 닫아서 뒤 100g을 침지로 뽑은 뒤 마지막에 다시 열어 흘려보내는 2단 구조.",
+    steps: c => { const h = c.water / 2; return [
+      { at:0,   kind:"pour", label:"1차 붓기 · 스위치 열림 (투과)", to:h, pat:"circle" },
+      { at:58,  kind:"wait", label:"스위치 닫기 — 물 빠짐 정지" },
+      { at:60,  kind:"pour", label:"2차 붓기 · 침지", to:c.water, pat:"center" },
+      { at:120, kind:"wait", label:"스위치 열기 — 최종 투과" },
+      { at:130, kind:"end",  label:"추출 완료" }]; },
+    tips:[
+      "<b>앞 절반은 투과, 뒤 절반은 침지</b> — 스위치를 연 채 100g을 원을 그리며 부어 향을 끌어내고, 닫은 뒤 남은 100g으로 단맛과 바디를 채웁니다.",
+      "<b>타이밍이 전부입니다</b> — 0:58 닫기 · 1:00 2차 붓기 · 2:00 열기. 총 2:10 전후에 끝납니다.",
+      "비율이 <b>1:13.3</b>으로 진한 편입니다. 대회에서는 파나마 핀카 누고 게이샤(내추럴 무산소, 1,700m)를 썼습니다.",
+      "분쇄도는 약 700μm에 <b>저속(≈580rpm)</b>으로 갈았고, 물은 50ppm에 마그네슘·칼슘을 맞춘 것으로 정리돼 있습니다.",
+      "UFO V3가 없으면 스위치만으로도 같은 순서를 따라갈 수 있습니다. 다만 드리퍼 모양이 달라 물 빠지는 속도가 바뀌니, 2:10에 맞지 않으면 분쇄도로 조절하세요."],
+    source:"2026 월드 브루어스컵(브뤼셀) 우승 레시피 · 15g / 200g / 92℃ · 커뮤니티 정리본 다수 교차 확인 (공식 발표 자료 아님)",
+    sourceUrl:"https://gota.cafe/en/recipes/ufo/ufo-jaafar-wbrc"
+  },
+  {
     id:"kasuya46", name:"4:6 메소드", by:"테츠 카스야", role:"2016 월드 브루어스컵 챔피언",
     dripper:"v60", method:"pourover", fit:"light", dose:20, ratio:15, temp:"93℃",
     um:1100, tol:80, total:210,
