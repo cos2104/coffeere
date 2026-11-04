@@ -84,7 +84,9 @@ const beanById = id => DB.beans.find(b => b.id === id) || null;
 /* ── 화면 상태 ──────────────────────────────────────── */
 const UI = {
   tab: 'recipes',
+  rMode: 'mine',
   rQuery: '', rMethod: 'all', rFav: false, rSort: 'recent',
+  lQuery: '', lMethod: 'all', lRoast: 'all', lSort: 'basic',
   bQuery: '', bRoast: 'all', bFav: false, bFinished: false, bSort: 'recent',
   cFrom: null, cVal: null, cOwnedOnly: false, cQuery: ''
 };
@@ -120,7 +122,7 @@ function render(){
   else                            bindSettings();
 
   const fab = $('#fab');
-  const show = UI.tab === 'recipes' || UI.tab === 'beans';
+  const show = (UI.tab === 'recipes' && UI.rMode !== 'lib') || UI.tab === 'beans';
   fab.hidden = !show;
   fab.onclick = () => UI.tab === 'recipes' ? openRecipeEditor(null) : openBeanEditor(null);
 }
@@ -176,21 +178,92 @@ function filteredRecipes(){
 const SORT_LABEL = { recent:'최신순', name:'이름순', rating:'평점순', dose:'원두량순' };
 
 function viewRecipes(){
-  const activeFilter = UI.rMethod !== 'all' || UI.rFav;
-  let out = `<div class="topbar">
+  const lib = UI.rMode === 'lib';
+  const activeFilter = lib ? (UI.lMethod !== 'all' || UI.lRoast !== 'all')
+                           : (UI.rMethod !== 'all' || UI.rFav);
+  const sortLabel = lib ? LSORT_LABEL[UI.lSort] : SORT_LABEL[UI.rSort];
+  return `<div class="topbar">
       <button class="iconbtn${activeFilter ? ' on' : ''}" type="button" id="rFilter" aria-label="필터">${ICON('filter',21)}</button>
       <div class="spacer"></div>
-      <button class="iconbtn labeled" type="button" id="rSort">${ICON('sort',18)}<span>${SORT_LABEL[UI.rSort]}</span></button>
+      <button class="iconbtn labeled" type="button" id="rSort">${ICON('sort',18)}<span>${sortLabel}</span></button>
     </div>
     <h1 class="page">레시피</h1>
-    ${searchBox('rq','이름, 원두, 추출 방식 검색', UI.rQuery)}
-    <div class="chips">
-      ${chip(UI.rFav, '즐겨찾기', 'data-rfav="1"', 'heart')}
-      ${chip(UI.rMethod === 'all', '전체', 'data-rm="all"')}
-      ${METHODS.map(m => chip(UI.rMethod === m.id, m.label, `data-rm="${m.id}"`)).join('')}
+    <div class="seg">
+      <button type="button" data-rmode="mine"${!lib ? ' class="on"' : ''}>내 레시피</button>
+      <button type="button" data-rmode="lib"${lib ? ' class="on"' : ''}>유명 레시피</button>
     </div>
-    <div id="listArea">${recipeListHTML()}</div>`;
-  return out;
+    ${lib
+      ? searchBox('rq','레시피, 바리스타, 기구 검색', UI.lQuery) +
+        `<div class="chips">
+          ${chip(UI.lMethod === 'all', '전체', 'data-lm="all"')}
+          ${METHODS.map(m => chip(UI.lMethod === m.id, m.label, `data-lm="${m.id}"`)).join('')}
+        </div>`
+      : searchBox('rq','이름, 원두, 추출 방식 검색', UI.rQuery) +
+        `<div class="chips">
+          ${chip(UI.rFav, '즐겨찾기', 'data-rfav="1"', 'heart')}
+          ${chip(UI.rMethod === 'all', '전체', 'data-rm="all"')}
+          ${METHODS.map(m => chip(UI.rMethod === m.id, m.label, `data-rm="${m.id}"`)).join('')}
+        </div>`}
+    <div id="listArea">${lib ? libListHTML() : recipeListHTML()}</div>`;
+}
+
+/* ── 유명 레시피 목록 ───────────────────────────────── */
+const LSORT_LABEL = { basic:'기본순', name:'이름순', by:'바리스타순', time:'추출시간순' };
+
+function filteredLibrary(){
+  const q = UI.lQuery.trim().toLowerCase();
+  let list = LIBRARY.slice();
+  if (UI.lMethod !== 'all')
+    list = list.filter(r => (DEVICES[LIB_DEVICE[r.dripper]] || {}).method === UI.lMethod);
+  if (UI.lRoast !== 'all') list = list.filter(r => r.fit === UI.lRoast);
+  if (q) list = list.filter(r => {
+    const dev = DEVICES[LIB_DEVICE[r.dripper]] || {};
+    return [r.name, r.by, r.role, dev.label, r.blurb].filter(Boolean).join(' ').toLowerCase().indexOf(q) >= 0;
+  });
+  const sorters = {
+    name: (a,b) => a.name.localeCompare(b.name, 'ko'),
+    by:   (a,b) => (a.by||'').localeCompare(b.by||'', 'ko'),
+    time: (a,b) => (a.total||0) - (b.total||0)
+  };
+  return sorters[UI.lSort] ? list.sort(sorters[UI.lSort]) : list;
+}
+
+function libListHTML(){
+  const list = filteredLibrary();
+  if (!list.length){
+    return `<div class="empty">
+      <div class="ill">${ICON('search', 70, 'stroke-width="1.1"')}</div>
+      <h2>검색 결과가 없습니다</h2>
+      <p>다른 이름이나 추출 방식으로 찾아보세요</p>
+    </div>`;
+  }
+  const g = primaryGrinder();
+  return `<div class="hint">${list.length}개의 레시피 · 분쇄도는 ${esc(g.name)} 기준</div>` +
+    list.map(r => libCard(r, g)).join('');
+}
+
+function libCard(r, g){
+  const d = DEVICES[LIB_DEVICE[r.dripper]] || DEVICES.v60;
+  const fit = ROASTS.find(x => x.id === r.fit) || ROASTS[2];
+  const dial = micronToDial(g, r.um);
+  return `<button class="rcard" type="button" data-lib="${r.id}">
+    <div class="top">
+      <div class="tile">${ICON(d.icon, 23)}</div>
+      <div style="min-width:0">
+        <h3>${esc(r.name)}</h3>
+        <div class="meta">${esc(r.by || d.label)}${r.role ? ' · ' + esc(r.role) : ''}</div>
+      </div>
+      <div class="right"><span class="dotcol" style="background:${fit.color}"></span></div>
+    </div>
+    <div class="specs">
+      <span class="spec"><b>${fmtG(r.dose)}</b>g</span>
+      <span class="spec">비율 <b>1:${(Math.round(r.ratio*10)/10).toFixed(1).replace(/\.0$/,'')}</b></span>
+      <span class="spec"><b>${mmss(r.total || 0)}</b></span>
+      <span class="spec">${esc(r.temp || '')}</span>
+      <span class="spec">${esc(g.brand)} <b>${fmtDial(g, dial.v)}</b> ${esc(g.unit)}</span>
+      <span class="spec" style="color:${fit.color}">${fit.label} 기준</span>
+    </div>
+  </button>`;
 }
 
 function recipeListHTML(){
@@ -199,8 +272,9 @@ function recipeListHTML(){
     return `<div class="empty">
       <div class="ill">${ICON('cup', 86, 'stroke-width="1.1"')}</div>
       <h2>레시피가 없습니다</h2>
-      <p>첫 번째 커피 레시피를 만들어보세요</p>
+      <p>첫 번째 커피 레시피를 만들거나\n유명 레시피에서 가져와 보세요</p>
       <button class="btn" type="button" id="rAdd">레시피 추가</button>
+      <button class="btn ghost" type="button" id="rBrowse" style="margin-top:10px">유명 레시피 둘러보기</button>
     </div>`;
   }
   if (!list.length){
@@ -220,7 +294,7 @@ function recipeCard(r){
   const specs = [
     `<span class="spec"><b>${fmtG(r.dose)}</b>g</span>`,
     `<span class="spec"><b>${fmtG(r.water)}</b>${d.method === 'espresso' ? 'ml' : 'g'}</span>`,
-    ratioText(r.dose, r.water) ? `<span class="spec"><b>${ratioText(r.dose, r.water)}</b></span>` : '',
+    ratioText(r.dose, r.water) ? `<span class="spec">비율 <b>${ratioText(r.dose, r.water)}</b></span>` : '',
     `<span class="spec"><b>${mmss(r.time)}</b></span>`,
     `<span class="spec"><b>${r.temp}</b>℃</span>`,
     r.grind != null ? `<span class="spec">${esc(g.brand)} <b>${fmtDial(g, r.grind)}</b> ${esc(g.unit)}</span>` : ''
@@ -244,20 +318,62 @@ function recipeCard(r){
 function repaintRecipeList(){
   const a = $('#listArea');
   if (!a) return render();
-  a.innerHTML = recipeListHTML();
+  a.innerHTML = UI.rMode === 'lib' ? libListHTML() : recipeListHTML();
   bindRecipeList();
 }
 function bindRecipeList(){
   const add = $('#rAdd'); if (add) add.onclick = () => openRecipeEditor(null);
   $$('[data-recipe]').forEach(b => b.onclick = () => openRecipeDetail(b.dataset.recipe));
+  $$('[data-lib]').forEach(b => b.onclick = () => openLibDetail(b.dataset.lib));
+  const br = $('#rBrowse'); if (br) br.onclick = () => { UI.rMode = 'lib'; render(); };
 }
 function bindRecipes(){
-  bindSearch('rq', 'rQuery', repaintRecipeList);
+  const lib = UI.rMode === 'lib';
+  $$('[data-rmode]').forEach(b => b.onclick = () => { UI.rMode = b.dataset.rmode; render(); });
+  bindSearch('rq', lib ? 'lQuery' : 'rQuery', repaintRecipeList);
   $$('[data-rm]').forEach(b => b.onclick = () => { UI.rMethod = b.dataset.rm; render(); });
+  $$('[data-lm]').forEach(b => b.onclick = () => { UI.lMethod = b.dataset.lm; render(); });
   const f = $('[data-rfav]'); if (f) f.onclick = () => { UI.rFav = !UI.rFav; render(); };
   bindRecipeList();
-  $('#rSort').onclick = () => openOptionSheet('정렬', SORT_LABEL, UI.rSort, v => { UI.rSort = v; render(); });
-  $('#rFilter').onclick = openRecipeFilter;
+  $('#rSort').onclick = () => lib
+    ? openOptionSheet('정렬', LSORT_LABEL, UI.lSort, v => { UI.lSort = v; render(); })
+    : openOptionSheet('정렬', SORT_LABEL, UI.rSort, v => { UI.rSort = v; render(); });
+  $('#rFilter').onclick = () => lib ? openLibFilter() : openRecipeFilter();
+}
+
+/* 유명 레시피 필터 — 추출 방식 · 기준 배전도 */
+function openLibFilter(){
+  openSheet({
+    title:'필터', right:'완료',
+    body: () => `
+      <div class="sect">추출 방식</div>
+      <div class="group">
+        ${['all'].concat(METHODS.map(m => m.id)).map(id => {
+          const label = id === 'all' ? '전체' : METHODS.find(m => m.id === id).label;
+          return `<button class="listbtn" type="button" data-lfm="${id}">
+            <span class="nm">${label}</span>
+            <span class="check${UI.lMethod === id ? ' on' : ''}">${ICON('check',14)}</span></button>`;
+        }).join('')}
+      </div>
+      <div class="sect">기준 배전도 <span class="sub">레시피가 설계된 배전도</span></div>
+      <div class="group">
+        ${['all'].concat(ROASTS.map(r => r.id)).map(id => {
+          const r = ROASTS.find(x => x.id === id);
+          return `<button class="listbtn" type="button" data-lfr="${id}">
+            ${r ? `<span class="dotcol" style="background:${r.color}"></span>` : ''}
+            <span class="nm">${r ? r.label : '전체'}</span>
+            <span class="check${UI.lRoast === id ? ' on' : ''}">${ICON('check',14)}</span></button>`;
+        }).join('')}
+      </div>
+      <div class="sect"></div>
+      <button class="btn wide ghost" type="button" data-lfreset="1">필터 초기화</button>`,
+    bind: (root, close, refresh) => {
+      $$('[data-lfm]', root).forEach(b => b.onclick = () => { UI.lMethod = b.dataset.lfm; refresh(); });
+      $$('[data-lfr]', root).forEach(b => b.onclick = () => { UI.lRoast = b.dataset.lfr; refresh(); });
+      $('[data-lfreset]', root).onclick = () => { UI.lMethod = 'all'; UI.lRoast = 'all'; refresh(); };
+    },
+    onRight: close => { close(); render(); }
+  });
 }
 
 function openRecipeFilter(){

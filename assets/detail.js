@@ -59,7 +59,10 @@ function openRecipeDetail(id){
     for (let k = 0; k <= i; k++) cum += num(r.steps[k].g, 0);
     const nxt = r.steps[i + 1];
     $('#tNow', root).innerHTML = s
-      ? '<b>' + (i + 1) + '단계</b> ' + esc(s.label || '푸어링') + ' · ' + fmtG(s.g) + 'g 붓기 <span style="color:var(--text-3)">(누적 ' + fmtG(cum) + 'g)</span>'
+      ? '<b>' + (i + 1) + '단계</b> ' + esc(s.label || '푸어링') +
+        (num(s.g, 0) > 0
+          ? ' · ' + fmtG(s.g) + 'g 붓기 <span style="color:var(--text-3)">(누적 ' + fmtG(cum) + 'g)</span>'
+          : '')
       : '<span style="color:var(--text-2)">시작을 누르면 1단계부터 안내합니다</span>';
     $('#tNext', root).textContent = nxt ? '다음 ' + mmss(nxt.t) + ' · ' + fmtG(nxt.g) + 'g'
       : (elapsed >= tt ? '추출 완료' : '목표 ' + mmss(tt));

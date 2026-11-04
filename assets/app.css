@@ -184,7 +184,7 @@ h1.page{font-size:40px;line-height:1.1;font-weight:800;letter-spacing:-.02em;mar
 }
 .rcard .tile svg{width:23px;height:23px}
 .rcard h3{margin:0;font-size:17px;font-weight:700;letter-spacing:-.01em}
-.rcard .meta{color:var(--text-2);font-size:13.5px;margin-top:2px}
+.rcard .meta{color:var(--text-2);font-size:13.5px;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .rcard .right{margin-left:auto;text-align:right;flex:0 0 auto}
 .rcard .score{color:var(--gold);font-weight:700;font-family:var(--mono);font-size:15px}
 .rcard .specs{display:flex;flex-wrap:wrap;gap:6px;margin-top:11px}
@@ -407,7 +407,8 @@ h1.page{font-size:40px;line-height:1.1;font-weight:800;letter-spacing:-.02em;mar
 .tl .ti.done .d{background:var(--green)}
 .tl .ti .tt{font-family:var(--mono);font-size:15px;width:52px;flex:0 0 auto}
 .tl .ti .gg{font-family:var(--mono);font-size:15px;font-weight:600}
-.tl .ti .nn{font-size:13.5px;color:var(--text-2);margin-left:auto;text-align:right}
+.tl .ti .nn{font-size:13.5px;color:var(--text-2);margin-left:auto;text-align:right;min-width:0}
+.tl .ti .nn small{display:block;color:var(--text-3);font-size:12px;margin-top:1px}
 
 /* ---------- 토스트 ---------- */
 .toast{
@@ -436,3 +437,8 @@ h1.page{font-size:40px;line-height:1.1;font-weight:800;letter-spacing:-.02em;mar
 .listbtn .nm small{display:block;color:var(--text-3);font-size:12.5px;margin-top:1px}
 .listbtn:active{background:var(--surface-2)}
 .dotcol{width:11px;height:11px;border-radius:50%;flex:0 0 auto}
+
+/* 유명 레시피 팁 */
+.card.tips p{margin:0 0 13px;color:var(--text-2);font-size:14.5px;line-height:1.68}
+.card.tips p:last-child{margin-bottom:0}
+.card.tips b{color:var(--text);font-weight:600}

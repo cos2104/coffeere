@@ -10,7 +10,7 @@ const GRINDERS = [
   { id:'c40', name:'코만단테 C40 (MK4)', brand:'Comandante', unit:'클릭', dec:0, max:50,
     hint:'니트로 블레이드 기준',
     curve:[[550,12],[600,14],[700,16],[800,20],[900,24],[1000,27.5],[1050,29],[1200,36],[1300,40]] },
-  { id:'kultra', name:'1Zpresso K-Ultra', brand:'1Zpresso', unit:'숫자.클릭', dec:0, max:120, base:10,
+  { id:'kultra', name:'1Zpresso K-Ultra', brand:'1Zpresso', unit:'다이얼', dec:0, max:120, base:10,
     hint:'다이얼 숫자 그대로 · 숫자 한 칸 10클릭',
     curve:[[600,37],[700,45],[800,55],[850,60],[900,70],[1000,82],[1050,84],[1200,100]] },
   { id:'a2', name:'페모북 A2', brand:'Fellow·호환', unit:'클릭', dec:0, max:90, dial:40,
@@ -53,6 +53,7 @@ const METHODS = [
     { id:'coldbrew', label:'콜드브루',    icon:'cold',     def:{dose:80, water:1000,time:43200,temp:20} }
   ]},
   { id:'other', label:'기타', devices:[
+    { id:'kono',  label:'코노',    icon:'kono',  dripper:true, def:{dose:20, water:300, time:210, temp:88} },
     { id:'nel',   label:'융드립',  icon:'nel',   dripper:true, def:{dose:20, water:240, time:210, temp:88} },
     { id:'phin',  label:'핀 드립', icon:'phin',  dripper:true, def:{dose:20, water:120, time:300, temp:95} },
     { id:'ibrik', label:'이브릭',  icon:'ibrik', def:{dose:10, water:120, time:180, temp:95} },
