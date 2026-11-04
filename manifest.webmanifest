@@ -1,0 +1,15 @@
+{
+  "name": "Coffeere — 커피 레시피",
+  "short_name": "Coffeere",
+  "description": "커피 레시피 · 원두 기록 · 그라인더 분쇄도 변환",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "lang": "ko",
+  "icons": [
+    { "src": "assets/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}

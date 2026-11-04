@@ -1,1 +1,39 @@
-<!doctype html><meta charset="utf-8"><meta http-equiv="refresh" content="0; url=brew-dial.html"><a href="brew-dial.html">brew-dial.html</a>
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no">
+<meta name="theme-color" content="#000000">
+<meta name="description" content="커피 레시피 · 원두 기록 · 그라인더 분쇄도 변환">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="Coffeere">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="assets/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="assets/icon.svg">
+<link rel="stylesheet" href="assets/app.css">
+<title>Coffeere · 커피 레시피</title>
+</head>
+<body>
+
+<div id="app">
+  <main id="view" class="view"></main>
+
+  <button id="fab" class="fab" type="button" aria-label="추가">
+    <svg viewBox="0 0 24 24" width="30" height="30" aria-hidden="true"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg>
+  </button>
+
+  <nav id="tabbar" class="tabbar" role="tablist"></nav>
+</div>
+
+<div id="sheets" class="sheets"></div>
+<div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<script src="assets/icons.js"></script>
+<script src="assets/data.js"></script>
+<script src="assets/app.js"></script>
+<script src="assets/sheets.js"></script>
+<script src="assets/editor.js"></script>
+<script src="assets/detail.js"></script>
+</body>
+</html>

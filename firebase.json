@@ -1,7 +1,7 @@
 {
   "hosting": {
     "public": ".",
-    "ignore": ["firebase.json", "**/.*", "**/node_modules/**", "*.md", "*.py"],
-    "rewrites": [{ "source": "**", "destination": "/brew-dial.html" }]
+    "ignore": ["firebase.json", "**/.*", "**/node_modules/**", "*.md"],
+    "rewrites": [{ "source": "**", "destination": "/index.html" }]
   }
 }
