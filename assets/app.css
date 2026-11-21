@@ -442,3 +442,16 @@ h1.page{font-size:40px;line-height:1.1;font-weight:800;letter-spacing:-.02em;mar
 .card.tips p{margin:0 0 13px;color:var(--text-2);font-size:14.5px;line-height:1.68}
 .card.tips p:last-child{margin-bottom:0}
 .card.tips b{color:var(--text);font-weight:600}
+
+/* 같은 원두로 내린 기록 */
+.histscore{
+  flex:0 0 auto;min-width:38px;height:28px;border-radius:9px;
+  display:inline-flex;align-items:center;justify-content:center;
+  background:var(--gold-tile);color:var(--gold);
+  font-family:var(--mono);font-size:14px;font-weight:700
+}
+.histscore.none{background:var(--surface-2);color:var(--text-3)}
+.histbest{
+  display:inline-block;margin-left:6px;padding:1px 7px;border-radius:9px;
+  background:var(--gold);color:var(--gold-ink);font-size:10.5px;font-weight:700;vertical-align:1px
+}

@@ -279,8 +279,25 @@ function beanDetailHTML(b){
       esc(b.notes) + '</div>' : '') +
 
     '<div class="sect">이 원두의 레시피 <span class="sub">' + linked.length + '개</span></div>' +
+    bestBrewHTML(linked) +
     (linked.length ? linked.map(recipeCard).join('') : '<div class="hint">아직 이 원두로 만든 레시피가 없습니다.</div>') +
     '<button class="addstep" type="button" data-newrecipe="1" style="margin-top:4px">' + ICON('plus', 18) + ' 이 원두로 레시피 만들기</button>';
+}
+
+/* 이 원두에서 가장 좋았던 조건 한 줄 요약 */
+function bestBrewHTML(linked){
+  const rated = linked.filter(function(x){ return x.rating; })
+    .sort(function(a, b){ return b.rating - a.rating; });
+  if (!rated.length) return '';
+  const x = rated[0];
+  const g = grinderById(x.grinderId);
+  return '<div class="card" style="display:flex;align-items:center;gap:12px;padding:13px 14px">' +
+    '<span class="histscore">' + x.rating.toFixed(1) + '</span>' +
+    '<span style="flex:1;min-width:0;font-size:14.5px;line-height:1.4">가장 좋았던 조건' +
+      '<small style="display:block;color:var(--text-2);font-size:13px;margin-top:2px">' +
+      x.temp + '℃ · ' + esc(g.brand) + ' ' + fmtDial(g, x.grind) + ' ' + esc(g.unit) +
+      ' · ' + esc(ratioText(x.dose, x.water) || '') + ' · ' + esc(x.name || '') +
+      '</small></span></div>';
 }
 
 /* ═══════════════════════════════════════════════════════

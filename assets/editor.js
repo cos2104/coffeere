@@ -159,6 +159,7 @@ function recipeFormHTML(r, isEdit){
       '<div class="field"><input data-f="name" type="text" placeholder="레시피 이름" value="' + esc(r.name) + '" autocomplete="off"></div>' +
       beanRowHTML(r) +
     '</div>' +
+    '<div id="secHistory">' + beanHistoryHTML(r) + '</div>' +
     '<div class="sect">추출 파라미터</div>' +
     '<div class="card" id="secParams">' + paramsHTML(r) + '</div>' +
     '<div class="sect">푸어링 스텝 <span class="sub" id="stepSum">' + stepSummary(r) + '</span></div>' +
@@ -195,6 +196,53 @@ function beanRowHTML(r){
     '<span class="lbl">원두</span>' +
     '<span class="val" style="' + (b ? '' : 'color:var(--text-3)') + '">' + esc(b ? b.name : '선택 안 함') + '</span>' +
     '<span class="chev">' + ICON('chevR', 17) + '</span></button>';
+}
+
+/* ── 이 원두로 내린 기록 ──────────────────────────────
+   배전도로 수온을 추측하는 대신, 같은 원두로 실제 내린 기록을 보여 줍니다.
+   평점 높은 순 → 최근 순. 누르면 그때의 수온·분쇄도를 가져옵니다. */
+function brewHistory(beanId, excludeId){
+  if (!beanId) return [];
+  return DB.recipes
+    .filter(function(x){ return x.beanId === beanId && x.id !== excludeId; })
+    .sort(function(a, b){
+      return (b.rating || 0) - (a.rating || 0) ||
+        new Date(b.updatedAt || b.createdAt) - new Date(a.updatedAt || a.createdAt);
+    });
+}
+
+function beanHistoryHTML(r){
+  if (!r.beanId) return '';
+  const b = beanById(r.beanId);
+  const list = brewHistory(r.beanId, r.id);
+  if (!list.length){
+    return '<div class="hint">' + esc(b ? b.name : '이 원두') +
+      ' 로 내린 기록이 아직 없습니다. 이번이 첫 기록이 됩니다.</div>';
+  }
+  const rated = list.filter(function(x){ return x.rating; });
+  const sub = list.length + '회' + (rated.length ? ' · 평점순' : ' · 최근순');
+  return '<div class="sect">이 원두로 내린 기록 <span class="sub">' + esc(sub) + '</span></div>' +
+    '<div class="hint" style="margin:-4px 0 9px">행을 누르면 그때의 수온과 분쇄도를 가져옵니다.</div>' +
+    '<div class="group">' + list.slice(0, 6).map(function(x, i){
+      const g = grinderById(x.grinderId);
+      const d = DEVICES[x.device] || DEVICES.v60;
+      const best = i === 0 && x.rating;
+      const meta = [
+        x.temp + '℃',
+        g.brand + ' ' + fmtDial(g, x.grind) + ' ' + g.unit,
+        ratioText(x.dose, x.water),
+        d.label,
+        daysAgo(x.updatedAt || x.createdAt)
+      ].filter(Boolean).join(' · ');
+      return '<button class="listbtn" type="button" data-hist="' + x.id + '">' +
+        '<span class="histscore' + (x.rating ? '' : ' none') + '">' +
+          (x.rating ? x.rating.toFixed(1) : '–') + '</span>' +
+        '<span class="nm">' + esc(x.name || d.label) +
+          (best ? ' <span class="histbest">최고</span>' : '') +
+          '<small>' + esc(meta) + '</small></span>' +
+        '<span class="chev">' + ICON('down', 17) + '</span></button>';
+    }).join('') + '</div>' +
+    (list.length > 6 ? '<div class="hint">최근·상위 6개만 표시합니다 (전체 ' + list.length + '회)</div>' : '');
 }
 
 function paramsHTML(r){
@@ -310,6 +358,23 @@ function bindRecipeForm(root, r, refresh, saveNow){
   if (bp) bp.onclick = function(){
     openBeanPicker(r.beanId, function(id){ r.beanId = id; refresh(); });
   };
+
+  /* 같은 원두로 내린 기록 → 수온·분쇄도만 가져옵니다 */
+  function bindHistory(){
+    $$('[data-hist]', $('#secHistory', root)).forEach(function(btn){
+      btn.onclick = function(){
+        const src = DB.recipes.find(function(x){ return x.id === btn.dataset.hist; });
+        if (!src) return;
+        r.temp = src.temp;
+        r.grinderId = src.grinderId;
+        r.grind = src.grind;
+        r.touched = true;
+        repaintParams();
+        const g = grinderById(r.grinderId);
+        toast(r.temp + '℃ · ' + g.brand + ' ' + fmtDial(g, r.grind) + ' ' + g.unit + ' 적용');
+      };
+    });
+  }
 
   /* 파라미터 */
   function repaintParams(){
@@ -433,6 +498,7 @@ function bindRecipeForm(root, r, refresh, saveNow){
 
   bindParamBlock();
   bindSteps();
+  bindHistory();
   bindStars(root, '맛 평가', function(){ return r.rating; }, function(v){ r.rating = v; });
 
   const fav = $('[data-fav]', root);
