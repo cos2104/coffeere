@@ -665,8 +665,12 @@ function viewSettings(){
     <div class="sect">정보</div>
     <div class="group">
       <div class="row"><span class="lbl">앱</span><span class="val">Coffeere v3.0</span></div>
+      <div class="row"><span class="lbl">빌드</span><span class="val" style="font-family:var(--mono)">${APP_BUILD}</span></div>
+      <div class="row"><span class="lbl">그라인더 · 레시피</span><span class="val">${GRINDERS.length}종 · ${LIBRARY.length}종</span></div>
       <div class="row"><span class="lbl">저장 위치</span><span class="val">이 기기 (브라우저)</span></div>
     </div>
+    <div class="hint">화면이 예전 그대로라면 캐시에 옛 버전이 남은 것입니다.
+      브라우저에서 새로고침하거나, 홈 화면 앱이면 지웠다 다시 추가하면 최신 빌드로 바뀝니다.</div>
     <div class="hint">모든 기록은 이 브라우저에만 저장됩니다. 기기를 옮기거나 캐시를 지우기 전에 백업 파일을 내보내세요.</div>
     <input type="file" id="sFile" accept="application/json,.json" hidden>`;
 }

@@ -80,6 +80,13 @@ assets/libview.js       유명 레시피 상세 화면
 assets/detail.js        레시피·원두 상세 · 추출 타이머
 ```
 
+## 배포 · 캐시
+
+자산은 `index.html` 에서 `?v=<빌드>` 를 붙여 불러옵니다. **CSS/JS 를 고치면
+`index.html` 의 모든 `?v=` 와 `assets/data.js` 의 `APP_BUILD` 를 같이 올리세요.**
+안 올리면 기기에 캐시된 옛 파일이 계속 쓰여, 고친 내용이 반영되지 않습니다.
+현재 빌드는 설정 탭 맨 아래에 표시됩니다.
+
 ## 데이터
 
 내 레시피와 원두 기록은 브라우저 `localStorage`(`coffeere.v3`)에 저장됩니다.
