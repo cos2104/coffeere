@@ -5,6 +5,30 @@
    =========================================================== */
 const LIBRARY = [
   {
+    id:"kasuya-devil-switch", name:"데빌 스위치", by:"테츠 카스야", role:"2016 월드 브루어스컵 챔피언",
+    dripper:"switch", method:"hybrid", fit:"mdark", dose:20, ratio:14, temp:"90 → 70℃",
+    um:875, tol:80, total:180,
+    blurb:"하리오 스위치 추출을 둘로 나눈다. 앞은 90℃로 밸브를 연 퍼콜레이션, 뒤는 70℃로 밸브를 닫은 이머전. 쓴 마무리 없이 생생한 과일 향과 강한 단맛을 노린다.",
+    steps: c => [
+      { at:0,   kind:"pour", label:"스위치 열고 1차 붓기 · 90℃", to:c.water * 3 / 14, pat:"spiral" },
+      { at:30,  kind:"pour", label:"2차 붓기 · 90℃",            to:c.water * 3 / 7,  pat:"spiral" },
+      { at:70,  kind:"wait", label:"스위치 닫기" },
+      { at:75,  kind:"pour", label:"70℃ 물로 바꿔 3차 붓기",      to:c.water,          pat:"spiral" },
+      { at:90,  kind:"wait", label:"그대로 침지" },
+      { at:105, kind:"wait", label:"스위치 열기" },
+      { at:110, kind:"wait", label:"물방울이 멈출 때까지" },
+      { at:180, kind:"end",  label:"추출 완료" }],
+    tips:[
+      "<b>두 온도의 물을 미리 준비하세요</b> — 90℃와 70℃를 모두 올려 두어야 전환이 즉각적이고 재현됩니다. 카스야 본인의 메모입니다.",
+      "<b>밸브를 닫기 전에 뜨거운 쪽을 다 흘려보내세요</b> — 1:10에 닫을 때쯤이면 90℃ 구간의 물이 거의 빠져 있어야 합니다.",
+      "<b>단맛이 약하면 온도보다 분쇄도를 먼저</b> — 70℃ 쪽을 올리기 전에 분쇄도를 조정하라는 것이 원 레시피의 권고입니다.",
+      "3:00쯤 다 떨어져야 합니다. <b>3:40을 넘으면 더 굵게, 2:20 전에 끝나면 더 곱게</b> 가세요.",
+      "쓰거나 떫으면 더 굵게 또는 물 온도를 낮게, 시고 묽으면 더 곱게. 한 번에 한 가지만 바꾸세요.",
+      "중배전~강배전용입니다. 분쇄도는 원문에 미크론이 없고 '중간보다 가늘게'로만 적혀 있어, 같은 자료의 코만단테 20–26클릭 구간을 875μm으로 환산해 넣었습니다."],
+    source:"Tetsu Kasuya · 하리오 스위치 02 · 20g / 280g / 90→70℃ · Gota 정리본 (원문 출처 timer.coffee)",
+    sourceUrl:"https://gota.cafe/ko/recipes/hario-switch-02/kasuya-devil-switch"
+  },
+  {
     id:"hario-switch-dark", name:"스위치 강배전 침지", by:"하리오 스위치 가이드", role:"강배전 전용 · 2차 정리본",
     dripper:"switch", method:"immersion", fit:"dark", dose:15, ratio:250/15, temp:"85℃",
     um:1050, tol:100, total:150,
