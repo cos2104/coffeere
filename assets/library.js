@@ -781,6 +781,19 @@ function libTemp(r){
   return m ? Math.round(Number(m[0])) : 92;
 }
 
+/* 라벨 속 그램 수치도 원두량 배율을 따라가게 합니다.
+   유량 표기(4g/s)는 배율과 무관하므로 건드리지 않습니다. */
+function scaleLabelGrams(label, k){
+  if (!label || !isFinite(k) || Math.abs(k - 1) < 0.001) return label;
+  function f(n){
+    var v = n * k;
+    return v >= 10 ? String(Math.round(v)) : String(Math.round(v * 10) / 10);
+  }
+  return label.replace(
+    /(\d+(?:\.\d+)?)(?:(\s*[\u2013\u007e-]\s*)(\d+(?:\.\d+)?))?(\s*g)(?!\s*\/)/g,
+    function(m, a, sep, b, g){ return f(+a) + (sep ? sep + f(+b) : '') + g; });
+}
+
 /* 라이브러리 레시피를 내 원두량 기준으로 펼칩니다 */
 function libExpand(r, dose){
   var d = dose || r.dose;
@@ -789,11 +802,30 @@ function libExpand(r, dose){
   var raw = [];
   try { raw = r.steps(ctx) || []; } catch (e) { raw = []; }
 
+  /* 일부 레시피는 steps() 안에서 라벨의 그램 수치를 이미 c.dose 로 만들어 냅니다.
+     그런 라벨까지 또 배율을 곱하면 두 번 적용되므로, 원래 원두량으로 한 번 더
+     펼쳐 보고 라벨이 달라지는 단계는 그대로 둡니다. */
+  var k = r.dose ? d / r.dose : 1;
+  var base = null;
+  if (Math.abs(k - 1) > 0.001){
+    try {
+      var b = r.steps({ dose: r.dose, water: r.dose * r.ratio,
+                        ice: r.iceMul ? r.dose * r.iceMul : 0, roast: null }) || [];
+      if (b.length === raw.length) base = b;
+    } catch (e) { base = null; }
+  }
+  function labelOf(s, i){
+    var lab = s.label || '';
+    if (!base) return lab;
+    /* 같은 자리의 라벨이 원두량에 따라 이미 변했다면 레시피가 직접 계산한 것 */
+    return (base[i] && base[i].label !== lab) ? lab : scaleLabelGrams(lab, k);
+  }
+
   var cum = 0, steps = [];
-  raw.forEach(function(s){
+  raw.forEach(function(s, i){
     if (typeof s.to !== 'number'){
       /* 'end' 같은 마무리 표시는 메모로만 남깁니다 */
-      if (s.label) steps.push({ t: s.at || 0, g: 0, label: s.label, note: '', mark: true });
+      if (s.label) steps.push({ t: s.at || 0, g: 0, label: labelOf(s, i), note: '', mark: true });
       return;
     }
     var add = Math.round((s.to - cum) * 10) / 10;
@@ -801,7 +833,7 @@ function libExpand(r, dose){
     steps.push({
       t: s.at || 0,
       g: Math.max(0, add),
-      label: s.label || '',
+      label: labelOf(s, i),
       note: (s.pat && LIB_PAT[s.pat]) || ''
     });
   });
