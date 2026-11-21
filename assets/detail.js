@@ -71,7 +71,7 @@ function openRecipeDetail(id){
       el.classList.toggle('done', k < i);
     });
     if (i !== lastStep && i >= 0 && running){ beep(880, 160); lastStep = i; }
-    if (!doneBeep && running && elapsed >= tt){ beep(660, 420); doneBeep = true; }
+    if (!doneBeep && running && elapsed >= tt){ beep(660, 420); doneBeep = true; showDone(); }
   }
   function loop(){
     elapsed = (Date.now() - t0) / 1000;
@@ -87,6 +87,19 @@ function openRecipeDetail(id){
   }
   function pause(){ running = false; if (tick) clearInterval(tick); tick = null; syncBtns(); }
   function reset(){ pause(); elapsed = 0; lastStep = -1; doneBeep = false; paint(); }
+  /* 추출이 끝나면 평점 칸을 펼쳐 바로 남길 수 있게 합니다 */
+  function showDone(){
+    if (!rootEl) return;
+    const box = $('#tDone', rootEl);
+    if (!box) return;
+    const first = !box.classList.contains('on');
+    box.classList.add('on');
+    const t = $('#tDoneTitle', rootEl);
+    if (t) t.textContent = '추출 완료 · 맛은 어땠나요?';
+    if (first) setTimeout(function(){
+      try { box.scrollIntoView({ behavior:'smooth', block:'center' }); } catch (e) {}
+    }, 300);
+  }
   function syncBtns(){
     if (!rootEl) return;
     const b = $('#tPlay', rootEl);
@@ -106,6 +119,17 @@ function openRecipeDetail(id){
       r.favorite = !r.favorite; r.updatedAt = new Date().toISOString(); save();
       fv.classList.toggle('on', r.favorite); render();
     };
+    bindStars(root, '맛 평가', function(){ return r.rating; }, function(v){
+      r.rating = v;
+      r.updatedAt = new Date().toISOString();
+      save();
+      const chip = $('#tHeroRate', root);
+      if (chip){
+        chip.hidden = (v == null);
+        chip.textContent = '★ ' + (v == null ? '–' : v.toFixed(1));
+      }
+      render();
+    });
     syncBtns(); paint();
   }
 
@@ -145,7 +169,8 @@ function recipeDetailHTML(r){
       '<div style="display:flex;gap:10px;justify-content:center;margin-top:14px">' +
         '<button class="chip' + (r.favorite ? ' on' : '') + '" type="button" data-tfav="1">' +
           ICON('heart', 15) + '<span>즐겨찾기</span></button>' +
-        (r.rating ? '<span class="chip amber">★ ' + r.rating.toFixed(1) + '</span>' : '') +
+        '<span class="chip amber" id="tHeroRate"' + (r.rating ? '' : ' hidden') + '>★ ' +
+          (r.rating ? r.rating.toFixed(1) : '–') + '</span>' +
         '<span class="chip">' + (ratioText(r.dose, r.water) || '–') + '</span>' +
       '</div>' +
     '</div>' +
@@ -185,6 +210,13 @@ function recipeDetailHTML(r){
           '<span class="nn">' + esc(s.label || '') + (s.note ? ' · ' + esc(s.note) : '') +
           ' <span style="color:var(--text-3)">누적 ' + fmtG(cum) + 'g</span></span></div>';
       }).join('') + '</div>' +
+    '</div>' +
+
+    '<div id="tDone" class="brewdone' + (r.rating != null ? ' on' : '') + '">' +
+      '<div class="sect" id="tDoneTitle">' +
+        (r.rating != null ? '맛 평가' : '추출 완료 · 맛은 어땠나요?') + '</div>' +
+      rateBoxHTML('맛 평가', r.rating) +
+      '<div class="hint">여기 남긴 평점이 다음에 같은 원두를 고를 때 기준이 됩니다.</div>' +
     '</div>' +
 
     (b ? '<div class="sect">원두</div><button class="rcard" type="button" data-openbean="' + b.id + '" style="margin-bottom:12px">' +

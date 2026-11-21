@@ -455,3 +455,10 @@ h1.page{font-size:40px;line-height:1.1;font-weight:800;letter-spacing:-.02em;mar
   display:inline-block;margin-left:6px;padding:1px 7px;border-radius:9px;
   background:var(--gold);color:var(--gold-ink);font-size:10.5px;font-weight:700;vertical-align:1px
 }
+
+/* 추출 후 평점 */
+.brewdone{display:none}
+.brewdone.on{display:block;animation:brewdone-in .32s ease-out}
+@keyframes brewdone-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.brewdone .ratebox{border:1px solid rgba(227,186,84,.35)}
+.brewdone .hint{margin-top:10px}
