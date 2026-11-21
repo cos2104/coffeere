@@ -102,7 +102,7 @@ function libDetailHTML(r, dose, gid){
       '<div class="note amber"><span>' + ICON('info', 17) + '</span><span>원 레시피 기준 ' + r.um + ' μm' +
         (r.tol ? ' ±' + r.tol : '') +
         (rotText(g, dial.v) ? ' · ' + rotText(g, dial.v) : '') +
-        (dial.flag ? ' · 이 그라인더의 조절 범위 밖입니다' : '') +
+        (dial.flag ? ' · 환산 자료 범위 밖이라 값이 부정확합니다' : '') +
         (owned.length ? '<br>' + owned.map(function(o){
           return esc(o.name) + ' ' + fmtDial(o, micronToDial(o, r.um).v) + ' ' + o.unit;
         }).join(' · ') : '') + '</span></div>' +

@@ -539,8 +539,8 @@ function convResultHTML(){
     <div class="group">
       ${targets.length ? targets.map(g => {
         const r = micronToDial(g, um);
-        const sub = r.flag === 'under' ? '이 그라인더의 최소 범위 밖' :
-                    r.flag === 'over'  ? '이 그라인더의 최대 범위 밖' :
+        const sub = r.flag === 'under' ? '환산 자료보다 가늚 · 값이 부정확' :
+                    r.flag === 'over'  ? '환산 자료보다 굵음 · 값이 부정확' :
                     (rotText(g, r.v) || g.hint);
         return `<div class="conv-res${r.flag ? ' warn' : ''}">
           <div class="nm">${esc(g.name)}<small>${esc(sub)}</small></div>
